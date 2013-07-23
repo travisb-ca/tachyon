@@ -1,0 +1,11 @@
+components: Documentation
+fix_by: Next_Release
+priority: 1 2 3 4 5
+project_name: Nitpick Project
+resolution: None Fixed Duplicate WontFix Invalid WorksForMe
+schedule: False
+severity: Blocker Critical Major Minor Trivial
+state: New Open Diagnosed Fixed Closed
+type: Bug Feature Regression
+vcs: svn
+--
