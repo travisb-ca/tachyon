@@ -1,11 +1,11 @@
-components: Documentation
-fix_by: Next_Release
+components: Documentation Client Server Prediction Terminal
+fix_by: Next_Release 1.0
 priority: 1 2 3 4 5
-project_name: Nitpick Project
+project_name: Tachyon
 resolution: None Fixed Duplicate WontFix Invalid WorksForMe
 schedule: False
 severity: Blocker Critical Major Minor Trivial
-state: New Open Diagnosed Fixed Closed
+state: New Open Diagnosed Closed
 type: Bug Feature Regression
 vcs: svn
 --
