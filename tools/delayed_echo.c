@@ -32,7 +32,7 @@ int main(int argn, char **args)
 	} buf[BUF_SIZE];
 
 	tcgetattr(STDIN, &termstate);
-	termstate.c_lflag &= ~ICANON;
+	termstate.c_lflag &= ~(ICANON | ECHO | ECHONL);
 	termstate.c_cc[VMIN] = 1;
 	tcsetattr(STDIN, TCSANOW, &termstate);
 
@@ -73,7 +73,7 @@ int main(int argn, char **args)
 			departure = &buf[used].departure;
 			gettimeofday(departure, NULL);
 			departure->tv_usec += DELAY_US;
-			while (departure->tv_usec > 1000000) {
+			while (departure->tv_usec >   1000000) {
 				departure->tv_usec -= 1000000;
 				departure->tv_sec += 1;
 			}
