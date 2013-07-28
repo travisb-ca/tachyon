@@ -38,6 +38,11 @@ int main(int argn, char **args)
 
 	setvbuf(stdout, NULL, _IONBF, 0);
 
+	used = 1;
+	result = fcntl(STDIN, F_SETFL, &used);
+	fprintf(stderr, "stdout %d %d\n", result, errno);
+	used = 0;
+
 	for (;;) {
 		if (used == 0) {
 			wait.tv_sec = 10000000;
@@ -69,7 +74,9 @@ int main(int argn, char **args)
 			if (used == BUF_SIZE)
 				continue; /* Drop it */
 
-			buf[used].c = getc(stdin);
+			result = read(STDIN, &(buf[used].c), 1);
+			if (result != 1)
+				continue;
 			departure = &buf[used].departure;
 			gettimeofday(departure, NULL);
 			departure->tv_usec += DELAY_US;
