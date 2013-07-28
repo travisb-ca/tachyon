@@ -60,9 +60,14 @@ int main(int argn, char **args)
 			}
 		}
 
-		FD_ZERO(&fds);
-		FD_SET(STDIN, &fds);
-		result = select(STDIN + 1, &fds, NULL, NULL, &wait);
+		if (wait.tv_sec != 0 || wait.tv_usec != 0) {
+			FD_ZERO(&fds);
+			FD_SET(STDIN, &fds);
+			result = select(STDIN + 1, &fds, NULL, NULL, &wait);
+		} else {
+			/* Print out the next character now */
+			result = 0;
+		}
 
 		if (result == 0) {
 			/* select timed out, output this character */
