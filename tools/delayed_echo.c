@@ -40,7 +40,6 @@ int main(int argn, char **args)
 
 	used = 1;
 	result = fcntl(STDIN, F_SETFL, &used);
-	fprintf(stderr, "stdout %d %d\n", result, errno);
 	used = 0;
 
 	for (;;) {
