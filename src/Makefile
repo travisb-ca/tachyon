@@ -1,6 +1,6 @@
 CFLAGS=-g
 
-OBJS=tty.o
+OBJS=tachyon.o tty.o
 
 tachyon: $(OBJS)
 	$(CC) $(CFLAGS) -o tachyon $(OBJS)
