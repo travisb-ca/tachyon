@@ -69,7 +69,7 @@ int main(int argn, char **args)
 		fprintf(stderr, "%d fds ready\n", result);
 
 		if (fds[STDIN].revents) {
-			fprintf(stderr, "STDIN is ready\n");
+			fprintf(stderr, "STDIN is ready %d\n", fds[STDIN].revents);
 			if (fds[STDIN].revents & (POLLHUP | POLLERR)) {
 				fprintf(stderr, "STDIN got error %d\n", fds[STDIN].revents);
 				fds[STDIN].events = 0;
@@ -95,6 +95,7 @@ int main(int argn, char **args)
 			}
 		}
 
+		fprintf(stderr, "STDOUT is ready %d\n", fds[STDOUT].revents);
 		if (fds[STDOUT].revents) {
 			fprintf(stderr, "STDOUT is ready\n");
 			if (fds[STDOUT].revents & (POLLHUP | POLLERR)) {
@@ -109,14 +110,16 @@ int main(int argn, char **args)
 					fprintf(stderr, "error writing stdout %d %d\n", result, errno);
 				} else {
 					buf_out_used -= result;
+					if (buf_out_used == 0)
+						fds[STDOUT].events = 0;
 
 					/* There is room now, so accept more input from the slave */
 					fds[SLAVE].events |= POLLIN | POLLPRI;
 				}
 			}
 		}
-		fprintf(stderr, "SLAVE %d %d\n", fds[SLAVE].events, fds[SLAVE].revents);
 		if (fds[SLAVE].revents) {
+			fprintf(stderr, "SLAVE %d %d\n", fds[SLAVE].events, fds[SLAVE].revents);
 			if (fds[SLAVE].revents & (POLLHUP | POLLERR)) {
 				fprintf(stderr, "SLAVE got error %d\n", fds[SLAVE].revents);
 				fds[SLAVE].events = 0;
@@ -146,6 +149,8 @@ int main(int argn, char **args)
 					fprintf(stderr, "error writing slave %d %d\n", result, errno);
 				} else {
 					buf_in_used -= result;
+					if (buf_in_used == 0)
+						fds[SLAVE].events &= ~POLLOUT;
 
 					/* There is room now, so accept more input from the stdin */
 					fds[STDIN].events |= POLLIN | POLLPRI;
