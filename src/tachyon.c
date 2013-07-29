@@ -90,7 +90,7 @@ int main(int argn, char **args)
 					}
 
 					/* Make sure we try and flush some data */
-					fds[SLAVE].events |= POLL_OUT;
+					fds[SLAVE].events |= POLLOUT;
 				}
 			}
 		}
