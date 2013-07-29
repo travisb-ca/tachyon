@@ -135,7 +135,7 @@ int main(int argn, char **args)
 					}
 
 					/* Make sure we try and flush some data */
-					fds[STDOUT].events |= POLL_OUT;
+					fds[STDOUT].events |= POLLOUT;
 				}
 			}
 
