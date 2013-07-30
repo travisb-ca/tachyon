@@ -19,6 +19,8 @@
 
 #include <stdio.h>
 
+#define VLOG(fmt, ...) 
+
 #define DLOG(fmt, ...) \
 	fprintf(stderr, fmt, ##__VA_ARGS__)
 

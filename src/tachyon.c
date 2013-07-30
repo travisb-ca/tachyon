@@ -71,10 +71,10 @@ int main(int argn, char **args)
 			WLOG("poll failed %d %d\n", result, errno);
 			continue;
 		}
-		DLOG("%d fds ready\n", result);
+		VLOG("%d fds ready\n", result);
 
 		if (fds[STDIN].revents) {
-			DLOG("STDIN is ready %d\n", fds[STDIN].revents);
+			VLOG("STDIN is ready %d\n", fds[STDIN].revents);
 			if (fds[STDIN].revents & (POLLHUP | POLLERR)) {
 				WLOG("STDIN got error %d\n", fds[STDIN].revents);
 				fds[STDIN].events = 0;
@@ -83,7 +83,7 @@ int main(int argn, char **args)
 			if (fds[STDIN].revents & (POLLIN | POLLPRI)) {
 				/* stdin -> slave */
 				result = read(STDIN, buf_in + buf_in_used, sizeof(buf_in) - buf_in_used);
-				DLOG("read %d bytes from STDIN\n", result);
+				VLOG("read %d bytes from STDIN\n", result);
 				if (result < 0) {
 					WLOG("error reading stdin %d %d\n", result, errno);
 				} else {
@@ -101,7 +101,7 @@ int main(int argn, char **args)
 		}
 
 		if (fds[STDOUT].revents) {
-			DLOG("STDOUT is ready %d\n", fds[STDOUT].revents);
+			VLOG("STDOUT is ready %d\n", fds[STDOUT].revents);
 			if (fds[STDOUT].revents & (POLLHUP | POLLERR)) {
 				WLOG("STDOUT got error %d\n", fds[STDOUT].revents);
 				fds[STDOUT].events = 0;
@@ -110,7 +110,7 @@ int main(int argn, char **args)
 			if (fds[STDOUT].revents & POLLOUT) {
 				/* flush data from slave */
 				result = write(STDOUT, buf_out, buf_out_used);
-				DLOG("wrote %d bytes from stdout\n", result);
+				VLOG("wrote %d bytes from stdout\n", result);
 				if (result <= 0) {
 					WLOG("error writing stdout %d %d\n", result, errno);
 				} else {
@@ -124,7 +124,7 @@ int main(int argn, char **args)
 			}
 		}
 		if (fds[SLAVE].revents) {
-			DLOG("SLAVE %d %d\n", fds[SLAVE].events, fds[SLAVE].revents);
+			VLOG("SLAVE %d %d\n", fds[SLAVE].events, fds[SLAVE].revents);
 			if (fds[SLAVE].revents & (POLLHUP | POLLERR)) {
 				WLOG("SLAVE got error %d\n", fds[SLAVE].revents);
 				fds[SLAVE].events = 0;
@@ -133,7 +133,7 @@ int main(int argn, char **args)
 			if (fds[SLAVE].revents & (POLLIN | POLLPRI)) {
 				/* slave -> stdout */
 				result = read(fds[SLAVE].fd, buf_out + buf_out_used, sizeof(buf_out) - buf_out_used);
-				DLOG("read %d bytes from SLAVE\n", result);
+				VLOG("read %d bytes from SLAVE\n", result);
 				if (result < 0) {
 					WLOG("error reading slave %d %d\n", result, errno);
 				} else {
@@ -151,7 +151,7 @@ int main(int argn, char **args)
 			if (fds[SLAVE].revents & POLLOUT) {
 				/* flush data from stdin */
 				result = write(fds[SLAVE].fd, buf_in, buf_in_used);
-				DLOG("wrote %d bytes from SLAVE\n", result);
+				VLOG("wrote %d bytes from SLAVE\n", result);
 				if (result <= 0) {
 					WLOG("error writing slave %d %d\n", result, errno);
 				} else {
