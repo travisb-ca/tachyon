@@ -147,11 +147,11 @@ int tty_configure_control_tty(void)
 	struct termios termstate;
 	int i = 1;
 
-	if (!tcgetattr(0, &termstate))
+	if (tcgetattr(0, &termstate))
 		return -1;
 	termstate.c_lflag &= ~(ICANON | ECHO | ECHONL);
 	termstate.c_cc[VMIN] = 1;
-	if (!tcsetattr(0, TCSANOW, &termstate))
+	if (tcsetattr(0, TCSANOW, &termstate))
 	    return -1;
 
 	setvbuf(stdout, NULL, _IONBF, 0);

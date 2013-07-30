@@ -63,7 +63,8 @@ int main(int argn, char **args)
 	fds[SLAVE].events = POLLIN | POLLPRI;
 
 	tty_save_termstate();
-	tty_configure_control_tty();
+	result = tty_configure_control_tty();
+	DLOG("tty_configure_control_tty %d %d\n", result, errno);
 
 	for (;;) {
 		result = pal_poll(fds, NUM_FDS, -1);
