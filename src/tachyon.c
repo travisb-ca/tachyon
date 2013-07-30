@@ -26,6 +26,7 @@
 
 #include "tty.h"
 #include "pal.h"
+#include "log.h"
 
 #define NUM_FDS 3
 
@@ -54,7 +55,7 @@ int main(int argn, char **args)
 
 	result = tty_new("/bin/bash");
 	if (result < 0) {
-		fprintf(stderr, "Failed to create slave %d\n", result);
+		ELOG("Failed to create slave %d\n", result);
 		return 1;
 	}
 
@@ -64,29 +65,29 @@ int main(int argn, char **args)
 	for (;;) {
 		result = pal_poll(fds, NUM_FDS, -1);
 		if (result <= 0) {
-			fprintf(stderr, "poll failed %d %d\n", result, errno);
+			WLOG("poll failed %d %d\n", result, errno);
 			continue;
 		}
-		fprintf(stderr, "%d fds ready\n", result);
+		DLOG("%d fds ready\n", result);
 
 		if (fds[STDIN].revents) {
-			fprintf(stderr, "STDIN is ready %d\n", fds[STDIN].revents);
+			DLOG("STDIN is ready %d\n", fds[STDIN].revents);
 			if (fds[STDIN].revents & (POLLHUP | POLLERR)) {
-				fprintf(stderr, "STDIN got error %d\n", fds[STDIN].revents);
+				WLOG("STDIN got error %d\n", fds[STDIN].revents);
 				fds[STDIN].events = 0;
 			}
 
 			if (fds[STDIN].revents & (POLLIN | POLLPRI)) {
 				/* stdin -> slave */
 				result = read(STDIN, buf_in + buf_in_used, sizeof(buf_in) - buf_in_used);
-				fprintf(stderr, "read %d bytes from STDIN\n", result);
+				DLOG("read %d bytes from STDIN\n", result);
 				if (result < 0) {
-					fprintf(stderr, "error reading stdin %d %d\n", result, errno);
+					WLOG("error reading stdin %d %d\n", result, errno);
 				} else {
 					buf_in_used += result;
 					if (buf_in_used >= sizeof(buf_in)) {
 						/* Buffer full, stop reading until we flush */
-						fprintf(stderr, "STDIN full, stopping reading\n");
+						DLOG("STDIN full, stopping reading\n");
 						fds[STDIN].events &= ~(POLLIN | POLLPRI);
 					}
 
@@ -97,18 +98,18 @@ int main(int argn, char **args)
 		}
 
 		if (fds[STDOUT].revents) {
-			fprintf(stderr, "STDOUT is ready %d\n", fds[STDOUT].revents);
+			DLOG("STDOUT is ready %d\n", fds[STDOUT].revents);
 			if (fds[STDOUT].revents & (POLLHUP | POLLERR)) {
-				fprintf(stderr, "STDOUT got error %d\n", fds[STDOUT].revents);
+				WLOG("STDOUT got error %d\n", fds[STDOUT].revents);
 				fds[STDOUT].events = 0;
 			}
 
 			if (fds[STDOUT].revents & POLLOUT) {
 				/* flush data from slave */
 				result = write(STDOUT, buf_out, buf_out_used);
-				fprintf(stderr, "wrote %d bytes from stdout\n", result);
+				DLOG("wrote %d bytes from stdout\n", result);
 				if (result <= 0) {
-					fprintf(stderr, "error writing stdout %d %d\n", result, errno);
+					WLOG("error writing stdout %d %d\n", result, errno);
 				} else {
 					buf_out_used -= result;
 					if (buf_out_used == 0)
@@ -120,18 +121,18 @@ int main(int argn, char **args)
 			}
 		}
 		if (fds[SLAVE].revents) {
-			fprintf(stderr, "SLAVE %d %d\n", fds[SLAVE].events, fds[SLAVE].revents);
+			DLOG("SLAVE %d %d\n", fds[SLAVE].events, fds[SLAVE].revents);
 			if (fds[SLAVE].revents & (POLLHUP | POLLERR)) {
-				fprintf(stderr, "SLAVE got error %d\n", fds[SLAVE].revents);
+				WLOG("SLAVE got error %d\n", fds[SLAVE].revents);
 				fds[SLAVE].events = 0;
 			}
 
 			if (fds[SLAVE].revents & (POLLIN | POLLPRI)) {
 				/* slave -> stdout */
 				result = read(fds[SLAVE].fd, buf_out + buf_out_used, sizeof(buf_out) - buf_out_used);
-				fprintf(stderr, "read %d bytes from SLAVE\n", result);
+				DLOG("read %d bytes from SLAVE\n", result);
 				if (result < 0) {
-					fprintf(stderr, "error reading slave %d %d\n", result, errno);
+					WLOG("error reading slave %d %d\n", result, errno);
 				} else {
 					buf_out_used += result;
 					if (buf_out_used >= sizeof(buf_out)) {
@@ -147,9 +148,9 @@ int main(int argn, char **args)
 			if (fds[SLAVE].revents & POLLOUT) {
 				/* flush data from stdin */
 				result = write(fds[SLAVE].fd, buf_in, buf_in_used);
-				fprintf(stderr, "wrote %d bytes from SLAVE\n", result);
+				DLOG("wrote %d bytes from SLAVE\n", result);
 				if (result <= 0) {
-					fprintf(stderr, "error writing slave %d %d\n", result, errno);
+					WLOG("error writing slave %d %d\n", result, errno);
 				} else {
 					buf_in_used -= result;
 					if (buf_in_used == 0)
