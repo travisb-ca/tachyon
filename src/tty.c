@@ -149,7 +149,7 @@ int tty_configure_control_tty(void)
 
 	if (!tcgetattr(0, &termstate))
 		return -1;
-	termstate.c_lflag &= ~ICANON;
+	termstate.c_lflag &= ~(ICANON | ECHO | ECHONL);
 	termstate.c_cc[VMIN] = 1;
 	if (!tcsetattr(0, TCSANOW, &termstate))
 	    return -1;
