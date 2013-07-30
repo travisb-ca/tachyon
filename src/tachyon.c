@@ -96,9 +96,8 @@ int main(int argn, char **args)
 			}
 		}
 
-		fprintf(stderr, "STDOUT is ready %d\n", fds[STDOUT].revents);
 		if (fds[STDOUT].revents) {
-			fprintf(stderr, "STDOUT is ready\n");
+			fprintf(stderr, "STDOUT is ready %d\n", fds[STDOUT].revents);
 			if (fds[STDOUT].revents & (POLLHUP | POLLERR)) {
 				fprintf(stderr, "STDOUT got error %d\n", fds[STDOUT].revents);
 				fds[STDOUT].events = 0;
@@ -107,6 +106,7 @@ int main(int argn, char **args)
 			if (fds[STDOUT].revents & POLLOUT) {
 				/* flush data from slave */
 				result = write(STDOUT, buf_out, buf_out_used);
+				fprintf(stderr, "wrote %d bytes from stdout\n", result);
 				if (result <= 0) {
 					fprintf(stderr, "error writing stdout %d %d\n", result, errno);
 				} else {
@@ -129,6 +129,7 @@ int main(int argn, char **args)
 			if (fds[SLAVE].revents & (POLLIN | POLLPRI)) {
 				/* slave -> stdout */
 				result = read(fds[SLAVE].fd, buf_out + buf_out_used, sizeof(buf_out) - buf_out_used);
+				fprintf(stderr, "read %d bytes from SLAVE\n", result);
 				if (result < 0) {
 					fprintf(stderr, "error reading slave %d %d\n", result, errno);
 				} else {
@@ -145,7 +146,8 @@ int main(int argn, char **args)
 
 			if (fds[SLAVE].revents & POLLOUT) {
 				/* flush data from stdin */
-				result = write(SLAVE, buf_in, buf_in_used);
+				result = write(fds[SLAVE].fd, buf_in, buf_in_used);
+				fprintf(stderr, "wrote %d bytes from SLAVE\n", result);
 				if (result <= 0) {
 					fprintf(stderr, "error writing slave %d %d\n", result, errno);
 				} else {
