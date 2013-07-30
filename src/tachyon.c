@@ -25,6 +25,7 @@
 #include <errno.h>
 
 #include "tty.h"
+#include "pal.h"
 
 #define NUM_FDS 3
 
@@ -61,7 +62,7 @@ int main(int argn, char **args)
 	fds[SLAVE].events = POLLIN | POLLPRI;
 
 	for (;;) {
-		result = poll(fds, NUM_FDS, -1);
+		result = pal_poll(fds, NUM_FDS, -1);
 		if (result <= 0) {
 			fprintf(stderr, "poll failed %d %d\n", result, errno);
 			continue;
