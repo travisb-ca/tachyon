@@ -83,19 +83,6 @@ int tty_new(char *command)
 
 		close(pty_master);
 
-		result = tcgetattr(pty_slave, &term_settings);
-		if (result != 0) {
-			ELOG("slave failed to get term_settings %d %d\n", result, errno);
-			return 5;
-		}
-
-		cfmakeraw(&term_settings);
-		result = tcsetattr(pty_slave, TCSANOW, &term_settings);
-		if (result != 0) {
-			ELOG("slave failed to change to raw %d %d\n", result, errno);
-			return 6;
-		}
-
 		close(0);
 		close(1);
 		close(2);
