@@ -10,9 +10,10 @@ Reported_By: travisb@travisbrown.ca
 Resolution: None
 Seen_In_Build: 
 Severity: Major
-State: New
+State: Open
 Title: Vim prediction mode
 Type: Feature
 Units_of_Work: 1000
+localdate: 2013-07-28 21:19:53
 --
 It would seem to be quite doable to have a vim specific prediction engine which tries to track the mode (normal/insert/command/visual/visual block) and perform accordingly.

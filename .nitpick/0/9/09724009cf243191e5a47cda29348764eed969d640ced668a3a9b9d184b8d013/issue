@@ -1,0 +1,18 @@
+Component: Prediction
+Date: 2013-07-31 05:02:02
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Null prediction
+Type: Feature
+Units_of_Work: 1000
+--
+There needs to be a prediction engine which never causes anything to be output. This engine would work well for many classes of programs where control keys aren't echoed to the screen and the content of the screen changes severely depending on the user input. Such an example would be using mutt to read email.
