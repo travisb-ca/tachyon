@@ -1,0 +1,18 @@
+Component: Server
+Date: 2013-07-31 04:54:50
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Scrollback
+Type: Feature
+Units_of_Work: 1000
+--
+It must be possible to scroll back in each session a configurable amount. As much of the scrollback as possible should be kept on the client for quick scrolling, but since bandwidth may result in some lines not having been sent to the client yet it must be possible to fetch those from the server as needed.

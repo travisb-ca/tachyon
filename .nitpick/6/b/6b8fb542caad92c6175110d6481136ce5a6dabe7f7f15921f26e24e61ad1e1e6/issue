@@ -1,0 +1,18 @@
+Component: Server
+Date: 2013-07-31 04:58:01
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Session Disconnect
+Type: Feature
+Units_of_Work: 1000
+--
+It should be possible to disconnect and then reconnect to sessions without missing anything. Just like screen works.

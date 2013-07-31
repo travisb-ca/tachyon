@@ -1,0 +1,18 @@
+Component: Client
+Date: 2013-07-31 04:53:29
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Session Multiplexing (client)
+Type: Feature
+Units_of_Work: 1000
+--
+When connecting remotely to a tachyon server the client should do session multiplexing. The sessions should be kept uptodate in the background (unless it would use too much bandwidth) and at least the latest screen output on the client for instant session switching.

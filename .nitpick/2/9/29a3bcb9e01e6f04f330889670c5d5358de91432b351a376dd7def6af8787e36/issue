@@ -1,0 +1,18 @@
+Component: Client
+Date: 2013-07-31 04:59:03
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Configurable key mappings
+Type: Feature
+Units_of_Work: 1000
+--
+Though I can hardcode the keymappings I like, it'd be nice if others could change them on the fly.
