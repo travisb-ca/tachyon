@@ -1,0 +1,19 @@
+Component: Client
+Date: 2013-08-01 20:40:28
+Depends_On: 583f23c50c0835fd42ddcd9c1882f1eea0bec46a944a07353a0986978efff13f 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Allow mouse scroll in subwindows
+Type: Feature
+Units_of_Work: 1000
+localdate: 2013-08-01 13:40:28
+--
+When we have windows where different terminals can live at once then it'd be very nice if we could put a mouse in any particular subwindow to view the scrollback there. This might be possible using the Xterm mouse protocol.

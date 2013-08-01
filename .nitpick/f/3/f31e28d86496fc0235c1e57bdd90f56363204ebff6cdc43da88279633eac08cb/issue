@@ -1,0 +1,20 @@
+Component: Documentation
+Date: 2013-08-01 20:40:28
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Ability to turn off data skipping
+Type: Feature
+Units_of_Work: 1000
+--
+As noted at https://github.com/keithw/mosh/issues/2#issuecomment-7925433 there are various sorts of links that someone may be using. We won't do connection persistence but will do the other four quadrants of the latency-bandwidth spectrum.
+
+As such it should be possible to disable automatic transfer skipping for the high latency high bandwidth case.
