@@ -1,0 +1,18 @@
+Component: Documentation
+Date: 2013-08-08 03:09:24
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Write a manpage
+Type: Feature
+Units_of_Work: 1000
+--
+I can't really release Tachyon 1.0 without  a complete manpage. It is a serious CLI application.
