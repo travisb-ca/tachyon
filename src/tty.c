@@ -79,8 +79,6 @@ int tty_new(char *command)
 		return pty_master;
 	} else {
 		/* Child */
-		struct termios term_settings;
-
 		close(pty_master);
 
 		close(0);
@@ -144,4 +142,6 @@ int tty_configure_control_tty(void)
 	setvbuf(stdout, NULL, _IONBF, 0);
 
 	fcntl(0, F_SETFL, &i);
+
+	return 0;
 }

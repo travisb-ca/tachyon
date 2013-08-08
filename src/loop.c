@@ -59,7 +59,6 @@ static struct signal_fd {
  * ENOMEM - Unable to allocate memory to register
  */
 int loop_register(struct loop_fd *fd) {
-	int result;
 	int i;
 
 	if (num_loop_items >= max_loop_items) {
