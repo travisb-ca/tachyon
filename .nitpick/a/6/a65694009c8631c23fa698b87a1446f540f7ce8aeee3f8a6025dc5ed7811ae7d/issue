@@ -1,0 +1,18 @@
+Component: Client
+Date: 2013-08-08 03:45:20
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Should the signal fd close on exec?
+Type: Bug
+Units_of_Work: 1000
+--
+Currently we create a pipe in order to have an out of band mechanism to trigger an action and break out of the poll. Should this pair of fds be set to close on exec?
