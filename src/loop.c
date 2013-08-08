@@ -199,4 +199,6 @@ bool loop_run(void) {
 			loop_items[i].fd->poll_callback(loop_items[i].fd, fds[i].revents);
 		}
 	}
+
+	return true;
 }
