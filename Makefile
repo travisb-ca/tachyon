@@ -1,4 +1,4 @@
-CFLAGS = -g
+CFLAGS = -g -Wall
 
 TACHYON_OBJS=src/tachyon.o src/tty.o src/pal.o src/loop.o
 TOOLS=tools/delayed_echo
@@ -10,3 +10,8 @@ tachyon: $(TACHYON_OBJS)
 
 run: tachyon
 	./tachyon
+
+clean:
+	@rm $(TACHYON_OBJS)
+	@rm tachyon
+	@rm $(TOOLS)
