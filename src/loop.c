@@ -92,6 +92,8 @@ int loop_register(struct loop_fd *fd) {
 		loop_items = new_items;
 		free(fds);
 		fds = new_fds;
+
+		max_loop_items = new_size;
 	}
 
 	i = num_loop_items++;
