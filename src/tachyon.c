@@ -122,14 +122,16 @@ static void stdout_cb(struct loop_fd *fd, int revents) {
 	}
 }
 
+static bool run = true;
+
 static void slave_cb(struct loop_fd *fd, int revents) {
 	struct slave_fd *slave = (struct slave_fd *)fd;
 	int result;
 
 	VLOG("SLAVE %d %d\n", slave->fd.poll_flags, revents);
 	if (revents & (POLLHUP | POLLERR)) {
-		WLOG("SLAVE got error %d\n", revents);
 		slave->fd.poll_flags = 0;
+		run = false;
 	}
 
 	if (revents & (POLLIN | POLLPRI)) {
@@ -224,7 +226,7 @@ int main(int argn, char **args)
 	result = loop_register((struct loop_fd *)&slave);
 	DLOG("register slave %d\n", result);
 
-	for (;;) {
+	while (run) {
 		if (!loop_run())
 			ELOG("Running the loop failed\n");
 	}
