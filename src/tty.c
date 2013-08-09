@@ -47,28 +47,28 @@ int tty_new(char *command)
 	pty_master = posix_openpt(O_RDWR | O_NOCTTY);
 
 	if (pty_master < 0) {
-		ELOG("openpt failed %d %d\n", pty_master, errno);
+		ELOG("openpt failed %d %d", pty_master, errno);
 		result = -1;
 		goto err_master;
 	}
 
 	result = grantpt(pty_master);
 	if (result != 0) {
-		ELOG("granpt failed %d %d\n", result, errno);
+		ELOG("granpt failed %d %d", result, errno);
 		result = -2;
 		goto err_master;
 	}
 
 	result = unlockpt(pty_master);
 	if (result != 0) {
-		ELOG("unlockpt failed %d %d\n", result, errno);
+		ELOG("unlockpt failed %d %d", result, errno);
 		result = -3;
 		goto err_master;
 	}
 
 	pty_slave = open(ptsname(pty_master), O_RDWR);
 	if (pty_slave < 0) {
-		ELOG("failed to open slave %d %d\n", pty_slave, errno);
+		ELOG("failed to open slave %d %d", pty_slave, errno);
 		result = -4;
 		goto err_slave;
 	}
@@ -95,14 +95,14 @@ int tty_new(char *command)
 
 		result = ioctl(0, TIOCSCTTY, 1);
 		if (result != 0) {
-			ELOG("slave failed to set controlling tty %d %d\n", result, errno);
+			ELOG("slave failed to set controlling tty %d %d", result, errno);
 			return 7;
 		}
 
 
 		result = execl(command, NULL);
 
-		ELOG("slave failed to exec %d %d\n", result, errno);
+		ELOG("slave failed to exec %d %d", result, errno);
 		return 8;
 	}
 

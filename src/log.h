@@ -19,14 +19,18 @@
 
 #include <stdio.h>
 
-#define VLOG(fmt, ...) 
+#define VLOG(fmt, ...) do { } while(0)
 
-#define DLOG(fmt, ...) \
-	fprintf(stderr, fmt, ##__VA_ARGS__)
+#define DLOG(fmt, ...) do {                       \
+	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+} while (0)
 
-#define WLOG(fmt, ...) \
-	fprintf(stderr, fmt, ##__VA_ARGS__)
+#define WLOG(fmt, ...) do {                       \
+	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+} while (0)
 
-#define ELOG(fmt, ...) \
-	fprintf(stderr, fmt, ##__VA_ARGS__)
+#define ELOG(fmt, ...) do {                       \
+	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+} while (0)
+
 #endif

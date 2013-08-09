@@ -71,23 +71,23 @@ static void stdin_cb(struct loop_fd *fd, int revents) {
 	struct stdin_fd *in = (struct stdin_fd *)fd;
 	int result;
 
-	VLOG("STDIN is ready %d\n", revents);
+	VLOG("STDIN is ready %d", revents);
 	if (revents & (POLLHUP | POLLERR)) {
-		WLOG("STDIN got error %d\n", revents);
+		WLOG("STDIN got error %d", revents);
 		in->fd.poll_flags = 0;
 	}
 
 	if (revents & (POLLIN | POLLPRI)) {
 		/* stdin -> slave */
 		result = read(in->fd.fd, in->buf_in + in->buf_in_used, sizeof(in->buf_in) - in->buf_in_used);
-		VLOG("read %d bytes from STDIN\n", result);
+		VLOG("read %d bytes from STDIN", result);
 		if (result < 0) {
-			WLOG("error reading stdin %d %d\n", result, errno);
+			WLOG("error reading stdin %d %d", result, errno);
 		} else {
 			in->buf_in_used += result;
 			if (in->buf_in_used >= sizeof(in->buf_in)) {
 				/* Buffer full, stop reading until we flush */
-				DLOG("STDIN full, stopping reading\n");
+				DLOG("STDIN full, stopping reading");
 				in->fd.poll_flags &= ~(POLLIN | POLLPRI);
 			}
 
@@ -101,18 +101,18 @@ static void stdout_cb(struct loop_fd *fd, int revents) {
 	struct stdout_fd *out = (struct stdout_fd *)fd;
 	int result;
 
-	VLOG("STDOUT is ready %d\n", revents);
+	VLOG("STDOUT is ready %d", revents);
 	if (revents & (POLLHUP | POLLERR)) {
-		WLOG("STDOUT got error %d\n", revents);
+		WLOG("STDOUT got error %d", revents);
 		out->fd.poll_flags = 0;
 	}
 
 	if (revents & POLLOUT) {
 		/* flush data from slave */
 		result = write(out->fd.fd, out->buf_out, out->buf_out_used);
-		VLOG("wrote %d bytes from stdout\n", result);
+		VLOG("wrote %d bytes from stdout", result);
 		if (result <= 0) {
-			WLOG("error writing stdout %d %d\n", result, errno);
+			WLOG("error writing stdout %d %d", result, errno);
 		} else {
 			out->buf_out_used -= result;
 			if (out->buf_out_used == 0)
@@ -130,7 +130,7 @@ static void slave_cb(struct loop_fd *fd, int revents) {
 	struct slave_fd *slave = (struct slave_fd *)fd;
 	int result;
 
-	VLOG("SLAVE %d %d\n", slave->fd.poll_flags, revents);
+	VLOG("SLAVE %d %d", slave->fd.poll_flags, revents);
 	if (revents & (POLLHUP | POLLERR)) {
 		slave->fd.poll_flags = 0;
 		run = false;
@@ -139,9 +139,9 @@ static void slave_cb(struct loop_fd *fd, int revents) {
 	if (revents & (POLLIN | POLLPRI)) {
 		/* slave -> stdout */
 		result = read(slave->fd.fd, slave->out->buf_out + slave->out->buf_out_used, sizeof(slave->out->buf_out) - slave->out->buf_out_used);
-		VLOG("read %d bytes from SLAVE\n", result);
+		VLOG("read %d bytes from SLAVE", result);
 		if (result < 0) {
-			WLOG("error reading slave %d %d\n", result, errno);
+			WLOG("error reading slave %d %d", result, errno);
 		} else {
 			slave->out->buf_out_used += result;
 			if (slave->out->buf_out_used >= sizeof(slave->out->buf_out)) {
@@ -157,9 +157,9 @@ static void slave_cb(struct loop_fd *fd, int revents) {
 	if (revents & POLLOUT) {
 		/* flush data from stdin */
 		result = write(slave->fd.fd, slave->in->buf_in, slave->in->buf_in_used);
-		VLOG("wrote %d bytes from SLAVE\n", result);
+		VLOG("wrote %d bytes from SLAVE", result);
 		if (result <= 0) {
-			WLOG("error writing slave %d %d\n", result, errno);
+			WLOG("error writing slave %d %d", result, errno);
 		} else {
 			slave->in->buf_in_used -= result;
 			if (slave->in->buf_in_used == 0)
@@ -200,7 +200,7 @@ char *get_login_shell(void) {
 		if (username) {
 			result = getpwnam_r(username, &passwd, buf, sizeof(buf), &p_result);
 			if (result)
-				ELOG("getpwnam_r returned %d\n", result);
+				ELOG("getpwnam_r returned %d", result);
 		}
 
 		if (!p_result) {
@@ -250,7 +250,7 @@ int main(int argn, char **args)
 
 	result = tty_new(get_login_shell());
 	if (result < 0) {
-		ELOG("Failed to create slave %d\n", result);
+		ELOG("Failed to create slave %d", result);
 		return 1;
 	}
 
@@ -262,18 +262,18 @@ int main(int argn, char **args)
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();
-	DLOG("tty_configure_control_tty %d %d\n", result, errno);
+	DLOG("tty_configure_control_tty %d %d", result, errno);
 
 	result = loop_register((struct loop_fd *)&in);
-	DLOG("register in %d\n", result);
+	DLOG("register in %d", result);
 	result = loop_register((struct loop_fd *)&out);
-	DLOG("register out %d\n", result);
+	DLOG("register out %d", result);
 	result = loop_register((struct loop_fd *)&slave);
-	DLOG("register slave %d\n", result);
+	DLOG("register slave %d", result);
 
 	while (run) {
 		if (!loop_run())
-			ELOG("Running the loop failed\n");
+			ELOG("Running the loop failed");
 	}
 
 	tty_restore_termstate();

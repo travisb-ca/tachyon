@@ -189,7 +189,7 @@ bool loop_run(void) {
 
 	result = pal_poll(fds, num_loop_items, -1);
 	if (result <= 0) {
-		WLOG("poll failed %d %d\n", result, errno);
+		WLOG("poll failed %d %d", result, errno);
 		return false;
 	}
 
