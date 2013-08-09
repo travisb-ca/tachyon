@@ -79,6 +79,8 @@ int tty_new(char *command)
 		return pty_master;
 	} else {
 		/* Child */
+		char *cmd_name;
+
 		close(pty_master);
 
 		close(0);
@@ -99,8 +101,13 @@ int tty_new(char *command)
 			return 7;
 		}
 
+		cmd_name = strrchr(command, '/');
+		if (!cmd_name)
+			cmd_name = "unknown";
+		else
+			cmd_name++; /* skip last '/' */
 
-		result = execl(command, NULL);
+		result = execl(command, cmd_name, NULL);
 
 		ELOG("slave failed to exec %d %d", result, errno);
 		return 8;
