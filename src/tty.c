@@ -100,7 +100,7 @@ int tty_new(char *command)
 		}
 
 
-		result = execv(command, NULL);
+		result = execl(command, NULL);
 
 		ELOG("slave failed to exec %d %d\n", result, errno);
 		return 8;
