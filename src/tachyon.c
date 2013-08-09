@@ -24,6 +24,8 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #include "tty.h"
 #include "pal.h"
@@ -169,6 +171,49 @@ static void slave_cb(struct loop_fd *fd, int revents) {
 	}
 }
 
+static char login_shell[128];
+
+/*
+ * Try hard to determine which shell the user uses at login. If that can't be
+ * determined then /bin/sh is used.
+ *
+ * Returns:
+ * - a valid static char*
+ */
+char *get_login_shell(void) {
+	int result;
+
+	if (login_shell[0] != '\0')
+		return login_shell;
+
+	{
+		char *username = NULL;
+		struct passwd passwd;
+		struct passwd *p_result = NULL;
+		char buf[1024];
+
+		username = getenv("USER");
+		if (!username) {
+			username = getlogin();
+		}
+
+		if (username) {
+			result = getpwnam_r(username, &passwd, buf, sizeof(buf), &p_result);
+			if (result)
+				ELOG("getpwnam_r returned %d\n", result);
+		}
+
+		if (!p_result) {
+			p_result = &passwd;
+			passwd.pw_shell = "/bin/bash";
+		}
+
+		strncpy(login_shell, p_result->pw_shell, sizeof(login_shell));
+
+		return login_shell;
+	}
+}
+
 int main(int argn, char **args)
 {
 	int result;
@@ -203,7 +248,7 @@ int main(int argn, char **args)
 		},
 	};
 
-	result = tty_new("/bin/bash");
+	result = tty_new(get_login_shell());
 	if (result < 0) {
 		ELOG("Failed to create slave %d\n", result);
 		return 1;
