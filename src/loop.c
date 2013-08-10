@@ -54,26 +54,6 @@ static struct signal_fd {
 	bool received_sigwinch;
 } signal_fd;
 
-static void signal_handler(int signal, siginfo_t *siginfo, void *context) {
-	int save_errno;
-	int result;
-
-	switch(signal) {
-		case SIGWINCH:
-			DLOG("Received SIGWINCH");
-			signal_fd.received_sigwinch = true;
-			break;
-
-		default:
-			DLOG("Received unexpected signal %d", signal);
-			break;
-	}
-
-	save_errno = errno;
-	result = write(signal_fd.write_fd, "1", 1);
-	errno = save_errno;
-}
-
 /*
  * Register a loop_fd to be polled for.
  *
@@ -147,6 +127,29 @@ int loop_deregister(struct loop_fd *fd) {
 	return 0;
 }
 
+static struct {
+	loop_signal_callback handler;
+	siginfo_t siginfo;
+	int num_calls;
+} signal_callbacks[NSIG + 1];
+
+static void signal_handler(int signal, siginfo_t *siginfo, void *context) {
+	int save_errno;
+	int result;
+
+	if (signal < 0 || signal > NSIG)
+		return;
+
+	if (signal_callbacks[signal].handler) {
+		signal_callbacks[signal].num_calls++;
+		signal_callbacks[signal].siginfo = *siginfo;
+	}
+
+	save_errno = errno;
+	result = write(signal_fd.write_fd, "1", 1);
+	errno = save_errno;
+}
+
 /*
  * This function is called from the main poll loop to handle out of band
  * signals. This is not only asynchronous unix signals, but also other out
@@ -162,10 +165,40 @@ static void process_signals(struct loop_fd *fd, int revents) {
 	/* Read one signal marker from the pipe */
 	result = read(signal->fd.fd, buf, sizeof(buf));
 
-	if (signal_fd.received_sigwinch) {
-		DLOG("received sigwinch");
-		signal_fd.received_sigwinch = false;
+	for (int i = 0; i <= NSIG; i++) {
+		if (signal_callbacks[i].num_calls > 0) {
+			if (signal_callbacks[i].handler) {
+				DLOG("Received signal %d %d times: Handling", i,
+				     signal_callbacks[i].num_calls);
+				signal_callbacks[i].handler(&signal_callbacks[i].siginfo,
+							    signal_callbacks[i].num_calls);
+				signal_callbacks[i].num_calls = 0;
+
+			} else {
+				DLOG("Received signal %d %d times: Ignoring", i,
+				     signal_callbacks[i].num_calls);
+			}
+		}
 	}
+}
+
+/*
+ * Register a function to be called after a specific signal has occured. This
+ * function will be called in the normal process context so all functions are
+ * safe, but you will stall program execution. The siginfo_t of the last
+ * specified signal to occur will be passed in as an argument as well as the
+ * number of times this signal has triggered since the last run of the
+ * handler.
+ *
+ * To unregister a handler simply register a NULL handler for the desired
+ * signal.
+ */
+void loop_register_signal(int signal, loop_signal_callback callback) {
+	if (signal < 0 && signal >= NSIG)
+		return;
+
+	signal_callbacks[signal].handler = callback;
+	signal_callbacks[signal].num_calls = 0;
 }
 
 /*

@@ -29,9 +29,12 @@ struct loop_fd {
 	void (*poll_callback)(struct loop_fd *fd, int revents);
 };
 
+typedef void (*loop_signal_callback)(siginfo_t *siginfo, int num_signals);
+
 bool loop_run(void);
 int loop_init(void);
 int loop_register(struct loop_fd *fd);
 int loop_deregister(struct loop_fd *fd);
+void loop_register_signal(int signal, loop_signal_callback callback);
 
 #endif
