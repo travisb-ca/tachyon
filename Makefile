@@ -1,4 +1,4 @@
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -std=c99
 
 TACHYON_OBJS=src/tachyon.o src/tty.o src/pal.o src/loop.o
 TOOLS=tools/delayed_echo
