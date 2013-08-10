@@ -215,40 +215,44 @@ char *get_login_shell(void) {
 	}
 }
 
+struct stdin_fd in = {
+	.fd = {
+		.fd = STDIN,
+		.poll_flags = POLLIN | POLLPRI,
+		.poll_callback = stdin_cb,
+	},
+	.buf_in_used = 0,
+	.buf_in = {0},
+	.slave = NULL,
+};
+
+struct stdout_fd out = {
+	.fd = {
+		.fd = STDOUT,
+		.poll_flags = 0,
+		.poll_callback = stdout_cb,
+	},
+	.buf_out_used = 0,
+	.buf_out = {0},
+	.slave = NULL,
+};
+
+struct slave_fd slave = {
+	.fd = {
+		.fd = 0,
+		.poll_flags = POLLIN | POLLPRI,
+		.poll_callback = slave_cb,
+	},
+};
+
+void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
+	DLOG("Received SIGWINCH %d times", num_signals);
+}
+
 int main(int argn, char **args)
 {
 	int result;
 	struct winsize winsize;
-
-	struct stdin_fd in = {
-		.fd = {
-			.fd = STDIN,
-			.poll_flags = POLLIN | POLLPRI,
-			.poll_callback = stdin_cb,
-		},
-		.buf_in_used = 0,
-		.buf_in = {0},
-		.slave = NULL,
-	};
-
-	struct stdout_fd out = {
-		.fd = {
-			.fd = STDOUT,
-			.poll_flags = 0,
-			.poll_callback = stdout_cb,
-		},
-		.buf_out_used = 0,
-		.buf_out = {0},
-		.slave = NULL,
-	};
-
-	struct slave_fd slave = {
-		.fd = {
-			.fd = 0,
-			.poll_flags = POLLIN | POLLPRI,
-			.poll_callback = slave_cb,
-		},
-	};
 
 	result = tty_new(get_login_shell());
 	if (result < 0) {
@@ -266,6 +270,7 @@ int main(int argn, char **args)
 	result = tty_set_winsize(slave.fd.fd, winsize.ws_row, winsize.ws_col);
 	if (result)
 		WLOG("Failed to set slave window size %d", result);
+	loop_register_signal(SIGWINCH, handle_sigwinch);
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();
