@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <sys/signal.h>
 
 #include "log.h"
 #include "pal.h"
@@ -49,7 +51,28 @@ static struct signal_fd {
 	struct loop_fd fd;
 
 	int write_fd;
+	bool received_sigwinch;
 } signal_fd;
+
+static void signal_handler(int signal, siginfo_t *siginfo, void *context) {
+	int save_errno;
+	int result;
+
+	switch(signal) {
+		case SIGWINCH:
+			DLOG("Received SIGWINCH");
+			signal_fd.received_sigwinch = true;
+			break;
+
+		default:
+			DLOG("Received unexpected signal %d", signal);
+			break;
+	}
+
+	save_errno = errno;
+	result = write(signal_fd.write_fd, "1", 1);
+	errno = save_errno;
+}
 
 /*
  * Register a loop_fd to be polled for.
@@ -136,7 +159,50 @@ static void process_signals(struct loop_fd *fd, int revents) {
 
 	DLOG("Received signal");
 
+	/* Read one signal marker from the pipe */
 	result = read(signal->fd.fd, buf, sizeof(buf));
+
+	if (signal_fd.received_sigwinch) {
+		DLOG("received sigwinch");
+		signal_fd.received_sigwinch = false;
+	}
+}
+
+/*
+ * Initialize all the signal calling.
+ *
+ * Returns:
+ * 0      - On success
+ * EPIPE  - Unable to create signal pipe
+ * ENOMEM - Unable to register with loop
+ */
+static int init_signals(void) {
+	int pipes[2];
+	int result;
+	struct sigaction sig;
+
+	result = pipe(pipes);
+	if (result == -1) {
+		ELOG("Unable to create signal pipe %d", errno);
+		return EPIPE;
+	}
+
+	signal_fd.fd.fd = pipes[0];
+	signal_fd.write_fd = pipes[1];
+	signal_fd.fd.poll_flags = POLLIN;
+	signal_fd.fd.poll_callback = process_signals;
+
+	sig.__sigaction_u.__sa_sigaction = signal_handler;
+	sig.sa_mask = 0;
+	sig.sa_flags = SA_SIGINFO | SA_RESTART;
+	result = sigaction(SIGWINCH, &sig, NULL);
+	DLOG("sigaction returned %d %d", result, errno);
+
+	result = loop_register((struct loop_fd *)&signal_fd);
+	if (result)
+		return ENOMEM;
+
+	return 0;
 }
 
 /*
@@ -150,26 +216,9 @@ static void process_signals(struct loop_fd *fd, int revents) {
 int loop_init(void) {
 	int result;
 
-	{
-		int pipes[2];
+	result = init_signals();
 
-		result = pipe(pipes);
-		if (result == -1) {
-			ELOG("Unable to create signal pipe %d", errno);
-			return EPIPE;
-		}
-
-		signal_fd.fd.fd = pipes[0];
-		signal_fd.write_fd = pipes[1];
-		signal_fd.fd.poll_flags = POLLIN;
-		signal_fd.fd.poll_callback = process_signals;
-
-		result = loop_register((struct loop_fd *)&signal_fd);
-		if (result)
-			return ENOMEM;
-	}
-
-	return 0;
+	return result;
 }
 
 /*
@@ -187,8 +236,14 @@ bool loop_run(void) {
 	for (i = 0; i < num_loop_items; i++)
 		fds[i].events = loop_items[i].fd->poll_flags;
 
+poll:
 	result = pal_poll(fds, num_loop_items, -1);
 	if (result <= 0) {
+		if (errno == EINTR) {
+			/* Just received a signal, carry on */
+			goto poll;
+		}
+
 		WLOG("poll failed %d %d", result, errno);
 		return false;
 	}

@@ -278,6 +278,9 @@ int main(int argn, char **args)
 	result = loop_register((struct loop_fd *)&slave);
 	DLOG("register slave %d", result);
 
+	result = loop_init();
+	DLOG("loop_init %d", result);
+
 	while (run) {
 		if (!loop_run())
 			ELOG("Running the loop failed");
