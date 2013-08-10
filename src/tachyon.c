@@ -246,7 +246,15 @@ struct slave_fd slave = {
 };
 
 void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
+	struct winsize winsize;
+	int result;
+
 	DLOG("Received SIGWINCH %d times", num_signals);
+
+	winsize = tty_get_winsize(STDIN);
+	result = tty_set_winsize(slave.fd.fd, winsize.ws_row, winsize.ws_col);
+	if (result)
+		WLOG("Failed to set slave window size %d", result);
 }
 
 int main(int argn, char **args)
