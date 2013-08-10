@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <termios.h>
 
 #include "tty.h"
 #include "pal.h"
@@ -217,6 +218,7 @@ char *get_login_shell(void) {
 int main(int argn, char **args)
 {
 	int result;
+	struct winsize winsize;
 
 	struct stdin_fd in = {
 		.fd = {
@@ -259,6 +261,11 @@ int main(int argn, char **args)
 	slave.out = &out;
 	in.slave = &slave;
 	out.slave = &slave;
+
+	winsize = tty_get_winsize(STDIN);
+	result = tty_set_winsize(slave.fd.fd, winsize.ws_row, winsize.ws_col);
+	if (result)
+		WLOG("Failed to set slave window size %d", result);
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();

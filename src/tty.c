@@ -31,6 +31,8 @@
 
 #include "log.h"
 
+#include "tty.h"
+
 /*
  * Create a new slave tty running the given command.
  *
@@ -151,4 +153,26 @@ int tty_configure_control_tty(void)
 	fcntl(0, F_SETFL, &i);
 
 	return 0;
+}
+
+int tty_set_winsize(int fd, int rows, int cols) {
+	int result;
+	struct winsize size = {rows, cols, 0, 0};
+
+	result = ioctl(fd, TIOCSWINSZ, &size);
+	DLOG("Setting winsize to %d x %d: %d", rows, cols, result);
+
+	return result;
+}
+
+struct winsize tty_get_winsize(int fd) {
+	int result;
+	struct winsize size;
+
+	result = ioctl(fd, TIOCGWINSZ, &size);
+
+	if (result != 0)
+		WLOG("Unable to get window size %d", errno);
+
+	return size;
 }
