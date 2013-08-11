@@ -57,8 +57,6 @@ int main(int argn, char **args)
 	}
 
 
-	/* Force the window size of the slave */
-	handle_sigwinch(NULL, -1);
 	loop_register_signal(SIGWINCH, handle_sigwinch);
 
 	tty_save_termstate();
@@ -72,6 +70,9 @@ int main(int argn, char **args)
 	DLOG("buffer_init %d", result);
 	result = controller_init();
 	DLOG("register out %d", result);
+
+	/* Force the window size of the slave */
+	handle_sigwinch(NULL, -1);
 
 	while (run) {
 		if (!loop_run())
