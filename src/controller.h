@@ -15,26 +15,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 /*
- * Header for buffers, which represent a psuedo-terminal which can be
- * multiplexed.
+ * Header for the functions related to the controlling tty which the user is
+ * sitting in front of.
  */
-#ifndef BUFFER_H
-#define BUFFER_H
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
 
 #include "loop.h"
 
-#define BUFFER_BUF_SIZE 1024
-struct buffer {
-	struct loop_fd fd;
+#define CONTROLLER_BUF_SIZE 1024
+struct controller {
+	struct loop_fd in; /* stdin */
+	struct loop_fd out; /* stdout */
 
 	int buf_out_used;
-	char buf_out[BUFFER_BUF_SIZE];
+	char buf_out[CONTROLLER_BUF_SIZE];
 };
 
-extern struct buffer global_buffer;
+extern struct controller global_controller;
 
-int buffer_init(void);
-int buffer_set_winsize(struct buffer *buf, int rows, int cols);
-int buffer_output(struct buffer *buffer, int size, char *buf);
+int controller_init(void);
+int controller_output(struct controller *controller, int size, char *buf);
 
 #endif

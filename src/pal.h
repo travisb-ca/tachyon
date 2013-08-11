@@ -17,6 +17,8 @@
 #ifndef PAL_H
 #define PAL_H
 
+#include <poll.h>
+
 int pal_poll(struct pollfd fds[], nfds_t nfds, int timeout);
 
 #endif

@@ -15,26 +15,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 /*
- * Header for buffers, which represent a psuedo-terminal which can be
- * multiplexed.
+ * Miscellanious functions and definitions which are useful.
  */
-#ifndef BUFFER_H
-#define BUFFER_H
+#ifndef UTIL_H
+#define UTIL_H
 
-#include "loop.h"
+#include <stddef.h>
 
-#define BUFFER_BUF_SIZE 1024
-struct buffer {
-	struct loop_fd fd;
-
-	int buf_out_used;
-	char buf_out[BUFFER_BUF_SIZE];
-};
-
-extern struct buffer global_buffer;
-
-int buffer_init(void);
-int buffer_set_winsize(struct buffer *buf, int rows, int cols);
-int buffer_output(struct buffer *buffer, int size, char *buf);
+/* This one borrowed from Linux.
+ *
+ * Used like so:
+ *
+ * struct subclass {
+ * 	struct a a;
+ * 	struct superclass super;
+ * } object;
+ *
+ * struct subclass *s = container_of(&object->super, struct subclass, super);
+ */
+#define container_of(ptr, type, member) ({ \
+                const typeof( ((type *)0)->member ) *__mptr = (ptr); \
+                (type *)( (char *)__mptr - offsetof(type,member) );})
 
 #endif

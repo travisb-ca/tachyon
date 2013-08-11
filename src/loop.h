@@ -18,6 +18,7 @@
 #define LOOP_H
 
 #include <stdbool.h>
+#include <signal.h>
 
 struct loop_fd {
 	int fd;
