@@ -131,6 +131,7 @@ int controller_output(struct controller *controller, int size, char *buf) {
 
 	memcpy(&controller->buf_out + controller->buf_out_used,
 	       buf, size);
+	controller->buf_out_used += size;
 	controller->out.poll_flags |= POLLOUT;
 
 	return 0;

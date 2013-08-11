@@ -151,6 +151,7 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
 
 	memcpy(&buffer->buf_out + buffer->buf_out_used,
 	       buf, size);
+	buffer->buf_out_used += size;
 	buffer->fd.poll_flags |= POLLOUT;
 
 	return 0;
