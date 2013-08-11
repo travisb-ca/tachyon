@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "util.h"
 #include "loop.h"
@@ -42,6 +43,7 @@ static void controller_cb_in(struct loop_fd *fd, int revents) {
 	if (revents & (POLLHUP | POLLERR)) {
 		ELOG("controller %p has error on stdin", controller);
 		controller->in.poll_flags = 0;
+		exit(0);
 	}
 
 	if (revents & (POLLIN | POLLPRI)) {
@@ -68,14 +70,18 @@ static void controller_cb_out(struct loop_fd *fd, int revents) {
 	if (revents & (POLLHUP | POLLERR)) {
 		ELOG("controller %p has error on stdout", controller);
 		controller->out.poll_flags = 0;
+		exit(0);
 	}
 
 	if (revents & POLLOUT) {
 		/* flush data to pty */
 		result = write(controller->out.fd, controller->buf_out, controller->buf_out_used);
 		VLOG("wrote %d bytes to controller %p", result, controller);
-		if (result <= 0) {
+		if (result < 0) {
 			WLOG("error writing controller %p %d %d", controller, result, errno);
+		} else if (result == 0) {
+			/* The out fd closed */
+			exit(0);
 		} else {
 			controller->buf_out_used -= result;
 			if (controller->buf_out_used == 0)
