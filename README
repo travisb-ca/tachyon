@@ -1,3 +1,5 @@
 Tachyon: A terminal faster than light!
 
 Tachyon combines the terminal multiplexing festures of gnuscreen and tmux with the local echo prediction of mosh. 
+
+The Tachyon bug tracker can be found at http://travisbrown.ca/projects/tachyon/issues/index.html
