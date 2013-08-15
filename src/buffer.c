@@ -33,8 +33,6 @@
 #include "tty.h"
 #include "buffer.h"
 
-struct buffer global_buffer;
-
 static void buffer_cb(struct loop_fd *fd, int revents) {
 	struct buffer *buf = container_of(fd, struct buffer, fd);
 	int result;
@@ -52,7 +50,7 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading buffer %p %d %d", buf, result, errno);
 		} else {
-			result = controller_output(&global_controller, result, bytes);
+			result = controller_output(result, bytes);
 			if (result != 0) {
 				WLOG("controller ran out of space! dropping chars");
 			}
@@ -116,21 +114,41 @@ static char *get_login_shell(void) {
 	}
 }
 /*
- * Initialize the global buffer.
+ * Initialize a buffer.
  *
  * Returns:
- * 0      - On success
- * ENOMEM - Failed to allocate memory to register
+ * A struct buffer * on success
+ * NULL on failure
  */
-int buffer_init(void) {
-	global_buffer.fd.poll_flags = POLLIN | POLLPRI;
-	global_buffer.fd.poll_callback = buffer_cb;
-	global_buffer.fd.fd = tty_new(get_login_shell());
+struct buffer *buffer_init(void) {
+	struct buffer *buffer;
+	int result;
 
-	if (global_buffer.fd.fd < 0)
-		return 1;
+	buffer = malloc(sizeof(buffer));
+	if (!buffer)
+		return NULL;
 
-	return loop_register((struct loop_fd *) &global_buffer.fd);
+	memset(buffer, 0, sizeof(*buffer));
+
+	buffer->fd.poll_flags = POLLIN | POLLPRI;
+	buffer->fd.poll_callback = buffer_cb;
+	buffer->fd.fd = tty_new(get_login_shell());
+
+	if (buffer->fd.fd < 0)
+		goto out_free;
+
+	result = loop_register(&buffer->fd);
+	if (result != 0)
+		goto out_free_fd;
+
+	return buffer;
+
+out_free_fd:
+	close(buffer->fd.fd);
+
+out_free:
+	free(buffer);
+	return NULL;
 }
 
 int buffer_set_winsize(struct buffer *buf, int rows, int cols) {

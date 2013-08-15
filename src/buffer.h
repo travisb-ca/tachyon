@@ -31,9 +31,7 @@ struct buffer {
 	char buf_out[BUFFER_BUF_SIZE];
 };
 
-extern struct buffer global_buffer;
-
-int buffer_init(void);
+struct buffer *buffer_init(void);
 int buffer_set_winsize(struct buffer *buf, int rows, int cols);
 int buffer_output(struct buffer *buffer, int size, char *buf);
 

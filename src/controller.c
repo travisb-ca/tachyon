@@ -15,7 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 /*
- * Functions relating to the terminal the user is sitting at.
+ * Functions relating to the terminal the user is sitting at. This also
+ * includes multiplexing.
  */
 
 #include <poll.h>
@@ -23,17 +24,32 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/signal.h>
+#include <termios.h>
 
 #include "util.h"
 #include "loop.h"
 #include "buffer.h"
 #include "log.h"
+#include "tty.h"
 #include "controller.h"
 
 #define STDIN 0
 #define STDOUT 1
 
-struct controller global_controller;
+static struct controller GCon;
+
+static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
+	struct winsize winsize;
+	int result;
+
+	DLOG("Received SIGWINCH %d times", num_signals);
+
+	winsize = tty_get_winsize(0);
+	result = buffer_set_winsize(GCon.buffers[0], winsize.ws_row, winsize.ws_col);
+	if (result)
+		WLOG("Failed to set slave window size %d", result);
+}
 
 static void controller_cb_in(struct loop_fd *fd, int revents) {
 	struct controller *controller = container_of(fd, struct controller, in);
@@ -54,7 +70,7 @@ static void controller_cb_in(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading controller %p %d %d", controller, result, errno);
 		} else {
-			result = buffer_output(&global_buffer, result, bytes);
+			result = buffer_output(GCon.buffers[0], result, bytes);
 			if (result != 0) {
 				WLOG("buffer ran out of space! dropping chars");
 			}
@@ -91,7 +107,7 @@ static void controller_cb_out(struct loop_fd *fd, int revents) {
 }
 
 /*
- * Initialize the global controller
+ * Initialize the global controller, this includes the first buffer.
  *
  * Returns:
  * 0      - On success
@@ -100,27 +116,40 @@ static void controller_cb_out(struct loop_fd *fd, int revents) {
 int controller_init(void) {
 	int result;
 
-	global_controller.in.fd = STDIN;
-	global_controller.in.poll_flags = POLLIN | POLLPRI;
-	global_controller.in.poll_callback = controller_cb_in;
+	GCon.in.fd = STDIN;
+	GCon.in.poll_flags = POLLIN | POLLPRI;
+	GCon.in.poll_callback = controller_cb_in;
 
-	global_controller.out.fd = STDOUT;
-	global_controller.out.poll_flags = 0;
-	global_controller.out.poll_callback = controller_cb_out;
+	GCon.out.fd = STDOUT;
+	GCon.out.poll_flags = 0;
+	GCon.out.poll_callback = controller_cb_out;
 
-	global_controller.buf_out_used = 0;
+	GCon.buf_out_used = 0;
 
-	result = loop_register((struct loop_fd *)&global_controller.in);
+	result = loop_register((struct loop_fd *)&GCon.in);
 	if (result != 0)
 		return result;
 
-	result = loop_register((struct loop_fd *)&global_controller.out);
-	if (result != 0) {
-		loop_deregister((struct loop_fd *)&global_controller.in);
-		return result;
+	result = loop_register((struct loop_fd *)&GCon.out);
+	if (result != 0)
+		goto out_deregister;
+
+	GCon.buffers[0] = buffer_init();
+	if (!GCon.buffers[0]) {
+		result = ENOMEM;
+		goto out_deregister;
 	}
 
+	loop_register_signal(SIGWINCH, handle_sigwinch);
+
+	/* Force the window size of the slave */
+	handle_sigwinch(NULL, -1);
+
 	return 0;
+
+out_deregister:
+	loop_deregister((struct loop_fd *)&GCon.in);
+	return result;
 }
 
 /*
@@ -131,14 +160,14 @@ int controller_init(void) {
  * 0      - On success
  * EAGAIN - The buffer is currently full
  */
-int controller_output(struct controller *controller, int size, char *buf) {
-	if (size > sizeof(controller->buf_out) - controller->buf_out_used)
+int controller_output(int size, char *buf) {
+	if (size > sizeof(GCon.buf_out) - GCon.buf_out_used)
 		return EAGAIN;
 
-	memcpy(&controller->buf_out + controller->buf_out_used,
+	memcpy(GCon.buf_out + GCon.buf_out_used,
 	       buf, size);
-	controller->buf_out_used += size;
-	controller->out.poll_flags |= POLLOUT;
+	GCon.buf_out_used += size;
+	GCon.out.poll_flags |= POLLOUT;
 
 	return 0;
 }

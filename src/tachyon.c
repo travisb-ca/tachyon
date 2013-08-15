@@ -23,8 +23,6 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <termios.h>
-#include <sys/signal.h>
 
 #include "tty.h"
 #include "pal.h"
@@ -35,18 +33,6 @@
 
 static bool run = true;
 
-void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
-	struct winsize winsize;
-	int result;
-
-	DLOG("Received SIGWINCH %d times", num_signals);
-
-	winsize = tty_get_winsize(0);
-	result = buffer_set_winsize(&global_buffer, winsize.ws_row, winsize.ws_col);
-	if (result)
-		WLOG("Failed to set slave window size %d", result);
-}
-
 int main(int argn, char **args)
 {
 	int result;
@@ -56,9 +42,6 @@ int main(int argn, char **args)
 		return 1;
 	}
 
-
-	loop_register_signal(SIGWINCH, handle_sigwinch);
-
 	tty_save_termstate();
 	result = tty_configure_control_tty();
 	DLOG("tty_configure_control_tty %d %d", result, errno);
@@ -66,13 +49,8 @@ int main(int argn, char **args)
 	result = loop_init();
 	DLOG("loop_init %d", result);
 
-	result = buffer_init();
-	DLOG("buffer_init %d", result);
 	result = controller_init();
 	DLOG("register out %d", result);
-
-	/* Force the window size of the slave */
-	handle_sigwinch(NULL, -1);
 
 	while (run) {
 		if (!loop_run())

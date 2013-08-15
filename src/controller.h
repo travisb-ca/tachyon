@@ -22,19 +22,21 @@
 #define CONTROLLER_H
 
 #include "loop.h"
+#include "buffer.h"
 
 #define CONTROLLER_BUF_SIZE 1024
+#define CONTROLLER_MAX_BUFS 10
 struct controller {
 	struct loop_fd in; /* stdin */
 	struct loop_fd out; /* stdout */
 
 	int buf_out_used;
 	char buf_out[CONTROLLER_BUF_SIZE];
+
+	struct buffer *buffers[CONTROLLER_BUF_SIZE];
 };
 
-extern struct controller global_controller;
-
 int controller_init(void);
-int controller_output(struct controller *controller, int size, char *buf);
+int controller_output(int size, char *buf);
 
 #endif
