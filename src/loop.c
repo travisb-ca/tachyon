@@ -225,8 +225,9 @@ static int init_signals(void) {
 	signal_fd.fd.poll_flags = POLLIN;
 	signal_fd.fd.poll_callback = process_signals;
 
-	sig.__sigaction_u.__sa_sigaction = signal_handler;
-	sig.sa_mask = 0;
+	memset(&sig, 0, sizeof(sig));
+	sig.sa_sigaction = signal_handler;
+	/* sig.sa_mask = 0; Not portable and unnecessary right now */
 	sig.sa_flags = SA_SIGINFO | SA_RESTART;
 	result = sigaction(SIGWINCH, &sig, NULL);
 	DLOG("sigaction returned %d %d", result, errno);
