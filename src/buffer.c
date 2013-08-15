@@ -122,7 +122,10 @@ static char *get_login_shell(void) {
  */
 struct buffer *buffer_init(void) {
 	struct buffer *buffer;
+	char *login_shell;
 	int result;
+
+	login_shell = get_login_shell();
 
 	buffer = malloc(sizeof(buffer));
 	if (!buffer)
@@ -132,7 +135,7 @@ struct buffer *buffer_init(void) {
 
 	buffer->fd.poll_flags = POLLIN | POLLPRI;
 	buffer->fd.poll_callback = buffer_cb;
-	buffer->fd.fd = tty_new(get_login_shell());
+	buffer->fd.fd = tty_new(login_shell);
 
 	if (buffer->fd.fd < 0)
 		goto out_free;
