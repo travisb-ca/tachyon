@@ -36,7 +36,10 @@ struct controller {
 	struct buffer *buffers[CONTROLLER_BUF_SIZE];
 };
 
+bool run;
+
 int controller_init(void);
 int controller_output(int size, char *buf);
+void controller_buffer_exiting(int bufid);
 
 #endif

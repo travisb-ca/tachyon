@@ -31,8 +31,6 @@
 #include "buffer.h"
 #include "controller.h"
 
-static bool run = true;
-
 int main(int argn, char **args)
 {
 	int result;

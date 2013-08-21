@@ -40,6 +40,8 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 	VLOG("buffer %p %d", buf, revents);
 	if (revents & (POLLHUP | POLLERR)) {
 		buf->fd.poll_flags = 0;
+		controller_buffer_exiting(buf->bufid);
+		return;
 	}
 
 	if (revents & (POLLIN | POLLPRI)) {
@@ -120,7 +122,7 @@ static char *get_login_shell(void) {
  * A struct buffer * on success
  * NULL on failure
  */
-struct buffer *buffer_init(void) {
+struct buffer *buffer_init(int bufid) {
 	struct buffer *buffer;
 	char *login_shell;
 	int result;
@@ -133,6 +135,7 @@ struct buffer *buffer_init(void) {
 
 	memset(buffer, 0, sizeof(*buffer));
 
+	buffer->bufid = bufid;
 	buffer->fd.poll_flags = POLLIN | POLLPRI;
 	buffer->fd.poll_callback = buffer_cb;
 	buffer->fd.fd = tty_new(login_shell);

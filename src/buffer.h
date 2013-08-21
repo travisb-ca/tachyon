@@ -27,11 +27,12 @@
 struct buffer {
 	struct loop_fd fd;
 
+	int bufid;
 	int buf_out_used;
 	char buf_out[BUFFER_BUF_SIZE];
 };
 
-struct buffer *buffer_init(void);
+struct buffer *buffer_init(int bufid);
 int buffer_set_winsize(struct buffer *buf, int rows, int cols);
 int buffer_output(struct buffer *buffer, int size, char *buf);
 

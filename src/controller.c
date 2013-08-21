@@ -39,6 +39,8 @@
 
 static struct controller GCon;
 
+bool run = true;
+
 static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 	struct winsize winsize;
 	int result;
@@ -134,7 +136,7 @@ int controller_init(void) {
 	if (result != 0)
 		goto out_deregister;
 
-	GCon.buffers[0] = buffer_init();
+	GCon.buffers[0] = buffer_init(0);
 	if (!GCon.buffers[0]) {
 		result = ENOMEM;
 		goto out_deregister;
@@ -170,4 +172,13 @@ int controller_output(int size, char *buf) {
 	GCon.out.poll_flags |= POLLOUT;
 
 	return 0;
+}
+
+/*
+ * Tell the controller that the given buffer is exiting, usually because the underlying shell has terminated.
+ *
+ * After this function is called the buffer is no longer valid.
+ */
+void controller_buffer_exiting(int bufid) {
+	run = false;
 }
