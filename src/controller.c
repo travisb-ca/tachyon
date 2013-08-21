@@ -72,7 +72,7 @@ static void controller_cb_in(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading controller %p %d %d", controller, result, errno);
 		} else {
-			result = buffer_output(GCon.buffers[0], result, bytes);
+			result = predictor_output(NULL, GCon.buffers[0], result, bytes);
 			if (result != 0) {
 				WLOG("buffer ran out of space! dropping chars");
 			}
@@ -162,7 +162,7 @@ out_deregister:
  * 0      - On success
  * EAGAIN - The buffer is currently full
  */
-int controller_output(int size, char *buf) {
+int controller_output(int bufid, int size, char *buf) {
 	if (size > sizeof(GCon.buf_out) - GCon.buf_out_used)
 		return EAGAIN;
 

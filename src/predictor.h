@@ -15,31 +15,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 /*
- * Header for the functions related to the controlling tty which the user is
- * sitting in front of.
+ * Header for the prediction engine, which runs various predictors against
+ * the input and output and uses the best predictor for local echo
+ * prediction.
  */
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#ifndef PREDICTOR_H
+#define PREDICTOR_H
 
-#include "loop.h"
 #include "buffer.h"
 
-#define CONTROLLER_BUF_SIZE 1024
-#define CONTROLLER_MAX_BUFS 10
-struct controller {
-	struct loop_fd in; /* stdin */
-	struct loop_fd out; /* stdout */
+#define PREDICTOR_PREDICTION_LENGTH 128
 
-	int buf_out_used;
-	char buf_out[CONTROLLER_BUF_SIZE];
+struct predictor {
+	int num_chars;
 
-	struct buffer *buffers[CONTROLLER_BUF_SIZE];
+	int num_echoed;
+
+	char history[PREDICTOR_PREDICTION_LENGTH];
 };
 
-bool run;
-
-int controller_init(void);
-int controller_output(int bufid, int size, char *buf);
-void controller_buffer_exiting(int bufid);
+int predictor_init(struct predictor *predictor);
+int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input);
+int predictor_learn(struct predictor *predictor, int bufid, int size, char *output);
 
 #endif

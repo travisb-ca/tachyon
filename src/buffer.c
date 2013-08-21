@@ -31,6 +31,7 @@
 #include "util.h"
 #include "log.h"
 #include "tty.h"
+#include "predictor.h"
 #include "buffer.h"
 
 static void buffer_cb(struct loop_fd *fd, int revents) {
@@ -52,7 +53,7 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading buffer %p %d %d", buf, result, errno);
 		} else {
-			result = controller_output(result, bytes);
+			result = predictor_learn(NULL, buf->bufid, result, bytes);
 			if (result != 0) {
 				WLOG("controller ran out of space! dropping chars");
 			}
