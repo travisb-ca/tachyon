@@ -46,8 +46,9 @@ int predictor_init(struct predictor *predictor) {
  * 0      - On success
  * EAGAIN - Buffer didn't have sufficient space
  */
-int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input) {
-	return buffer_output(buffer, size, input);
+int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input,
+		     int (*outfunc)(struct buffer *buffer, int size, char *buf)) {
+	return outfunc(buffer, size, input);
 }
 
 /*

@@ -72,7 +72,7 @@ static void controller_cb_in(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading controller %p %d %d", controller, result, errno);
 		} else {
-			result = predictor_output(NULL, GCon.buffers[0], result, bytes);
+			result = buffer_output(GCon.buffers[0], result, bytes);
 			if (result != 0) {
 				WLOG("buffer ran out of space! dropping chars");
 			}

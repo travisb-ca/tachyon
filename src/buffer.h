@@ -22,10 +22,12 @@
 #define BUFFER_H
 
 #include "loop.h"
+#include "predictor.h"
 
 #define BUFFER_BUF_SIZE 1024
 struct buffer {
 	struct loop_fd fd;
+	struct predictor predictor;
 
 	int bufid;
 	int buf_out_used;

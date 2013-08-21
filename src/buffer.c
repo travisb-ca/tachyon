@@ -53,7 +53,7 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading buffer %p %d %d", buf, result, errno);
 		} else {
-			result = predictor_learn(NULL, buf->bufid, result, bytes);
+			result = predictor_learn(&buf->predictor, buf->bufid, result, bytes);
 			if (result != 0) {
 				WLOG("controller ran out of space! dropping chars");
 			}
@@ -136,6 +136,10 @@ struct buffer *buffer_init(int bufid) {
 
 	memset(buffer, 0, sizeof(*buffer));
 
+	result = predictor_init(&buffer->predictor);
+	if (result)
+		goto out_free;
+
 	buffer->bufid = bufid;
 	buffer->fd.poll_flags = POLLIN | POLLPRI;
 	buffer->fd.poll_callback = buffer_cb;
@@ -162,15 +166,7 @@ int buffer_set_winsize(struct buffer *buf, int rows, int cols) {
 	return tty_set_winsize(buf->fd.fd, rows, cols);
 }
 
-/*
- * Queue data to be output to the slave so the pty process can see it.
- * Either all the bytes or none of the bytes will be queued.
- *
- * Returns:
- * 0      - On success
- * EAGAIN - The buffer is currently full
- */
-int buffer_output(struct buffer *buffer, int size, char *buf) {
+static int _buffer_output(struct buffer *buffer, int size, char *buf) {
 	if (size > sizeof(buffer->buf_out) - buffer->buf_out_used)
 		return EAGAIN;
 
@@ -180,4 +176,17 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
 	buffer->fd.poll_flags |= POLLOUT;
 
 	return 0;
+}
+
+/*
+ * Queue data to be output to the slave so the pty process can see it.
+ * Either all the bytes or none of the bytes will be queued.
+ *
+ * Returns:
+ * 0      - On success
+ * EAGAIN - The buffer is currently full
+ */
+int buffer_output(struct buffer *buffer, int size, char *buf) {
+	return predictor_output(&buffer->predictor, buffer, size, buf,
+				_buffer_output);
 }

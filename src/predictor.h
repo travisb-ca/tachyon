@@ -22,7 +22,7 @@
 #ifndef PREDICTOR_H
 #define PREDICTOR_H
 
-#include "buffer.h"
+struct buffer;
 
 #define PREDICTOR_PREDICTION_LENGTH 128
 
@@ -35,7 +35,8 @@ struct predictor {
 };
 
 int predictor_init(struct predictor *predictor);
-int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input);
+int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input,
+		     int (*outfunc)(struct buffer *buffer, int size, char *buf));
 int predictor_learn(struct predictor *predictor, int bufid, int size, char *output);
 
 #endif
