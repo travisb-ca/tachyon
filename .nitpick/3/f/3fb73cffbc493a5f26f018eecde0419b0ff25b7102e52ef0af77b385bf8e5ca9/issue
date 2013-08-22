@@ -1,0 +1,18 @@
+Component: Server
+Date: 2013-08-22 02:58:30
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Receive signal to recreate sockets
+Type: Feature
+Units_of_Work: 1000
+--
+One major problem with screen multiplexors is that they have to keep a socket file around in order to work. Most of the time this works fine, but there are cases (such as /tmp and a periodic file deleter) where these socket files get deleted. tmux will recreate these sockets when it receives a signal and screen will do the same. Tachyon should support this as well.
