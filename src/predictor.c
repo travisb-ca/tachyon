@@ -57,11 +57,24 @@ int predictor_init(struct predictor *predictor) {
 int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input,
 		     int (*outfunc)(struct buffer *buffer, int size, char *buf)) {
 	int old_history_used;
+	bool predict;
 	int result;
 
 	old_history_used = predictor->history_used;
 
-	if (sizeof(predictor->history) - predictor->history_used >= size) {
+	/* Normalize to avoid integer overflow */
+	if (predictor->num_chars > 1000000) {
+		predictor->num_chars /= 2;
+		predictor->num_echoed /= 2;
+	}
+
+	if (predictor->num_chars == 0)
+		predict = true;
+	else
+		predict = (predictor->num_echoed * 100) / predictor->num_chars
+			>= PREDICTOR_ECHO_PERCENTAGE;
+
+	if (predictor && sizeof(predictor->history) - predictor->history_used >= size) {
 		/*
 		 * We have room so we can try to predict. We only predict
 		 * whole input pieces to attempt to avoid cutting escape
