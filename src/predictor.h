@@ -26,11 +26,20 @@ struct buffer;
 
 #define PREDICTOR_PREDICTION_LENGTH 128
 
-struct predictor {
-	int num_chars;
+/*
+ * If this percentage of characters or more have been echoed after user input
+ * predict that they'll continue to be output directly.
+ */
+#define PREDICTOR_ECHO_PERCENTAGE 70
 
+struct predictor {
+	/* Number of characters seen */
+	int num_chars;
+	/* Number of characters which ended up being echoed verbatim */
 	int num_echoed;
 
+	/* The predicted characters which have been echoed out */
+	int history_used;
 	char history[PREDICTOR_PREDICTION_LENGTH];
 };
 
