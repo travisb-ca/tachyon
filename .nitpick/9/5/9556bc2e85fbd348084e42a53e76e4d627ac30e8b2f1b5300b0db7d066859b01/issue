@@ -1,0 +1,18 @@
+Component: Server
+Date: 2013-09-20 04:11:46
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Screen sharing
+Type: Feature
+Units_of_Work: 1000
+--
+Both screen and tmux support screen sharing to greater or lessor degrees. It isn't used much, but when you want to share a screen not much else will do.
