@@ -22,6 +22,7 @@
 
 extern struct cmd_options {
 	int predict; /* Should character prediction be performed ? */
+	char meta_key; /* The key combination which accesses the meta terminal functionality */
 } cmd_options;
 
 #endif

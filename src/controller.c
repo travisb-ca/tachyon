@@ -32,6 +32,7 @@
 #include "buffer.h"
 #include "log.h"
 #include "tty.h"
+#include "options.h"
 #include "controller.h"
 
 #define STDIN 0
@@ -53,6 +54,41 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 		WLOG("Failed to set slave window size %d", result);
 }
 
+static int controller_handle_metakey(int size, char *input) {
+	int bytes_eaten = 0;
+	int meta_start = 0;
+	int meta_end;
+	for (int i = 0; i < size; i++) {
+		if (input[i] == CONTROL(cmd_options.meta_key) && !(GCon.flags & CONTROLLER_IN_META)) {
+			/*
+			 * Received a metakey, do higher level processing and
+			 * then remove the key sequence from the input
+			 */
+			meta_start = i;
+			meta_end = i;
+			bytes_eaten++;
+			GCon.flags |= CONTROLLER_IN_META;
+
+			printf("received meta key\n");
+		}
+
+		if (GCon.flags & CONTROLLER_IN_META) {
+			bytes_eaten++;
+			meta_end = i;
+			if (input[i] == cmd_options.meta_key) {
+				printf("escaping metakey\n");
+				input[i - 1] = cmd_options.meta_key;
+				meta_start++;
+			}
+
+			GCon.flags &= ~CONTROLLER_IN_META;
+			memmove(input + meta_start, input + meta_end, size - meta_end);
+		}
+	}
+
+	return size - bytes_eaten;
+}
+
 static void controller_cb_in(struct loop_fd *fd, int revents) {
 	struct controller *controller = container_of(fd, struct controller, in);
 	int result;
@@ -72,9 +108,12 @@ static void controller_cb_in(struct loop_fd *fd, int revents) {
 		if (result < 0) {
 			WLOG("error reading controller %p %d %d", controller, result, errno);
 		} else {
-			result = buffer_output(GCon.buffers[0], result, bytes);
-			if (result != 0) {
-				WLOG("buffer ran out of space! dropping chars");
+			result = controller_handle_metakey(result, bytes);
+			if (result > 0) {
+				result = buffer_output(GCon.buffers[0], result, bytes);
+				if (result != 0) {
+					WLOG("buffer ran out of space! dropping chars");
+				}
 			}
 		}
 	}

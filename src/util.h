@@ -40,6 +40,11 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
+/*
+ * Return the ascii character code of the normal character converted into control-X form.
+ */
+#define CONTROL(x) ( (x) & ~((1 << 6) | (1 << 5)))
+
 void close_on_exec(int fd);
 
 #endif

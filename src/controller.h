@@ -30,6 +30,9 @@ struct controller {
 	struct loop_fd in; /* stdin */
 	struct loop_fd out; /* stdout */
 
+	int flags;
+#define CONTROLLER_IN_META (1 << 0) /* Input processing is in the middle of processing meta keys */
+
 	int buf_out_used;
 	char buf_out[CONTROLLER_BUF_SIZE];
 
