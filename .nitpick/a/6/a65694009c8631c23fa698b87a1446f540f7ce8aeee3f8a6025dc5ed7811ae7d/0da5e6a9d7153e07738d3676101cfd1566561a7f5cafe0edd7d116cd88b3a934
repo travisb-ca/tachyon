@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2013-10-17 03:54:28
+Parent: issue
+User: travisb@travisbrown.ca
+--
+Yes all the file descriptors created should be closed on exec to avoid the client programs from having access to them.

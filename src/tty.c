@@ -32,6 +32,7 @@
 #include <sys/ioctl.h>
 
 #include "log.h"
+#include "util.h"
 
 #include "tty.h"
 
@@ -55,6 +56,7 @@ int tty_new(char *command)
 		result = -1;
 		goto err_master;
 	}
+	close_on_exec(pty_master);
 
 	result = grantpt(pty_master);
 	if (result != 0) {

@@ -17,32 +17,12 @@
 /*
  * Miscellanious functions and definitions which are useful.
  */
-#ifndef UTIL_H
-#define UTIL_H
 
-#include <stddef.h>
+#include <fcntl.h>
 
-/* This one borrowed from Linux.
- *
- * Used like so:
- *
- * struct subclass {
- * 	struct a a;
- * 	struct superclass super;
- * } object;
- *
- * struct subclass *s = container_of(&object->super, struct subclass, super);
- */
-#define container_of(ptr, type, member) ({ \
-                const typeof( ((type *)0)->member ) *__mptr = (ptr); \
-                (type *)( (char *)__mptr - offsetof(type,member) );})
+#include "util.h"
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#define max(a, b) ((a) > (b) ? (a) : (b))
-
-/*
- * Mark a file descriptor close-on-exec
- */
-void close_on_exec(int fd);
-
-#endif
+void close_on_exec(int fd) {
+	int flags = fcntl(fd, F_GETFD);
+	fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+}

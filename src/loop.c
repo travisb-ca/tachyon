@@ -29,6 +29,7 @@
 
 #include "log.h"
 #include "pal.h"
+#include "util.h"
 
 #include "loop.h"
 
@@ -219,6 +220,9 @@ static int init_signals(void) {
 		ELOG("Unable to create signal pipe %d", errno);
 		return EPIPE;
 	}
+
+	close_on_exec(pipes[0]);
+	close_on_exec(pipes[1]);
 
 	signal_fd.fd.fd = pipes[0];
 	signal_fd.write_fd = pipes[1];
