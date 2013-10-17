@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <getopt.h>
 
 #include "tty.h"
 #include "pal.h"
@@ -30,15 +31,58 @@
 #include "loop.h"
 #include "buffer.h"
 #include "controller.h"
+#include "options.h"
+
+/* Default values for the options are set here */
+struct cmd_options cmd_options = {
+	.predict = false,
+};
+
+const static struct option parameters[] = {
+	{"help"    , no_argument , NULL , 'h'}  , 
+	{"predict" , no_argument , NULL , 'p'}  , 
+	{NULL      , no_argument , NULL , 0 }};
+
+static void usage(void)
+{
+	printf("tachyon -hp\n");
+	printf("	-h --help      - Display this message\n");
+	printf("	-p --predictor - Turn on character prediction\n");
+}
+
+/*
+ * Returns:
+ * 0 - On success
+ * 1 - When tachyon should terminate cleanly, such as after displaying the usage
+ * 2 - When tachyon should terminate uncleanly, such as on parameter error
+ */
+static int process_args(int argn, char **args)
+{
+	int flag;
+
+	while ((flag = getopt_long(argn, args, "hp", parameters, NULL)) != -1) {
+		switch(flag) {
+			case 'p':
+				option.predict = true;
+				break;
+
+			default:
+			case 'h':
+				usage();
+				return 1;
+		}
+	}
+
+	return 1;
+}
 
 int main(int argn, char **args)
 {
 	int result;
 
-	if (result < 0) {
-		ELOG("Failed to create slave %d", result);
-		return 1;
-	}
+	result = process_args(argn, args);
+	if (result)
+		return result - 1;
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();
