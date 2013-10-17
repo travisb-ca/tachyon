@@ -22,6 +22,7 @@
 #include "buffer.h"
 #include "controller.h"
 #include "util.h"
+#include "options.h"
 
 #include "predictor.h"
 
@@ -49,13 +50,8 @@ int predictor_init(struct predictor *predictor) {
 /*
  * Given the latest input from the user, output the best prediction of the
  * local echo to the windows of that buffer.
- *
- * Returns:
- * 0      - On success
- * EAGAIN - Buffer didn't have sufficient space
  */
-int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input,
-		     int (*outfunc)(struct buffer *buffer, int size, char *buf)) {
+static void predictor_output_guess(struct predictor *predictor, struct buffer *buffer, int size, char *input) {
 	int old_history_used;
 	bool predict;
 	int result;
@@ -91,7 +87,21 @@ int predictor_output(struct predictor *predictor, struct buffer *buffer, int siz
 			predictor->history_used = old_history_used;
 		}
 	}
+}
 
+/*
+ * Given the latest input from the user, output the best prediction of the
+ * local echo to the windows of that buffer if prediction is enabled. In all
+ * cases forward that user input to the slave.
+ *
+ * Returns:
+ * 0      - On success
+ * EAGAIN - Buffer didn't have sufficient space
+ */
+int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input,
+		     int (*outfunc)(struct buffer *buffer, int size, char *buf)) {
+	if (cmd_options.predict)
+		predictor_output_guess(predictor, buffer, size, input);
 	return outfunc(buffer, size, input);
 }
 

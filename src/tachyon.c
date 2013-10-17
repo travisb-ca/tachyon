@@ -63,7 +63,7 @@ static int process_args(int argn, char **args)
 	while ((flag = getopt_long(argn, args, "hp", parameters, NULL)) != -1) {
 		switch(flag) {
 			case 'p':
-				option.predict = true;
+				cmd_options.predict = true;
 				break;
 
 			default:
@@ -73,7 +73,7 @@ static int process_args(int argn, char **args)
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 int main(int argn, char **args)
