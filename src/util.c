@@ -22,6 +22,9 @@
 
 #include "util.h"
 
+/*
+ * Mark a file descriptor close-on-exec
+ */
 void close_on_exec(int fd) {
 	int flags = fcntl(fd, F_GETFD);
 	fcntl(fd, F_SETFD, flags | FD_CLOEXEC);

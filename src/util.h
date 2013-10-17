@@ -40,9 +40,6 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
-/*
- * Mark a file descriptor close-on-exec
- */
 void close_on_exec(int fd);
 
 #endif
