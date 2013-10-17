@@ -119,39 +119,44 @@ int predictor_learn(struct predictor *predictor, int bufid, int size, char *outp
 	int n;
 	int result;
 
-	/*
-	 * Find the first difference between what we predicted and what
-	 * actually came back.
-	 */
-	for (n = 0; n < predictor->history_used && n < size; n++) {
-		predictor->num_chars++;
-
-		if (output[n] != predictor->history[n])
-			break;
-
-		predictor->num_echoed++;
-	}
-
-	if (output[n] != predictor->history[n]) {
+	if (cmd_options.predict) {
 		/*
-		 * We weren't perfect up to the end. First figure out how
-		 * many characters were not echoed immediately to get
-		 * better.
+		 * Find the first difference between what we predicted and what
+		 * actually came back.
 		 */
-		predictor->num_chars += min(predictor->history_used - i, size - i);
-	}
+		for (n = 0; n < predictor->history_used && n < size; n++) {
+			predictor->num_chars++;
 
-	/* Undo all the prediction to replay the correct sequence */
-	controller_output(bufid, predictor->history_used, backspaces);
+			if (output[n] != predictor->history[n])
+				break;
+
+			predictor->num_echoed++;
+		}
+
+		if (output[n] != predictor->history[n]) {
+			/*
+			 * We weren't perfect up to the end. First figure out how
+			 * many characters were not echoed immediately to get
+			 * better.
+			 */
+			predictor->num_chars += min(predictor->history_used - i, size - i);
+		}
+
+		/* Undo all the prediction to replay the correct sequence */
+		controller_output(bufid, predictor->history_used, backspaces);
+	}
 
 	/* Output the actual output */
 	result = controller_output(bufid, size, output);
-	predictor->history_used = max(0, predictor->history_used - size);
-	memmove(predictor->history, predictor->history + size, predictor->history_used);
 
-	if (result == 0 && predictor->history_used > 0) {
-		/* Reoutput the prediction */
-		controller_output(bufid, predictor->history_used, predictor->history);
+	if (cmd_options.predict) {
+		predictor->history_used = max(0, predictor->history_used - size);
+		memmove(predictor->history, predictor->history + size, predictor->history_used);
+
+		if (result == 0 && predictor->history_used > 0) {
+			/* Reoutput the prediction */
+			controller_output(bufid, predictor->history_used, predictor->history);
+		}
 	}
 
 	return result;
