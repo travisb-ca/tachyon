@@ -59,7 +59,7 @@ static int controller_handle_metakey(int size, char *input) {
 	int meta_start = 0;
 	int meta_end;
 	for (int i = 0; i < size; i++) {
-		if (input[i] == CONTROL(cmd_options.meta_key) && !(GCon.flags & CONTROLLER_IN_META)) {
+		if (input[i] == CONTROL(cmd_options.keys.meta) && !(GCon.flags & CONTROLLER_IN_META)) {
 			/*
 			 * Received a metakey, do higher level processing and
 			 * then remove the key sequence from the input
@@ -74,9 +74,9 @@ static int controller_handle_metakey(int size, char *input) {
 		if (GCon.flags & CONTROLLER_IN_META) {
 			bytes_eaten++;
 			meta_end = i;
-			if (input[i] == cmd_options.meta_key) {
+			if (input[i] == cmd_options.keys.meta) {
 				VLOG("escaping metakey\n");
-				input[i - 1] = cmd_options.meta_key;
+				input[i - 1] = cmd_options.keys.meta;
 				meta_start++;
 			}
 

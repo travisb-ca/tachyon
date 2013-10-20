@@ -22,7 +22,10 @@
 
 extern struct cmd_options {
 	int predict; /* Should character prediction be performed ? */
-	char meta_key; /* The key combination which accesses the meta terminal functionality */
+	struct {
+		char meta; /* The key combination which accesses the meta terminal functionality */
+		char buffer_create; /* The key command which creates a new buffer */
+	} keys;
 } cmd_options;
 
 #endif

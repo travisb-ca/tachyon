@@ -36,7 +36,10 @@
 /* Default values for the options are set here */
 struct cmd_options cmd_options = {
 	.predict = false,
-	.meta_key = 't',
+	.keys = {
+		.meta= 't',
+		.buffer_create = 'c',
+	},
 };
 
 const static struct option parameters[] = {
