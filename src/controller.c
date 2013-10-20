@@ -40,6 +40,10 @@
 
 static struct controller GCon;
 
+/* The currently active buffer */
+static int current_buf_num;
+static struct buffer *current_buf;
+
 bool run = true;
 
 static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
@@ -49,7 +53,7 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 	DLOG("Received SIGWINCH %d times", num_signals);
 
 	winsize = tty_get_winsize(0);
-	result = buffer_set_winsize(GCon.buffers[0], winsize.ws_row, winsize.ws_col);
+	result = buffer_set_winsize(current_buf, winsize.ws_row, winsize.ws_col);
 	if (result)
 		WLOG("Failed to set slave window size %d", result);
 }
@@ -124,7 +128,7 @@ static void controller_cb_in(struct loop_fd *fd, int revents) {
 		} else {
 			result = controller_handle_metakey(result, bytes);
 			if (result > 0) {
-				result = buffer_output(GCon.buffers[0], result, bytes);
+				result = buffer_output(current_buf, result, bytes);
 				if (result != 0) {
 					WLOG("buffer ran out of space! dropping chars");
 				}
@@ -194,6 +198,9 @@ int controller_init(void) {
 		result = ENOMEM;
 		goto out_deregister;
 	}
+
+	current_buf_num = 0;
+	current_buf = GCon.buffers[0];
 
 	loop_register_signal(SIGWINCH, handle_sigwinch);
 
