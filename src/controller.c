@@ -58,6 +58,21 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 		WLOG("Failed to set slave window size %d", result);
 }
 
+static void controller_next_buffer(void) {
+	int i;
+	for (i = current_buf_num + 1; i != current_buf_num; i = (i + 1) % CONTROLLER_MAX_BUFS) {
+		if (GCon.buffers[i] != NULL)
+			break;
+	}
+
+	if (i == current_buf_num) {
+		printf("No other buffer!\n");
+	} else {
+		current_buf_num = i;
+		current_buf = GCon.buffers[i];
+	}
+}
+
 static int controller_handle_metakey(int size, char *input) {
 	int bytes_eaten = 0;
 	int meta_start = 0;
@@ -95,6 +110,8 @@ static int controller_handle_metakey(int size, char *input) {
 				bytes_eaten--;
 			} else if (input[i] == cmd_options.keys.buffer_create) {
 				VLOG("Creating new buffer\n");
+			} else if (input[i] == cmd_options.keys.buffer_next) {
+				controller_next_buffer();
 			} else {
 				VLOG("Ignoring unhandled meta-sequence\n");
 			}

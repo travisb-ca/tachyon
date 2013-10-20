@@ -39,6 +39,7 @@ struct cmd_options cmd_options = {
 	.keys = {
 		.meta= 't',
 		.buffer_create = 'c',
+		.buffer_next = 'n',
 	},
 };
 
