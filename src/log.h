@@ -19,18 +19,38 @@
 
 #include <stdio.h>
 
+/*
+ * Verbose log, logging that won't be useful to anybody but developers.
+ */
 #define VLOG(fmt, ...) do { } while(0)
 
+/*
+ * Debug log, logging which might be useful to people trying to figure out why something doesn't
+ * work.
+ */
 #define DLOG(fmt, ...) do {                       \
 	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 
+/*
+ * Warn log, logging something the user should know about which isn't normal.
+ */
 #define WLOG(fmt, ...) do {                       \
 	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 
+/*
+ * Error log, logging the user must know about because something is broken.
+ */
 #define ELOG(fmt, ...) do {                       \
 	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+} while (0)
+
+/*
+ * Normal informational messages, often as a result of user input.
+ */
+#define NOTIFY(fmt, ...) do {                       \
+	fprintf(stdout, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 
 #endif

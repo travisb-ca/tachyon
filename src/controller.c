@@ -66,7 +66,7 @@ static void controller_next_buffer(void) {
 	}
 
 	if (i == current_buf_num) {
-		printf("No other buffer!\n");
+		NOTIFY("No other buffer!\n");
 	} else {
 		current_buf_num = i;
 		current_buf = GCon.buffers[i];
