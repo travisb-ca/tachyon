@@ -131,7 +131,7 @@ struct buffer *buffer_init(int bufid) {
 
 	login_shell = get_login_shell();
 
-	buffer = malloc(sizeof(buffer));
+	buffer = malloc(sizeof(*buffer));
 	if (!buffer)
 		return NULL;
 
