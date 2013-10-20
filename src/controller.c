@@ -96,6 +96,7 @@ static void controller_new_buffer(void) {
 	}
 
 	controller_set_current_buffer(buf_num);
+	handle_sigwinch(NULL, -1);
 }
 
 /*
