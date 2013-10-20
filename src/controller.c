@@ -52,7 +52,7 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 
 	DLOG("Received SIGWINCH %d times", num_signals);
 
-	winsize = tty_get_winsize(0);
+	winsize = tty_get_winsize(STDIN);
 	result = buffer_set_winsize(current_buf, winsize.ws_row, winsize.ws_col);
 	if (result)
 		WLOG("Failed to set slave window size %d", result);
