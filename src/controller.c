@@ -57,7 +57,7 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 static int controller_handle_metakey(int size, char *input) {
 	int bytes_eaten = 0;
 	int meta_start = 0;
-	int meta_end;
+	int meta_end = 0;
 	for (int i = 0; i < size; i++) {
 		if (input[i] == CONTROL(cmd_options.keys.meta) && !(GCon.flags & CONTROLLER_IN_META)) {
 			/*
@@ -69,24 +69,34 @@ static int controller_handle_metakey(int size, char *input) {
 			bytes_eaten++;
 			GCon.flags |= CONTROLLER_IN_META;
 			VLOG("received meta key\n");
+			continue;
 		}
 
 		if (GCon.flags & CONTROLLER_IN_META) {
+			/* Just about every meta-sequence doesn't display, so
+			 * eat the character. Just about every meta-sequence is
+			 * only ony character and so exits meta-mode
+			 * immediately, so do that by default too.
+			 */
 			bytes_eaten++;
 			meta_end = i;
+			GCon.flags &= ~CONTROLLER_IN_META;
 
 			if (input[i] == cmd_options.keys.meta) {
 				VLOG("escaping metakey\n");
 				input[i - 1] = cmd_options.keys.meta;
+
+				/* Don't consume this character, but output it */
 				meta_start++;
+				bytes_eaten--;
 			} else if (input[i] == cmd_options.keys.buffer_create) {
-				printf("Creating new buffer\n");
+				VLOG("Creating new buffer\n");
 			} else {
-				printf("Ignoring unhandled meta-sequence\n");
+				VLOG("Ignoring unhandled meta-sequence\n");
 			}
 
-			GCon.flags &= ~CONTROLLER_IN_META;
-			memmove(input + meta_start, input + meta_end, size - meta_end);
+			if (meta_start != meta_end)
+				memmove(input + meta_start, input + meta_end, size - meta_end);
 		}
 	}
 
