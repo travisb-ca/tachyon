@@ -1,0 +1,18 @@
+Component: Client
+Date: 2013-10-20 19:33:03
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Critical
+State: Open
+Title: Meta-sequence skipping memmove test seems off
+Type: Bug
+Units_of_Work: 1000
+--
+The logic which determines if the memmove to eliminate the meta-sequence characters seems off. It seems to work fine in the single character case of a real live terminal, but I fear that it will fail in an ssh environment where network effects could cause a long input string to arrive at once. The logic must be confirmed and tested in such an environment.

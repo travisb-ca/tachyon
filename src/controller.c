@@ -95,7 +95,7 @@ static int controller_handle_metakey(int size, char *input) {
 				VLOG("Ignoring unhandled meta-sequence\n");
 			}
 
-			if (meta_start != meta_end)
+			if (meta_start < meta_end)
 				memmove(input + meta_start, input + meta_end, size - meta_end);
 		}
 	}
