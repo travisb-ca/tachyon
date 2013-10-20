@@ -116,6 +116,7 @@ static char *get_login_shell(void) {
 		return login_shell;
 	}
 }
+
 /*
  * Initialize a buffer.
  *
