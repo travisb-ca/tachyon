@@ -68,15 +68,14 @@ static int controller_handle_metakey(int size, char *input) {
 			meta_end = i;
 			bytes_eaten++;
 			GCon.flags |= CONTROLLER_IN_META;
-
-			printf("received meta key\n");
+			VLOG("received meta key\n");
 		}
 
 		if (GCon.flags & CONTROLLER_IN_META) {
 			bytes_eaten++;
 			meta_end = i;
 			if (input[i] == cmd_options.meta_key) {
-				printf("escaping metakey\n");
+				VLOG("escaping metakey\n");
 				input[i - 1] = cmd_options.meta_key;
 				meta_start++;
 			}
