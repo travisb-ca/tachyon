@@ -58,6 +58,50 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 		WLOG("Failed to set slave window size %d", result);
 }
 
+/*
+ * Set the current buffer to the given buffer number if it exists.
+ */
+static void controller_set_current_buffer(int num) {
+	if (GCon.buffers[num] != NULL) {
+		current_buf_num = num;
+		current_buf = GCon.buffers[num];
+	}
+}
+
+/*
+ * Create a new buffer and switch to it if successful.
+ */
+static void controller_new_buffer(void) {
+	int buf_num;
+
+	/* Find next available buffer number */
+	if (GCon.buffers[0] != NULL) {
+		buf_num = 0;
+	} else {
+		for (buf_num = 0; buf_num != 0; buf_num = (buf_num + 1) % CONTROLLER_MAX_BUFS) {
+			if (GCon.buffers[buf_num] != NULL)
+				break;
+		}
+
+		if (buf_num == 0) {
+			NOTIFY("No free buffers found! Failed to create new buffer");
+			return;
+		}
+	}
+
+	GCon.buffers[buf_num] = buffer_init(buf_num);
+	if (!GCon.buffers[buf_num]) {
+		NOTIFY("Failed to create new buffer");
+		return;
+	}
+
+	controller_set_current_buffer(buf_num);
+}
+
+/*
+ * Change the current buffer to the next buffer, if there is one. Otherwise
+ * notify the user that there is only one.
+ */
 static void controller_next_buffer(void) {
 	int i;
 	for (i = current_buf_num + 1; i != current_buf_num; i = (i + 1) % CONTROLLER_MAX_BUFS) {
@@ -65,12 +109,10 @@ static void controller_next_buffer(void) {
 			break;
 	}
 
-	if (i == current_buf_num) {
+	if (i == current_buf_num)
 		NOTIFY("No other buffer!\n");
-	} else {
-		current_buf_num = i;
-		current_buf = GCon.buffers[i];
-	}
+	else
+		controller_set_current_buffer(i);
 }
 
 static int controller_handle_metakey(int size, char *input) {
@@ -110,7 +152,9 @@ static int controller_handle_metakey(int size, char *input) {
 				bytes_eaten--;
 			} else if (input[i] == cmd_options.keys.buffer_create) {
 				VLOG("Creating new buffer\n");
+				controller_new_buffer();
 			} else if (input[i] == cmd_options.keys.buffer_next) {
+				VLOG("Changing to next buffer\n");
 				controller_next_buffer();
 			} else {
 				VLOG("Ignoring unhandled meta-sequence\n");
