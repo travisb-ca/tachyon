@@ -75,11 +75,11 @@ static void controller_new_buffer(void) {
 	int buf_num;
 
 	/* Find next available buffer number */
-	if (GCon.buffers[0] != NULL) {
+	if (GCon.buffers[0] == NULL) {
 		buf_num = 0;
 	} else {
-		for (buf_num = 0; buf_num != 0; buf_num = (buf_num + 1) % CONTROLLER_MAX_BUFS) {
-			if (GCon.buffers[buf_num] != NULL)
+		for (buf_num = 1; buf_num != 0; buf_num = (buf_num + 1) % CONTROLLER_MAX_BUFS) {
+			if (GCon.buffers[buf_num] == NULL)
 				break;
 		}
 
