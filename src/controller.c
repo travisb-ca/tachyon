@@ -105,7 +105,9 @@ static void controller_new_buffer(void) {
  */
 static void controller_next_buffer(void) {
 	int i;
-	for (i = current_buf_num + 1; i != current_buf_num; i = (i + 1) % CONTROLLER_MAX_BUFS) {
+	for (i = (current_buf_num + 1) % CONTROLLER_MAX_BUFS;
+	     i != current_buf_num;
+	     i = (i + 1) % CONTROLLER_MAX_BUFS) {
 		if (GCon.buffers[i] != NULL)
 			break;
 	}
@@ -302,5 +304,20 @@ int controller_output(int bufid, int size, char *buf) {
  * After this function is called the buffer is no longer valid.
  */
 void controller_buffer_exiting(int bufid) {
+	buffer_free(GCon.buffers[bufid]);
+	GCon.buffers[bufid] = NULL;
+
+	for (int i = (bufid + 1) % CONTROLLER_MAX_BUFS;
+	     i != bufid;
+	     i = (i + 1) % CONTROLLER_MAX_BUFS) {
+		if (GCon.buffers[i] != NULL) {
+			controller_set_current_buffer(i);
+			return;
+		}
+	}
+
+	/*
+	 * We have no buffers remaining, exit.
+	 */
 	run = false;
 }

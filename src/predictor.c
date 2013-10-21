@@ -47,6 +47,10 @@ int predictor_init(struct predictor *predictor) {
 	return 0;
 }
 
+void predictor_free(struct predictor *predictor) {
+	return;
+}
+
 /*
  * Given the latest input from the user, output the best prediction of the
  * local echo to the windows of that buffer.

@@ -35,6 +35,7 @@ struct buffer {
 };
 
 struct buffer *buffer_init(int bufid);
+void buffer_free(struct buffer *buffer);
 int buffer_set_winsize(struct buffer *buf, int rows, int cols);
 int buffer_output(struct buffer *buffer, int size, char *buf);
 

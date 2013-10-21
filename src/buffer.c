@@ -163,6 +163,13 @@ out_free:
 	return NULL;
 }
 
+void buffer_free(struct buffer *buffer) {
+	loop_deregister(&buffer->fd);
+	predictor_free(&buffer->predictor);
+	close(buffer->fd.fd);
+	free(buffer);
+}
+
 int buffer_set_winsize(struct buffer *buf, int rows, int cols) {
 	return tty_set_winsize(buf->fd.fd, rows, cols);
 }
