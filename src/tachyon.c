@@ -71,10 +71,13 @@ static int process_args(int argn, char **args)
 				cmd_options.predict = true;
 				break;
 
-			default:
 			case 'h':
 				usage();
 				return 1;
+
+			default:
+				usage();
+				return 2;
 		}
 	}
 
