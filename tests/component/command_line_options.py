@@ -1,9 +1,8 @@
 #!/usr/bin/env python2.7
 
-import unittest
 import subprocess
 
-class TestCommandLineOptions(unittest.TestCase):
+class TestCommandLineOptions(LousyTestCase):
 	def setUp(self):
 		self.tachyon = None
 		self.tachyonTerminated = False
@@ -24,5 +23,3 @@ class TestCommandLineOptions(unittest.TestCase):
 
 		self.assertEqual(self.tachyon.returncode, 1)
 
-if __name__ == '__main__':
-	unittest.main()
