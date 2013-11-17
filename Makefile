@@ -10,7 +10,7 @@ tachyon: $(TACHYON_OBJS)
 	$(CC) $(CFLAGS) -o tachyon $^
 
 test: tachyon
-	lousy run -a
+	@lousy run
 
 run: tachyon
 	./tachyon
