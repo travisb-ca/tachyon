@@ -12,11 +12,6 @@ class TestCommandLineOptions(tachyon.TachyonTestCase):
 		if self.tachyon and not self.tachyonTerminated:
 			self.tachyon.kill()
 
-	def waitForTermination(self):
-		while not self.tachyon.poll():
-			pass
-		self.tachyonTerminated = True
-
 	def test_invalidOption(self):
 		self.tachyon = subprocess.Popen('./tachyon -z', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
