@@ -10,7 +10,7 @@ tachyon: $(TACHYON_OBJS)
 	$(CC) $(CFLAGS) -o tachyon $^
 
 test: tachyon
-	./tests/component/command_line_options.py
+	lousy run -a
 
 run: tachyon
 	./tachyon
