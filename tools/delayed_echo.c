@@ -25,6 +25,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <termios.h>
+#include <unistd.h>
 
 #define DELAY_US (2000 * 1000)
 #define BUF_SIZE 4096
