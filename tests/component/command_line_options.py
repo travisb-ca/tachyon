@@ -1,8 +1,9 @@
 #!/usr/bin/env python2.7
 
+import tachyon
 import subprocess
 
-class TestCommandLineOptions(LousyTestCase):
+class TestCommandLineOptions(tachyon.TachyonTestCase):
 	def setUp(self):
 		self.tachyon = None
 		self.tachyonTerminated = False
