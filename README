@@ -4,4 +4,6 @@ Tachyon combines the terminal multiplexing festures of gnuscreen and tmux with t
 
 The Tachyon bug tracker can be found at http://travisbrown.ca/projects/tachyon/issues/index.html
 
+The test suite uses Lousy to run. Lousy can be found at https://github.com/travisb-ca/lousy
+
 The Tachyon mailing list is tachyon@travisbrown.ca and the list archive and information can be found at http://lists.travisbrown.ca/listinfo.cgi/tachyon-travisbrown.ca
