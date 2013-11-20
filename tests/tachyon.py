@@ -4,7 +4,7 @@ import lousy
 import time
 import subprocess
 
-class TachyonTestCase(lousy.LousyTestCase):
+class TachyonTestCase(lousy.TestCase):
 
 	def setUp(self):
 		self.tachyon = None
