@@ -5,6 +5,7 @@ import time
 import subprocess
 
 class TachyonTestCase(lousy.TestCase):
+	META = '\x14'
 
 	def setUp(self):
 		self.tachyon = None
@@ -27,4 +28,16 @@ class TachyonTestCase(lousy.TestCase):
 				self.fail('Timed out waiting to process to terminate')
 			time.sleep(0.001)
 		self.tachyonTerminated = True
+
+	# Send the given string to tachyon as given
+	def sendString(self, string):
+		self.tachyon.stdin.write(string)
+
+	# Send a meta command with the metacharacter prepended
+	def sendMeta(self, cmd):
+		self.sendString(self.META + cmd)
+
+	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
+	def terminalLine(self, lineFromEnd):
+		return 'not implemented'
 
