@@ -27,11 +27,16 @@ class TachyonTestCase(lousy.TestCase):
 	def sendString(self, string):
 		self.tachyon.stdin.write(string)
 
+	# Send a command, this mostly just appends a newline
+	def sendCmd(self, cmd):
+		self.sendString(cmd + '\n')
+
 	# Send a meta command with the metacharacter prepended
 	def sendMeta(self, cmd):
 		self.sendString(self.META + cmd)
 
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):
-		return 'not implemented'
+		output = self.tachyon.stdout.read()
+		return output.split('\n')[-1 * lineFromEnd - 1]
 
