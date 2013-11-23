@@ -9,10 +9,10 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 	def tearDown(self):
 		self.waitForTermination()
 
-	def test_createNewBuffer(self):
+	def test_bufferShellResponds(self):
 		self.sendLine('export BUFNUM=1')
-		self.sendMeta('c')
 		self.sendLine('echo $BUFNUM')
 		response = self.terminalLine(-1)
-		self.assertEqual(response, '')
+		self.assertEqual(response, '1')
+		self.sendLine('exit')
 
