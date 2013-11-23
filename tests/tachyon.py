@@ -15,7 +15,7 @@ class TachyonTestCase(lousy.TestCase):
 			self.tachyon.terminate()
 
 	# Start a tachyon process with the given arguments
-	def startTachyon(self, args):
+	def startTachyon(self, args=''):
 		self.tachyon = lousy.Process('./tachyon ' + args, shell=True, pty=True)
 
 		# Read the preamble

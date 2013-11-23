@@ -4,7 +4,7 @@ import tachyon
 
 class TestBasicWindows(tachyon.TachyonTestCase):
 	def setUp(self):
-		self.startTachyon('-p')
+		self.startTachyon()
 
 	def tearDown(self):
 		self.waitForTermination()
