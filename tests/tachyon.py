@@ -39,6 +39,10 @@ class TachyonTestCase(lousy.TestCase):
 	def sendMeta(self, cmd):
 		self.send(self.META + cmd)
 
+	def sendCmd(self, cmd):
+		self.sendLine(cmd)
+		time.sleep(1)
+
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):
 		output = self.tachyon.stdout.read()
