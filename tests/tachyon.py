@@ -28,17 +28,16 @@ class TachyonTestCase(lousy.TestCase):
 		self.assertTrue(response, 'Timed out waiting to process to terminate')
 
 	# Send the given string to tachyon as given
-	def sendString(self, string):
-		self.tachyon.stdin.write(string)
+	def send(self, string):
+		self.tachyon.send(string)
 
-	# Send a command, this mostly just appends a newline
-	def sendCmd(self, cmd):
-		self.sendString(cmd + '\n')
-		time.sleep(1)
+	# Send the given characters to tachyon, adding newline
+	def sendLine(self, string):
+		self.tachyon.sendLine(string)
 
 	# Send a meta command with the metacharacter prepended
 	def sendMeta(self, cmd):
-		self.sendString(self.META + cmd)
+		self.send(self.META + cmd)
 
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):

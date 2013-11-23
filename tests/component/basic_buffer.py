@@ -10,9 +10,9 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 		self.waitForTermination()
 
 	def test_createNewBuffer(self):
-		self.sendString('export BUFNUM=1')
+		self.sendLine('export BUFNUM=1')
 		self.sendMeta('c')
-		self.sendString('echo $BUFNUM')
+		self.sendLine('echo $BUFNUM')
 		response = self.terminalLine(-1)
 		self.assertEqual(response, '')
 
