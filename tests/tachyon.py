@@ -44,3 +44,10 @@ class TachyonTestCase(lousy.TestCase):
 		output = self.tachyon.stdout.read()
 		return output.split('\n')[-1 - lineFromEnd]
 
+	def expect(self, regexes, timeout=5):
+		return self.tachyon.expect(regexes, timeout)
+
+	def expectOnly(self, regex, timeout=5):
+		result = self.tachyon.expect([regex], timeout)
+		self.assertEqual(result, 0)
+

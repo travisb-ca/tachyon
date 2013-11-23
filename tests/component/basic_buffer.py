@@ -13,9 +13,8 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 		self.sendLine('exit')
 
 	def test_bufferShellResponds(self):
-		self.sendLine('export BUFNUM=1')
-		self.sendLine('echo $BUFNUM')
-		response = self.terminalLine(-1)
-		self.assertEqual(response, '1')
-		self.sendLine('exit')
+		self.sendCmd('export BUFNUM=1')
+		self.sendCmd('echo $BUFNUM')
+		self.expectOnly('^1$')
+		self.sendCmd('exit')
 
