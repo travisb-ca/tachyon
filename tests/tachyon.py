@@ -16,7 +16,11 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Start a tachyon process with the given arguments
 	def startTachyon(self, args):
-		self.tachyon = lousy.Process('./tachyon ' + args, shell=True)
+		self.tachyon = lousy.Process('./tachyon ' + args, shell=True, pty=True)
+
+		# Read the preamble
+		time.sleep(1)
+		self.tachyon.flushOutput()
 
 	# Wait for the tachyon process to terminate. Fail if the timeout is exceeded
 	def waitForTermination(self, timeout=5):
@@ -30,6 +34,7 @@ class TachyonTestCase(lousy.TestCase):
 	# Send a command, this mostly just appends a newline
 	def sendCmd(self, cmd):
 		self.sendString(cmd + '\n')
+		time.sleep(1)
 
 	# Send a meta command with the metacharacter prepended
 	def sendMeta(self, cmd):
@@ -38,5 +43,5 @@ class TachyonTestCase(lousy.TestCase):
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):
 		output = self.tachyon.stdout.read()
-		return output.split('\n')[-1 * lineFromEnd - 1]
+		return output.split('\n')[-1 - lineFromEnd]
 
