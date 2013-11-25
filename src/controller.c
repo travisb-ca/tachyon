@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <sys/signal.h>
 #include <termios.h>
+#include <sys/ioctl.h>
 
 #include "util.h"
 #include "loop.h"
