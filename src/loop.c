@@ -136,7 +136,6 @@ static struct {
 
 static void signal_handler(int signal, siginfo_t *siginfo, void *context) {
 	int save_errno;
-	int result;
 
 	if (signal < 0 || signal > NSIG)
 		return;
@@ -147,7 +146,7 @@ static void signal_handler(int signal, siginfo_t *siginfo, void *context) {
 	}
 
 	save_errno = errno;
-	result = write(signal_fd.write_fd, "1", 1);
+	write(signal_fd.write_fd, "1", 1);
 	errno = save_errno;
 }
 
@@ -158,13 +157,12 @@ static void signal_handler(int signal, siginfo_t *siginfo, void *context) {
  */
 static void process_signals(struct loop_fd *fd, int revents) {
 	struct signal_fd *signal = (struct signal_fd *)fd;
-	int result;
 	char buf[4];
 
 	DLOG("Received signal");
 
 	/* Read one signal marker from the pipe */
-	result = read(signal->fd.fd, buf, sizeof(buf));
+	read(signal->fd.fd, buf, sizeof(buf));
 
 	for (int i = 0; i <= NSIG; i++) {
 		if (signal_callbacks[i].num_calls > 0) {
