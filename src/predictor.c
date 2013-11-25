@@ -74,7 +74,7 @@ static void predictor_output_guess(struct predictor *predictor, struct buffer *b
 		predict = (predictor->num_echoed * 100) / predictor->num_chars
 			>= PREDICTOR_ECHO_PERCENTAGE;
 
-	if (predictor && sizeof(predictor->history) - predictor->history_used >= size) {
+	if (predict && sizeof(predictor->history) - predictor->history_used >= size) {
 		/*
 		 * We have room so we can try to predict. We only predict
 		 * whole input pieces to attempt to avoid cutting escape
@@ -119,7 +119,6 @@ int predictor_output(struct predictor *predictor, struct buffer *buffer, int siz
  * EAGAIN - Controller buffer didn't have sufficient space
  */
 int predictor_learn(struct predictor *predictor, int bufid, int size, char *output) {
-	int i;
 	int n;
 	int result;
 
@@ -143,7 +142,7 @@ int predictor_learn(struct predictor *predictor, int bufid, int size, char *outp
 			 * many characters were not echoed immediately to get
 			 * better.
 			 */
-			predictor->num_chars += min(predictor->history_used - i, size - i);
+			predictor->num_chars += min(predictor->history_used - n, size - n);
 		}
 
 		/* Undo all the prediction to replay the correct sequence */
