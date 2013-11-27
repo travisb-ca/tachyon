@@ -3,10 +3,10 @@
 import tachyon
 
 class TestBasicWindows(tachyon.TachyonTestCase):
-	def setUp(self):
+	def setUp1(self):
 		self.startTachyon()
 
-	def tearDown(self):
+	def tearDown1(self):
 		self.waitForTermination()
 
 	def test_exitImmedately(self):

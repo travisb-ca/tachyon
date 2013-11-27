@@ -3,10 +3,10 @@
 import tachyon
 
 class TestCommandLineOptions(tachyon.TachyonTestCase):
-	def setUp(self):
+	def setUp1(self):
 		pass
 
-	def tearDown(self):
+	def tearDown1(self):
 		pass
 
 	def test_invalidOption(self):

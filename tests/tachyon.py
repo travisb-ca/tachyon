@@ -7,10 +7,10 @@ import subprocess
 class TachyonTestCase(lousy.TestCase):
 	META = '\x14'
 
-	def setUp(self):
+	def setUp2(self):
 		self.tachyon = None
 
-	def tearDown(self):
+	def tearDown2(self):
 		if self.tachyon:
 			self.tachyon.terminate()
 
