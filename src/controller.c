@@ -144,7 +144,7 @@ static int controller_handle_metakey(int size, char *input) {
 			 * immediately, so do that by default too.
 			 */
 			bytes_eaten++;
-			meta_end = i;
+			meta_end = i + 1;
 			GCon.flags &= ~CONTROLLER_IN_META;
 
 			if (input[i] == cmd_options.keys.meta) {
@@ -164,8 +164,11 @@ static int controller_handle_metakey(int size, char *input) {
 				VLOG("Ignoring unhandled meta-sequence\n");
 			}
 
-			if (meta_start < meta_end)
+			if (meta_start < meta_end) {
 				memmove(input + meta_start, input + meta_end, size - meta_end);
+				VLOG("skipped meta, left with '%s'", input);
+			}
+
 		}
 	}
 
