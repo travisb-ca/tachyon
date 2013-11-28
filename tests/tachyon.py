@@ -3,6 +3,7 @@
 import lousy
 import time
 import subprocess
+import re
 
 class TachyonTestCase(lousy.TestCase):
 	META = '\x14'
@@ -17,10 +18,6 @@ class TachyonTestCase(lousy.TestCase):
 	# Start a tachyon process with the given arguments
 	def startTachyon(self, args=''):
 		self.tachyon = lousy.Process('./tachyon ' + args, shell=True, pty=True)
-
-		# Read the preamble
-		time.sleep(1)
-		self.tachyon.flushOutput()
 
 	# Wait for the tachyon process to terminate. Fail if the timeout is exceeded
 	def waitForTermination(self, timeout=5):
@@ -41,7 +38,7 @@ class TachyonTestCase(lousy.TestCase):
 
 	def sendCmd(self, cmd):
 		self.sendLine(cmd)
-		time.sleep(1)
+		self.expectOnly('.*' + re.escape(cmd) + '.*')
 
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):
