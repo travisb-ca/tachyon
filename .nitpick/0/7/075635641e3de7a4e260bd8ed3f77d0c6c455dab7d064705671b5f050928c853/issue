@@ -1,0 +1,20 @@
+Component: Client
+Date: 2013-11-28 01:48:32
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: New
+Title: Link with Interesting Ideas
+Type: Feature
+Units_of_Work: 1000
+--
+The discussion at http://www.reddit.com/r/programming/comments/137kd9/18_months_ago_termkit_a_nextgeneration_terminal/ has a number of interesting thoughts on ways to improve the capability of terminals. Since tachyon is going to be a terminal emulator of sorts it should do what it can to implement the best of them.
+
+This bug is created with the intent of going through that discussion and creating new bugs for the useful feature suggestions which came out of that discussion.
