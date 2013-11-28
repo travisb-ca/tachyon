@@ -133,7 +133,7 @@ static int controller_handle_metakey(int size, char *input) {
 			meta_end = i;
 			bytes_eaten++;
 			GCon.flags |= CONTROLLER_IN_META;
-			VLOG("received meta key\n");
+			VLOG("received meta key");
 			continue;
 		}
 
@@ -148,20 +148,20 @@ static int controller_handle_metakey(int size, char *input) {
 			GCon.flags &= ~CONTROLLER_IN_META;
 
 			if (input[i] == cmd_options.keys.meta) {
-				VLOG("escaping metakey\n");
+				VLOG("escaping metakey");
 				input[i - 1] = cmd_options.keys.meta;
 
 				/* Don't consume this character, but output it */
 				meta_start++;
 				bytes_eaten--;
 			} else if (input[i] == cmd_options.keys.buffer_create) {
-				VLOG("Creating new buffer\n");
+				VLOG("Creating new buffer");
 				controller_new_buffer();
 			} else if (input[i] == cmd_options.keys.buffer_next) {
-				VLOG("Changing to next buffer\n");
+				VLOG("Changing to next buffer");
 				controller_next_buffer();
 			} else {
-				VLOG("Ignoring unhandled meta-sequence\n");
+				VLOG("Ignoring unhandled meta-sequence");
 			}
 
 			if (meta_start < meta_end) {
