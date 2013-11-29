@@ -22,7 +22,6 @@
 #include <poll.h>
 #include <errno.h>
 #include <unistd.h>
-#include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,6 +31,7 @@
 #include "log.h"
 #include "tty.h"
 #include "predictor.h"
+#include "options.h"
 #include "buffer.h"
 
 static void buffer_cb(struct loop_fd *fd, int revents) {
@@ -74,49 +74,6 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 	}
 }
 
-static char login_shell[128];
-
-/*
- * Try hard to determine which shell the user uses at login. If that can't be
- * determined then /bin/sh is used.
- *
- * Returns:
- * - a valid static char*
- */
-static char *get_login_shell(void) {
-	int result;
-
-	if (login_shell[0] != '\0')
-		return login_shell;
-
-	{
-		char *username = NULL;
-		struct passwd passwd;
-		struct passwd *p_result = NULL;
-		char buf[1024];
-
-		username = getenv("USER");
-		if (!username) {
-			username = getlogin();
-		}
-
-		if (username) {
-			result = getpwnam_r(username, &passwd, buf, sizeof(buf), &p_result);
-			if (result)
-				ELOG("getpwnam_r returned %d", result);
-		}
-
-		if (!p_result) {
-			p_result = &passwd;
-			passwd.pw_shell = "/bin/bash";
-		}
-
-		strncpy(login_shell, p_result->pw_shell, sizeof(login_shell));
-
-		return login_shell;
-	}
-}
-
 /*
  * Initialize a buffer.
  *
@@ -126,10 +83,7 @@ static char *get_login_shell(void) {
  */
 struct buffer *buffer_init(int bufid) {
 	struct buffer *buffer;
-	char *login_shell;
 	int result;
-
-	login_shell = get_login_shell();
 
 	buffer = malloc(sizeof(*buffer));
 	if (!buffer)
@@ -144,7 +98,7 @@ struct buffer *buffer_init(int bufid) {
 	buffer->bufid = bufid;
 	buffer->fd.poll_flags = POLLIN | POLLPRI;
 	buffer->fd.poll_callback = buffer_cb;
-	buffer->fd.fd = tty_new(login_shell);
+	buffer->fd.fd = tty_new(cmd_options.new_buf_command);
 
 	if (buffer->fd.fd < 0)
 		goto out_free;

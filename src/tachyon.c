@@ -24,6 +24,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <getopt.h>
+#include <pwd.h>
+#include <stdlib.h>
 
 #include "tty.h"
 #include "pal.h"
@@ -40,6 +42,7 @@
 struct cmd_options cmd_options = {
 	.predict = false,
 	.verbose = 1,
+	.new_buf_command = "",
 	.keys = {
 		.meta= 't',
 		.buffer_create = 'c',
@@ -51,11 +54,12 @@ const static struct option parameters[] = {
 	{"help"    , no_argument , NULL , 'h'}  , 
 	{"hello"   , no_argument , NULL , 'H'}  , 
 	{"predict" , no_argument , NULL , 'p'}  , 
+	{"shell"   , required_argument , NULL , 's'}  , 
 	{"verbose" , no_argument , NULL , 'v'}  , 
 	{"quiet"   , no_argument , NULL , 'q'}  , 
 	{NULL      , no_argument , NULL , 0 }};
 
-#define SHORTARGS "hHpqv"
+#define SHORTARGS "hHpqs:v"
 static void usage(void)
 {
 	printf("tachyon -" SHORTARGS "\n");
@@ -63,6 +67,7 @@ static void usage(void)
 	printf("        -H --hello     - Display the version and welcome message on start\n");
 	printf("	-p --predictor - Turn on character prediction\n");
 	printf("	-v --verbose   - increase log level (multiple allowed)\n");
+	printf("	-s --shell=shell - command to run as shell for new buffer\n");
 	printf("	-q --quiet     - decrease log level (multiple allowed)\n");
 }
 
@@ -94,6 +99,10 @@ static int process_args(int argn, char **args)
 				cmd_options.verbose--;
 				break;
 
+			case 's':
+				strncpy(cmd_options.new_buf_command, optarg, sizeof(cmd_options.new_buf_command));
+				break;
+
 			case 'h':
 				usage();
 				return 1;
@@ -107,6 +116,43 @@ static int process_args(int argn, char **args)
 	return 0;
 }
 
+/*
+ * Try hard to determine which shell the user uses at login. If that can't be
+ * determined then /bin/sh is used.
+ *
+ * Returns:
+ * 0 - given string now contains the login shell
+ * 1 - Failure
+ */
+static int get_login_shell(char *destination, int size) {
+	int result;
+
+	char *username = NULL;
+	struct passwd passwd;
+	struct passwd *p_result = NULL;
+	char buf[1024];
+
+	username = getenv("USER");
+	if (!username) {
+		username = getlogin();
+	}
+
+	if (username) {
+		result = getpwnam_r(username, &passwd, buf, sizeof(buf), &p_result);
+		if (result)
+			ELOG("getpwnam_r returned %d", result);
+	}
+
+	if (!p_result) {
+		p_result = &passwd;
+		passwd.pw_shell = "/bin/bash";
+	}
+
+	strncpy(destination, p_result->pw_shell, size);
+
+	return 0;
+}
+
 int main(int argn, char **args)
 {
 	int result;
@@ -114,6 +160,9 @@ int main(int argn, char **args)
 	result = process_args(argn, args);
 	if (result)
 		return result - 1;
+
+	if (cmd_options.new_buf_command[0] == '\0')
+		get_login_shell(cmd_options.new_buf_command, sizeof(cmd_options.new_buf_command));
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();
