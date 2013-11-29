@@ -164,6 +164,7 @@ int main(int argn, char **args)
 
 	if (cmd_options.new_buf_command[0] == '\0')
 		get_login_shell(cmd_options.new_buf_command, sizeof(cmd_options.new_buf_command));
+	DLOG("Shell is '%s'", cmd_options.new_buf_command);
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();
