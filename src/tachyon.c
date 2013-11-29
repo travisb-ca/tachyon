@@ -51,24 +51,24 @@ struct cmd_options cmd_options = {
 };
 
 const static struct option parameters[] = {
-	{"help"    , no_argument , NULL , 'h'}  , 
-	{"hello"   , no_argument , NULL , 'H'}  , 
-	{"predict" , no_argument , NULL , 'p'}  , 
+	{"help"    , no_argument       , NULL , 'h'}  , 
+	{"hello"   , no_argument       , NULL , 'H'}  , 
+	{"predict" , no_argument       , NULL , 'p'}  , 
 	{"shell"   , required_argument , NULL , 's'}  , 
-	{"verbose" , no_argument , NULL , 'v'}  , 
-	{"quiet"   , no_argument , NULL , 'q'}  , 
-	{NULL      , no_argument , NULL , 0 }};
+	{"verbose" , no_argument       , NULL , 'v'}  , 
+	{"quiet"   , no_argument       , NULL , 'q'}  , 
+	{NULL      , no_argument       , NULL , 0 }};
 
 #define SHORTARGS "hHpqs:v"
 static void usage(void)
 {
-	printf("tachyon -" SHORTARGS "\n");
-	printf("	-h --help      - Display this message\n");
-	printf("        -H --hello     - Display the version and welcome message on start\n");
-	printf("	-p --predictor - Turn on character prediction\n");
-	printf("	-v --verbose   - increase log level (multiple allowed)\n");
-	printf("	-s --shell=shell - command to run as shell for new buffer\n");
-	printf("	-q --quiet     - decrease log level (multiple allowed)\n");
+	printf("tachyon [-hHpqv] [-s shell] \n");
+	printf("	-h --help              - Display this message\n");
+	printf("        -H --hello             - Display the version and welcome message on start\n");
+	printf("	-p --predictor         - Turn on character prediction\n");
+	printf("	-v --verbose           - increase log level (multiple allowed)\n");
+	printf("	-s shell --shell=shell - command to run as shell for new buffer\n");
+	printf("	-q --quiet             - decrease log level (multiple allowed)\n");
 }
 
 /*
@@ -100,7 +100,8 @@ static int process_args(int argn, char **args)
 				break;
 
 			case 's':
-				strncpy(cmd_options.new_buf_command, optarg, sizeof(cmd_options.new_buf_command));
+				strncpy(cmd_options.new_buf_command, optarg,
+					sizeof(cmd_options.new_buf_command));
 				break;
 
 			case 'h':
