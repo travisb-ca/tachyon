@@ -1,0 +1,18 @@
+Component: Server
+Date: 2013-11-29 05:19:48
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Proper shell command argument splitting
+Type: Feature
+Units_of_Work: 1000
+--
+Currently Tachyon does simple whitespace tokenization of the shell command arguments. This works much of the time, but is broken if quoting is used to combine space separated words into a single argument or if any escaping is used. This should be fixed to take these complications into account.
