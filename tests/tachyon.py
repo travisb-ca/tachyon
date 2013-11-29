@@ -17,9 +17,9 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Start a tachyon process with the given arguments
 	def startTachyon(self, args='', sync=True):
-		self.tachyon = lousy.Process('./tachyon ' + args, shell=True, pty=True)
+		self.tachyon = lousy.Process('./tachyon -H' + args, shell=True, pty=True)
 		if sync:
-			self.expectOnly('.*register out.*')
+			self.expectOnly('^Tachyon v\..*')
 
 	# Wait for the tachyon process to terminate. Fail if the timeout is exceeded
 	def waitForTermination(self, timeout=5):
