@@ -30,9 +30,11 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/ioctl.h>
+#include <ctype.h>
 
 #include "log.h"
 #include "util.h"
+#include "options.h"
 
 #include "tty.h"
 
@@ -86,6 +88,55 @@ int tty_new(char *command)
 	} else {
 		/* Child */
 		char *cmd_name;
+		int num_args = 1; /* cmd_name counts as an arg */
+		char buf[1024];
+		char **args;
+
+		memcpy(buf, cmd_options.new_buf_command, sizeof(buf));
+
+		/* First we need to count the number of arguments */
+		for (int i = 1; i < sizeof(buf); i++) {
+			if (buf[i] == '\0')
+				break;
+
+			if (isspace(buf[i-1]) && !isspace(buf[i]))
+				num_args++;
+		}
+		DLOG("Shell command had %d args", num_args);
+
+		/* Now that we know how many arguments we have we can create our array */
+		args = calloc(num_args + 1, sizeof(char *));
+		if (!args) {
+			ELOG("Unable to allocate arg buffer");
+			return 9;
+		}
+
+		cmd_name = strrchr(buf, '/');
+		if (!cmd_name)
+			cmd_name = "unknown";
+		else
+			cmd_name++; /* skip last '/' */
+
+		args[0] = cmd_name;
+
+		/*
+		 * Now we fill in the pointers to the start of the args,
+		 * making sure to terminate each arg with a nil.
+		 */
+		for (int i = 1, n = 1; i < sizeof(buf); i++) {
+			if (isspace(buf[i]))
+				buf[i] = '\0';
+
+			if (buf[i - 1] == '\0' && buf[i] != '\0')
+				args[n++] = &buf[i];
+		}
+
+		if (cmd_options.verbose >= 2)
+			for (int i = 0; i < num_args + 1; i++)
+				if (args[i])
+					DLOG("arg %d is '%s'", i, args[i]);
+				else
+					DLOG("arg %d is NULL", i);
 
 		close(pty_master);
 
@@ -107,13 +158,8 @@ int tty_new(char *command)
 			return 7;
 		}
 
-		cmd_name = strrchr(command, '/');
-		if (!cmd_name)
-			cmd_name = "unknown";
-		else
-			cmd_name++; /* skip last '/' */
-
-		result = execl(command, cmd_name, NULL);
+		/* Use buf because the command path needs to be nil separated from the arguments */
+		result = execv(buf, args);
 
 		ELOG("slave failed to exec %d %d", result, errno);
 		return 8;
