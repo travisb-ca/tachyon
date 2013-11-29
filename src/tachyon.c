@@ -52,16 +52,18 @@ const static struct option parameters[] = {
 	{"hello"   , no_argument , NULL , 'H'}  , 
 	{"predict" , no_argument , NULL , 'p'}  , 
 	{"verbose" , no_argument , NULL , 'v'}  , 
+	{"quiet"   , no_argument , NULL , 'q'}  , 
 	{NULL      , no_argument , NULL , 0 }};
 
-#define SHORTARGS "hHpv"
+#define SHORTARGS "hHpqv"
 static void usage(void)
 {
 	printf("tachyon -" SHORTARGS "\n");
 	printf("	-h --help      - Display this message\n");
 	printf("        -H --hello     - Display the version and welcome message on start\n");
 	printf("	-p --predictor - Turn on character prediction\n");
-	printf("	-v --verbose   - enable debug output\n");
+	printf("	-v --verbose   - increase log level (multiple allowed)\n");
+	printf("	-q --quiet     - decrease log level (multiple allowed)\n");
 }
 
 /*
@@ -86,6 +88,10 @@ static int process_args(int argn, char **args)
 
 			case 'v':
 				cmd_options.verbose++;
+				break;
+
+			case 'q':
+				cmd_options.verbose--;
 				break;
 
 			case 'h':
