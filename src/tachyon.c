@@ -33,6 +33,9 @@
 #include "controller.h"
 #include "options.h"
 
+#define VERSION "0.01"
+#define WELCOME_MSG "Tachyon v." VERSION
+
 /* Default values for the options are set here */
 struct cmd_options cmd_options = {
 	.predict = false,
@@ -45,13 +48,16 @@ struct cmd_options cmd_options = {
 
 const static struct option parameters[] = {
 	{"help"    , no_argument , NULL , 'h'}  , 
+	{"hello"   , no_argument , NULL , 'H'}  , 
 	{"predict" , no_argument , NULL , 'p'}  , 
 	{NULL      , no_argument , NULL , 0 }};
 
+#define SHORTARGS "hHp"
 static void usage(void)
 {
-	printf("tachyon -hp\n");
+	printf("tachyon -" SHORTARGS "\n");
 	printf("	-h --help      - Display this message\n");
+	printf("        -H --hello     - Display the version and welcome message on start\n");
 	printf("	-p --predictor - Turn on character prediction\n");
 }
 
@@ -65,10 +71,14 @@ static int process_args(int argn, char **args)
 {
 	int flag;
 
-	while ((flag = getopt_long(argn, args, "hp", parameters, NULL)) != -1) {
+	while ((flag = getopt_long(argn, args, SHORTARGS, parameters, NULL)) != -1) {
 		switch(flag) {
 			case 'p':
 				cmd_options.predict = true;
+				break;
+
+			case 'H':
+				printf(WELCOME_MSG "\n");
 				break;
 
 			case 'h':
