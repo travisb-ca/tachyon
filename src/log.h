@@ -19,31 +19,39 @@
 
 #include <stdio.h>
 
+#include "options.h"
+
 /*
  * Verbose log, logging that won't be useful to anybody but developers.
  */
-#define VLOG(fmt, ...) do { } while(0)
+#define VLOG(fmt, ...) do {                               \
+	if (cmd_options.verbose >= 3)                     \
+		fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+} while(0)
 
 /*
  * Debug log, logging which might be useful to people trying to figure out why something doesn't
  * work.
  */
-#define DLOG(fmt, ...) do {                       \
-	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+#define DLOG(fmt, ...) do {                               \
+	if (cmd_options.verbose >= 2)                     \
+		fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 
 /*
  * Warn log, logging something the user should know about which isn't normal.
  */
-#define WLOG(fmt, ...) do {                       \
-	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+#define WLOG(fmt, ...) do {                               \
+	if (cmd_options.verbose >= 1)                     \
+		fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 
 /*
  * Error log, logging the user must know about because something is broken.
  */
-#define ELOG(fmt, ...) do {                       \
-	fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
+#define ELOG(fmt, ...) do {                               \
+	if (cmd_options.verbose >= 0)                     \
+		fprintf(stderr, fmt "\n", ##__VA_ARGS__); \
 } while (0)
 
 /*

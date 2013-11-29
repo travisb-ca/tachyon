@@ -39,6 +39,7 @@
 /* Default values for the options are set here */
 struct cmd_options cmd_options = {
 	.predict = false,
+	.verbose = 1,
 	.keys = {
 		.meta= 't',
 		.buffer_create = 'c',
@@ -50,15 +51,17 @@ const static struct option parameters[] = {
 	{"help"    , no_argument , NULL , 'h'}  , 
 	{"hello"   , no_argument , NULL , 'H'}  , 
 	{"predict" , no_argument , NULL , 'p'}  , 
+	{"verbose" , no_argument , NULL , 'v'}  , 
 	{NULL      , no_argument , NULL , 0 }};
 
-#define SHORTARGS "hHp"
+#define SHORTARGS "hHpv"
 static void usage(void)
 {
 	printf("tachyon -" SHORTARGS "\n");
 	printf("	-h --help      - Display this message\n");
 	printf("        -H --hello     - Display the version and welcome message on start\n");
 	printf("	-p --predictor - Turn on character prediction\n");
+	printf("	-v --verbose   - enable debug output\n");
 }
 
 /*
@@ -79,6 +82,10 @@ static int process_args(int argn, char **args)
 
 			case 'H':
 				printf(WELCOME_MSG "\n");
+				break;
+
+			case 'v':
+				cmd_options.verbose++;
 				break;
 
 			case 'h':
