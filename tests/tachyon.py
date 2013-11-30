@@ -39,8 +39,14 @@ class TachyonTestCase(lousy.TestCase):
 		self.send(self.META + cmd)
 
 	def sendCmd(self, cmd):
+		self.expectPrompt('bash.*\$ ')
 		self.sendLine(cmd)
 		self.expectOnly('.*' + re.escape(cmd) + '.*')
+
+	# Wait until the timeout is seen or the given prompt is that last output on the last line
+	def expectPrompt(self, prompt, timeout=5):
+		result = self.tachyon.expectPrompt([prompt], timeout)
+		self.assertEqual(result, 0)
 
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):
