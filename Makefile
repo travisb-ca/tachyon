@@ -12,6 +12,9 @@ tachyon: $(TACHYON_OBJS)
 test: tachyon
 	@lousy run
 
+testd: tachyon
+	@lousy run -d
+
 run: tachyon
 	./tachyon
 
