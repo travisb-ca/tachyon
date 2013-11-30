@@ -1,0 +1,20 @@
+Component: Client
+Date: 2013-11-30 22:02:33
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Immediate exit with 'I/O Possible' on Linux over ssh
+Type: Bug
+Units_of_Work: 1000
+--
+Sometimes when starting Tachyon on a Linux machine it will terminate immediately, before all the initialization is complete, with the message "I/O Possible". This is coming from the default action of SIGIO on Linux which is to terminate the process. If I catch these signals they happen continuously.
+
+It doesn't happen every time I start Tachyon, but seems to happen consistently if I start Tachyon from bash as sh from inside a fresh screen window.
