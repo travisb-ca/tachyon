@@ -36,6 +36,7 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Send a meta command with the metacharacter prepended
 	def sendMeta(self, cmd):
+		self.tachyon.flushOutput()
 		self.send(self.META + cmd)
 
 	def sendCmd(self, cmd):
