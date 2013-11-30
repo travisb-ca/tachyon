@@ -10,7 +10,7 @@ class TestCommandLineOptions(tachyon.TachyonTestCase):
 		pass
 
 	def test_invalidOption(self):
-		self.startTachyon('-z', sync=False)
+		self.startTachyon(['-z'], sync=False)
 		self.waitForTermination()
 		self.assertEqual(self.tachyon.returncode, 1)
 
