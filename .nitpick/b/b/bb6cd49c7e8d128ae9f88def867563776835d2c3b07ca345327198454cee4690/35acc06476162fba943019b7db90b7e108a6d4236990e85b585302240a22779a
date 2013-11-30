@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: text/plain
+Date: 2013-11-30 23:13:40
+Parent: issue
+User: travisb@travisbrown.ca
+--
+This happens in xterm in /bin/sh on Linux 3.2.30 on ARM as well as via ssh on Linux 2.6.24 on PPC
