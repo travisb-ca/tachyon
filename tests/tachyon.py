@@ -61,3 +61,18 @@ class TachyonTestCase(lousy.TestCase):
 		result = self.tachyon.expect([regex], timeout)
 		self.assertEqual(result, 0)
 
+	# Like sendCmd('exit') but handles the necessary extra synchronization
+	def sendCmdExit(self):
+		self.sendCmd('exit')
+		time.sleep(0.5)
+		self.sendLine('') # Reshow prompt
+
+	# Create a new buffer ^tc
+	def bufferCreate(self):
+		self.sendMeta('c')
+
+	# Goto the next buffer ^tn, handles special synchronization
+	def bufferNext(self):
+		self.sendMeta('n')
+		self.sendLine('') # Reshow prompt
+
