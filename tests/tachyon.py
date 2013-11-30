@@ -17,7 +17,7 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Start a tachyon process with the given arguments
 	def startTachyon(self, args='', sync=True):
-		self.tachyon = lousy.Process('./tachyon -H' + args, shell=True, pty=True)
+		self.tachyon = lousy.Process('./tachyon --hello --shell="/bin/bash --noprofile --norc"' + args, shell=True, pty=True)
 		if sync:
 			self.expectOnly('^Tachyon v\..*')
 
