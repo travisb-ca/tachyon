@@ -189,7 +189,6 @@ void tty_restore_termstate(void)
 int tty_configure_control_tty(void)
 {
 	struct termios termstate;
-	int i = 1;
 
 	if (tcgetattr(0, &termstate))
 		return -1;
