@@ -200,8 +200,6 @@ int tty_configure_control_tty(void)
 
 	setvbuf(stdout, NULL, _IONBF, 0);
 
-	fcntl(0, F_SETFL, &i);
-
 	return 0;
 }
 

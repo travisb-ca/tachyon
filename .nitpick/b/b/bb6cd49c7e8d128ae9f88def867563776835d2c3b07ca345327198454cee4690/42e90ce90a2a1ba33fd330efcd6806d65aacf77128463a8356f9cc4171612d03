@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: text/plain
+Date: 2013-12-01 02:28:56
+Parent: issue
+User: travisb@travisbrown.ca
+--
+This seems to have been caused by a non-sensical fcntl(0, F_SETFL, 1) call which set nonsensical file values. I'm not really sure why that code was there in the first place. Perhaps it was meant to be F_SETFD? In any case I don't need to set close-on-exec here and the code as is is broken. Removing it fixes this bug.
