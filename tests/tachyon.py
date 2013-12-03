@@ -78,3 +78,7 @@ class TachyonTestCase(lousy.TestCase):
 		self.sendMeta('n')
 		self.sendLine('') # Reshow prompt
 
+	# Goto the previous buffer ^tn, handles special synchronization
+	def bufferPrev(self):
+		self.sendMeta('p')
+		self.sendLine('') # Reshow prompt
