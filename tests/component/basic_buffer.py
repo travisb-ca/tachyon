@@ -29,7 +29,7 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 		self.expectOnly('^1$')
 		self.sendCmd('exit')
 
-	def test_changeBuffers(self):
+	def test_nextBuffers(self):
 		self.sendCmd('export BUFNUM=1')
 		self.bufferCreate()
 		self.sendCmd('export BUFNUM=2')
