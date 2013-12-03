@@ -28,6 +28,7 @@ extern struct cmd_options {
 		char meta; /* The key combination which accesses the meta terminal functionality */
 		char buffer_create; /* The key command which creates a new buffer */
 		char buffer_next; /* Change the current window to the next buffer */
+		char buffer_prev; /* Change the current window to the previous buffer */
 	} keys;
 } cmd_options;
 

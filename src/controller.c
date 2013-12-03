@@ -62,7 +62,7 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 /*
  * Set the current buffer to the given buffer number if it exists.
  */
-static void controller_set_current_buffer(int num) {
+static void controller_set_current_buffer(unsigned int num) {
 	if (GCon.buffers[num] != NULL) {
 		current_buf_num = num;
 		current_buf = GCon.buffers[num];
@@ -73,7 +73,7 @@ static void controller_set_current_buffer(int num) {
  * Create a new buffer and switch to it if successful.
  */
 static void controller_new_buffer(void) {
-	int buf_num;
+	unsigned int buf_num;
 
 	/* Find next available buffer number */
 	if (GCon.buffers[0] == NULL) {
@@ -105,10 +105,37 @@ static void controller_new_buffer(void) {
  * notify the user that there is only one.
  */
 static void controller_next_buffer(void) {
-	int i;
+	unsigned int i;
 	for (i = (current_buf_num + 1) % CONTROLLER_MAX_BUFS;
 	     i != current_buf_num;
 	     i = (i + 1) % CONTROLLER_MAX_BUFS) {
+		if (GCon.buffers[i] != NULL)
+			break;
+	}
+
+	if (i == current_buf_num)
+		NOTIFY("No other buffer!\n");
+	else
+		controller_set_current_buffer(i);
+}
+
+static int unsigned_mod_less_one(unsigned int i, unsigned int m)
+{
+	if (i == 0)
+		return m - 1;
+	else
+		return i - 1;
+}
+
+/*
+ * Change the current buffer to the previous buffer, if there is one. Otherwise
+ * notify the user that there is only one.
+ */
+static void controller_prev_buffer(void) {
+	unsigned int i;
+	for (i = unsigned_mod_less_one(current_buf_num, CONTROLLER_MAX_BUFS);
+	     i != current_buf_num;
+	     i = unsigned_mod_less_one(i, CONTROLLER_MAX_BUFS)) {
 		if (GCon.buffers[i] != NULL)
 			break;
 	}
@@ -160,6 +187,9 @@ static int controller_handle_metakey(int size, char *input) {
 			} else if (input[i] == cmd_options.keys.buffer_next) {
 				VLOG("Changing to next buffer");
 				controller_next_buffer();
+			} else if (input[i] == cmd_options.keys.buffer_prev) {
+				VLOG("Changing to prev buffer");
+				controller_prev_buffer();
 			} else {
 				VLOG("Ignoring unhandled meta-sequence");
 			}
@@ -311,7 +341,7 @@ void controller_buffer_exiting(int bufid) {
 	buffer_free(GCon.buffers[bufid]);
 	GCon.buffers[bufid] = NULL;
 
-	for (int i = (bufid + 1) % CONTROLLER_MAX_BUFS;
+	for (unsigned int i = (bufid + 1) % CONTROLLER_MAX_BUFS;
 	     i != bufid;
 	     i = (i + 1) % CONTROLLER_MAX_BUFS) {
 		if (GCon.buffers[i] != NULL) {
