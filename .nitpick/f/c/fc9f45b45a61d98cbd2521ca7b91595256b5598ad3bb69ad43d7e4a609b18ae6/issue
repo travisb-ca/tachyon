@@ -1,0 +1,20 @@
+Component: Tests
+Date: 2013-12-05 18:14:41
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: vttest Tests
+Type: Feature
+Units_of_Work: 1000
+--
+Since Tachyon will have to understand all the terminal control sequences in order to properly multiplex we should do deep testing on those codes. vttest looks to be an extensive test suite which should be integrated into the automated testing.
+
+http://invisible-island.net/vttest/vttest.html
