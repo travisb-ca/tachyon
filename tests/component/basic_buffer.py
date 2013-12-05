@@ -68,3 +68,27 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 		self.sendCmd('echo $BUFNUM')
 		self.expectOnly('^3$')
 		self.sendCmd('exit')
+
+	def test_tachyonVariables(self):
+		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.expectOnly('^0')
+
+		self.bufferCreate()
+		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.expectOnly('^1')
+
+		self.bufferPrev()
+		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.expectOnly('^0$')
+
+		self.sendCmdExit()
+		
+		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.expectOnly('^1')
+
+		self.bufferCreate()
+		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.expectOnly('^0$')
+
+		self.sendCmdExit()
+		self.sendCmdExit()
