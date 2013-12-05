@@ -155,6 +155,29 @@ static int get_login_shell(char *destination, int size) {
 	return 0;
 }
 
+/*
+ * Compute any dynamic default settings which weren't given to us by the user.
+ * This is for things like session name, login shell and the like which we can't
+ * know until runtime and that may/must differ between runs.
+ *
+ * Returns:
+ * 0 - Success
+ * 1 - Failure, settings in an undefined state
+ */
+static int set_defaults(void)
+{
+	int result;
+
+	if (cmd_options.new_buf_command[0] == '\0') {
+		result = get_login_shell(cmd_options.new_buf_command, sizeof(cmd_options.new_buf_command));
+		if (result)
+			return 1;
+	}
+	DLOG("Shell is '%s'", cmd_options.new_buf_command);
+
+	return 0;
+}
+
 int main(int argn, char **args)
 {
 	int result;
@@ -163,9 +186,8 @@ int main(int argn, char **args)
 	if (result)
 		return result - 1;
 
-	if (cmd_options.new_buf_command[0] == '\0')
-		get_login_shell(cmd_options.new_buf_command, sizeof(cmd_options.new_buf_command));
-	DLOG("Shell is '%s'", cmd_options.new_buf_command);
+	if (set_defaults())
+		return 1;
 
 	tty_save_termstate();
 	result = tty_configure_control_tty();
