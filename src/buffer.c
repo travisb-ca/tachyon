@@ -98,7 +98,7 @@ struct buffer *buffer_init(int bufid) {
 	buffer->bufid = bufid;
 	buffer->fd.poll_flags = POLLIN | POLLPRI;
 	buffer->fd.poll_callback = buffer_cb;
-	buffer->fd.fd = tty_new(cmd_options.new_buf_command);
+	buffer->fd.fd = tty_new(cmd_options.new_buf_command, bufid);
 
 	if (buffer->fd.fd < 0)
 		goto out_free;

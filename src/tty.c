@@ -41,11 +41,14 @@
 /*
  * Create a new slave tty running the given command.
  *
+ * command is the command to exec after creating the tty
+ * bufnum is the number to assign to the TACHYON_BUFNUM environment variable
+ *
  * Returns the master filedescriptor on success. On failure returns:
  * -1	Failed posix_openpt
  * -2	Failed grantpt
  */
-int tty_new(char *command)
+int tty_new(char *command, int bufnum)
 {
 	int result;
 	int pty_master;
@@ -137,6 +140,20 @@ int tty_new(char *command)
 					DLOG("arg %d is '%s'", i, args[i]);
 				else
 					DLOG("arg %d is NULL", i);
+
+		/*
+		 * Add the special environment variables
+		 */
+		{
+			char bufnum_str[16];
+			snprintf(bufnum_str, sizeof(bufnum_str), "%d", bufnum);
+			/*
+			 * If we fail here due to lack of memory we'll power on
+			 * in the hopes that we can still exec below.
+			 */
+			setenv("TACHYON_BUFNUM", bufnum_str, 1);
+			setenv("TACHYON_SESSION", cmd_options.session_name, 1);
+		}
 
 		close(pty_master);
 
