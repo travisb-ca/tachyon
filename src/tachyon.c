@@ -43,6 +43,7 @@ struct cmd_options cmd_options = {
 	.predict = false,
 	.verbose = 1,
 	.new_buf_command = "",
+	.session_name = "",
 	.keys = {
 		.meta= 't',
 		.buffer_create = 'c',
@@ -58,18 +59,20 @@ const static struct option parameters[] = {
 	{"shell"   , required_argument , NULL , 's'}  , 
 	{"verbose" , no_argument       , NULL , 'v'}  , 
 	{"quiet"   , no_argument       , NULL , 'q'}  , 
+	{"name"    , required_argument , NULL , 'n'}  , 
 	{NULL      , no_argument       , NULL , 0 }};
 
-#define SHORTARGS "hHpqs:v"
+#define SHORTARGS "hHpqs:vn:"
 static void usage(void)
 {
-	printf("tachyon [-hHpqv] [-s shell] \n");
+	printf("tachyon [-hHpqv] [-s shell] [-n name]\n");
 	printf("	-h --help              - Display this message\n");
 	printf("        -H --hello             - Display the version and welcome message on start\n");
 	printf("	-p --predictor         - Turn on character prediction\n");
 	printf("	-v --verbose           - increase log level (multiple allowed)\n");
 	printf("	-s shell --shell=shell - command to run as shell for new buffer\n");
 	printf("	-q --quiet             - decrease log level (multiple allowed)\n");
+	printf("        -n --name              - Name to use for this session\n");
 }
 
 /*
@@ -103,6 +106,11 @@ static int process_args(int argn, char **args)
 			case 's':
 				strncpy(cmd_options.new_buf_command, optarg,
 					sizeof(cmd_options.new_buf_command));
+				break;
+
+			case 'n':
+				strncpy(cmd_options.session_name, optarg,
+					sizeof(cmd_options.session_name));
 				break;
 
 			case 'h':
@@ -174,6 +182,12 @@ static int set_defaults(void)
 			return 1;
 	}
 	DLOG("Shell is '%s'", cmd_options.new_buf_command);
+
+	if (cmd_options.session_name[0] == '\0') {
+		snprintf(cmd_options.session_name, sizeof(cmd_options.session_name) - 1, "tachyon-%d",
+			 getpid());
+	}
+	DLOG("Session name is '%s'", cmd_options.session_name);
 
 	return 0;
 }

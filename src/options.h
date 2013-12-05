@@ -24,6 +24,7 @@ extern struct cmd_options {
 	int predict; /* Should character prediction be performed ? */
 	int verbose; /* Logging verbosity level */
 	char new_buf_command[1024]; /* Command to run when opening a new buffer */
+	char session_name[128]; /* Name of this session to differentiate it from other sessions */
 	struct {
 		char meta; /* The key combination which accesses the meta terminal functionality */
 		char buffer_create; /* The key command which creates a new buffer */
