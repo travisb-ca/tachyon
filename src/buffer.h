@@ -21,15 +21,32 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include <stdint.h>
+
 #include "loop.h"
 #include "predictor.h"
 
 #define BUFFER_BUF_SIZE 1024
+
+struct buffer_cell {
+	char c;
+#define BUF_CELL_SET (1 << 0) /* This cell is in use */
+	uint8_t flags;
+};
+
 struct buffer {
 	struct loop_fd fd;
 	struct predictor predictor;
 
 	int bufid;
+
+	uint16_t rows;
+	uint16_t cols;
+	struct buffer_cell *cells;
+
+	uint16_t current_row;
+	uint16_t current_col;
+
 	int buf_out_used;
 	char buf_out[BUFFER_BUF_SIZE];
 };
@@ -38,5 +55,6 @@ struct buffer *buffer_init(int bufid);
 void buffer_free(struct buffer *buffer);
 int buffer_set_winsize(struct buffer *buf, int rows, int cols);
 int buffer_output(struct buffer *buffer, int size, char *buf);
+int buffer_input(struct buffer *buffer, int size, char *buf);
 
 #endif

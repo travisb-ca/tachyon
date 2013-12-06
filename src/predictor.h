@@ -47,6 +47,6 @@ int predictor_init(struct predictor *predictor);
 void predictor_free(struct predictor *predictor);
 int predictor_output(struct predictor *predictor, struct buffer *buffer, int size, char *input,
 		     int (*outfunc)(struct buffer *buffer, int size, char *buf));
-int predictor_learn(struct predictor *predictor, int bufid, int size, char *output);
+int predictor_learn(struct predictor *predictor, struct buffer *buffer, int size, char *output);
 
 #endif

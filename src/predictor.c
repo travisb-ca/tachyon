@@ -85,7 +85,7 @@ static void predictor_output_guess(struct predictor *predictor, struct buffer *b
 		       input, size);
 		predictor->history_used += size;
 
-		result = controller_output(buffer->bufid, size, input);
+		result = buffer_input(buffer, size, input);
 		if (result != 0) {
 			/* We've failed to output, pretend we didn't do anything */
 			predictor->history_used = old_history_used;
@@ -118,7 +118,7 @@ int predictor_output(struct predictor *predictor, struct buffer *buffer, int siz
  * 0      - On success
  * EAGAIN - Controller buffer didn't have sufficient space
  */
-int predictor_learn(struct predictor *predictor, int bufid, int size, char *output) {
+int predictor_learn(struct predictor *predictor, struct buffer *buffer, int size, char *output) {
 	int n;
 	int result;
 
@@ -146,11 +146,11 @@ int predictor_learn(struct predictor *predictor, int bufid, int size, char *outp
 		}
 
 		/* Undo all the prediction to replay the correct sequence */
-		controller_output(bufid, predictor->history_used, backspaces);
+		buffer_input(buffer, predictor->history_used, backspaces);
 	}
 
 	/* Output the actual output */
-	result = controller_output(bufid, size, output);
+	result = buffer_input(buffer, size, output);
 
 	if (cmd_options.predict) {
 		predictor->history_used = max(0, predictor->history_used - size);
@@ -158,7 +158,7 @@ int predictor_learn(struct predictor *predictor, int bufid, int size, char *outp
 
 		if (result == 0 && predictor->history_used > 0) {
 			/* Reoutput the prediction */
-			controller_output(bufid, predictor->history_used, predictor->history);
+			buffer_input(buffer, predictor->history_used, predictor->history);
 		}
 	}
 
