@@ -53,7 +53,7 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Retrieve the n'th last line of the terminal output as if the test was a terminal emulator
 	def terminalLine(self, lineFromEnd):
-		output = self.tachyon.stdout.read()
+		output = self.tachyon.read()
 		return output.split('\n')[-1 - lineFromEnd]
 
 	def expect(self, regexes, timeout=5):
