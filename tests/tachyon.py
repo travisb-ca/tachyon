@@ -6,6 +6,7 @@ import subprocess
 import re
 
 class TachyonTestCase(lousy.TestCase):
+	verbose_output = True
 	META = '\x14'
 
 	def setUp2(self):
