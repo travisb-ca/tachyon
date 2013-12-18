@@ -278,28 +278,32 @@ int buffer_input(struct buffer *buffer, int size, char *buf) {
 		else
 			buffer->current_col++;
 
+		/* TODO Interpret newline */
 #endif
-		if (buffer->current_col == buffer->cols || buf[i] == '\n') {
+		if (buffer->current_col == buffer->cols) {
 			/* End of the line, move down one */
 			DLOG("End of line reached");
 			buffer->current_col = 0;
 			buffer->current_row++;
 
-			if (buffer->current_row == buffer->rows) {
-				/* Last line in the buffer, scroll */
-				DLOG("End of buffer reached");
-				line = buffer_line_alloc(buffer->cols);
-				if (!line) {
-					ELOG("Failed to allocate new line!");
-					continue;
-				}
+		}
 
-				buffer_line_init(line, buffer->bottommost, NULL);
-				buffer->bottommost->next = line;
-				memmove(&buffer->lines[0], &buffer->lines[1], (buffer->rows - 1) * sizeof(*buffer->lines));
-				buffer->lines[buffer->rows - 1] = line;
-				buffer->bottommost = line;
+		if (buffer->current_row == buffer->rows) {
+			/* Last line in the buffer, scroll */
+			DLOG("End of buffer reached");
+			line = buffer_line_alloc(buffer->cols);
+			if (!line) {
+				ELOG("Failed to allocate new line!");
+				continue;
 			}
+
+			buffer_line_init(line, buffer->bottommost, NULL);
+			buffer->bottommost->next = line;
+			memmove(&buffer->lines[0], &buffer->lines[1], (buffer->rows - 1) * sizeof(*buffer->lines));
+			buffer->lines[buffer->rows - 1] = line;
+			buffer->bottommost = line;
+
+			buffer->current_row--;
 		}
 
 #if 0
