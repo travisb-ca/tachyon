@@ -34,21 +34,30 @@ struct buffer_cell {
 	uint8_t flags;
 };
 
+struct buffer_line {
+	struct buffer_line *next, *prev;
+	uint16_t len;
+	struct buffer_cell cells[0];
+};
+
 struct buffer {
 	struct loop_fd fd;
 	struct predictor predictor;
 
 	int bufid;
 
-	uint16_t rows;
-	uint16_t cols;
-	struct buffer_cell *cells;
-
 	uint16_t current_row;
 	uint16_t current_col;
 
 	int buf_out_used;
 	char buf_out[BUFFER_BUF_SIZE];
+
+	uint16_t rows;
+	uint16_t cols;
+
+	struct buffer_line *topmost;
+	struct buffer_line *bottommost;
+	struct buffer_line **lines;
 };
 
 struct buffer *buffer_init(int bufid);

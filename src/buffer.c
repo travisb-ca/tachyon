@@ -74,6 +74,41 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 	}
 }
 
+static void buffer_cell_init(struct buffer_cell *cell)
+{
+	memset(cell, 0, sizeof(*cell));
+}
+
+static struct buffer_line *buffer_line_alloc(int columns)
+{
+	struct buffer_line *line;
+
+	line = malloc(sizeof(*line) + columns*sizeof(*line->cells));
+	if (!line)
+		return NULL;
+
+	line->next = NULL;
+	line->prev = NULL;
+	line->len = columns;
+
+	for (int i = 0; i < columns; i++)
+		buffer_cell_init(&line->cells[i]);
+
+	return line;
+}
+
+static void buffer_line_free(struct buffer_line *line)
+{
+	free(line);
+}
+
+static void buffer_line_init(struct buffer_line *line, struct buffer_line *prev,
+			     struct buffer_line *next)
+{
+	line->next = next;
+	line->prev = prev;
+}
+
 /*
  * Initialize a buffer.
  *
@@ -103,23 +138,41 @@ struct buffer *buffer_init(int bufid) {
 	if (buffer->fd.fd < 0)
 		goto out_free;
 
+	/* Allocate the screen/line buffer */
 	buffer->cols = 80;
 	buffer->rows = 24;
 	buffer->current_row = 0;
 	buffer->current_col = 0;
-	buffer->cells = calloc(buffer->cols * buffer->rows, sizeof(*buffer->cells));
 
-	if (!buffer->cells)
+	buffer->lines = malloc(buffer->cols * sizeof(*buffer->lines));
+	if (!buffer->lines)
 		goto out_free_fd;
+
+	for (int i = 0; i < buffer->rows; i++) {
+		buffer->lines[i] = buffer_line_alloc(buffer->cols);
+		if (!buffer->lines[i])
+			goto out_free_lines;
+	}
+	buffer->topmost = buffer->lines[0];
+	buffer->bottommost = buffer->lines[buffer->rows - 1];
+
+	buffer_line_init(buffer->topmost, NULL, buffer->lines[1]);
+	for (int i = 1; i < buffer->cols - 1; i++)
+		buffer_line_init(buffer->lines[i], buffer->lines[i - 1], buffer->lines[i + 1]);
+	buffer_line_init(buffer->bottommost, buffer->lines[buffer->cols - 2], NULL);
 
 	result = loop_register(&buffer->fd);
 	if (result != 0)
-		goto out_free_cells;
+		goto out_free_lines;
 
 	return buffer;
 
-out_free_cells:
-	free(buffer->cells);
+out_free_lines:
+	if (buffer->lines) {
+		for (int i = 0; i < buffer->cols; i++)
+			free(buffer->lines[i]);
+	}
+	free(buffer->lines);
 out_free_fd:
 	close(buffer->fd.fd);
 
@@ -129,22 +182,46 @@ out_free:
 }
 
 void buffer_free(struct buffer *buffer) {
+	struct buffer_line *current;
+	struct buffer_line *next;
+
 	loop_deregister(&buffer->fd);
 	predictor_free(&buffer->predictor);
 	close(buffer->fd.fd);
-	free(buffer->cells);
+
+	current = buffer->topmost;
+	if (current)
+		next = current->next;
+	while (current) {
+		buffer_line_free(current);
+
+		current = next;
+		if (next)
+			next = next->next;
+	}
+
 	free(buffer);
 }
 
 static struct buffer_cell *get_cell(struct buffer *buf, unsigned int row, unsigned int col)
 {
+	struct buffer_line *line;
+
 	if (row >= buf->rows || col >= buf->cols)
 		return NULL;
 
-	return &buf->cells[buf->cols * row + col];
+	line = buf->lines[row];
+
+	if (col >= line->len)
+		return NULL;
+
+	return &line[row].cells[col];
 }
 
 int buffer_set_winsize(struct buffer *buf, int rows, int cols) {
+	tty_set_winsize(buf->fd.fd, rows, cols);
+	return 1;
+#if 0
 	if (rows != buf->rows || cols != buf->cols) {
 		struct buffer cells;
 		struct buffer_cell *oldcell;
@@ -180,11 +257,12 @@ int buffer_set_winsize(struct buffer *buf, int rows, int cols) {
 	 * change our size, to ensure that the signal is passed through.
 	 */
 out:
-	return tty_set_winsize(buf->fd.fd, rows, cols);
+#endif
 }
 
 int buffer_input(struct buffer *buffer, int size, char *buf) {
 	struct buffer_cell *cell;
+	struct buffer_line *line;
 
 	for (int i = 0; i < size; i++) {
 		if (buf[i] == '\b' && buffer->current_col > 0) {
@@ -208,9 +286,16 @@ int buffer_input(struct buffer *buffer, int size, char *buf) {
 			if (buffer->current_row == buffer->rows) {
 				/* Last line in the buffer, scroll */
 				DLOG("End of buffer reached");
-				memmove(get_cell(buffer, 0, 0), get_cell(buffer, buffer->rows - 2, 0),
-					(buffer->rows - 1) * buffer->cols * sizeof(*buffer->cells));
-				memset(get_cell(buffer, buffer->rows - 1, 0), 0, buffer->cols * sizeof(*buffer->cells));
+				line = buffer_line_alloc(buffer->cols);
+				if (!line) {
+					ELOG("Failed to allocate new line!");
+					continue;
+				}
+
+				buffer_line_init(line, buffer->bottommost, NULL);
+				buffer->bottommost->next = line;
+				memmove(&buffer->lines[0], &buffer->lines[1], (buffer->rows - 1) * sizeof(*buffer->lines));
+				buffer->lines[buffer->rows - 1] = line;
 			}
 		}
 
