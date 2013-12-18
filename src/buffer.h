@@ -66,4 +66,8 @@ int buffer_set_winsize(struct buffer *buf, int rows, int cols);
 int buffer_output(struct buffer *buffer, int size, char *buf);
 int buffer_input(struct buffer *buffer, int size, char *buf);
 
+/*
+ * Semi-private methods for use of the terminal emulation functions
+ */
+struct buffer_cell *buffer_get_cell(struct buffer *buf, unsigned int row, unsigned int col);
 #endif

@@ -32,6 +32,7 @@
 #include "tty.h"
 #include "predictor.h"
 #include "options.h"
+#include "vt.h"
 #include "buffer.h"
 
 static void buffer_cb(struct loop_fd *fd, int revents) {
@@ -203,7 +204,7 @@ void buffer_free(struct buffer *buffer) {
 	free(buffer);
 }
 
-static struct buffer_cell *get_cell(struct buffer *buf, unsigned int row, unsigned int col)
+struct buffer_cell *buffer_get_cell(struct buffer *buf, unsigned int row, unsigned int col)
 {
 	struct buffer_line *line;
 
@@ -261,25 +262,11 @@ out:
 }
 
 int buffer_input(struct buffer *buffer, int size, char *buf) {
-	struct buffer_cell *cell;
 	struct buffer_line *line;
 
 	for (int i = 0; i < size; i++) {
-#if 0
-		if (buf[i] == '\b' && buffer->current_col > 0) {
-			DLOG("Backing up a backspace");
-			buffer->current_col--;
-			continue;
-		}
+		vt_interpret(buffer, buf[i]);
 
-		if (buffer->current_col == 0 && buffer->current_row == 0 &&
-		    get_cell(buffer, 0, 0)->flags == 0)
-			DLOG("Starting fresh buffer at the beginning");
-		else
-			buffer->current_col++;
-
-		/* TODO Interpret newline */
-#endif
 		if (buffer->current_col == buffer->cols) {
 			/* End of the line, move down one */
 			DLOG("End of line reached");
@@ -305,12 +292,6 @@ int buffer_input(struct buffer *buffer, int size, char *buf) {
 
 			buffer->current_row--;
 		}
-
-#if 0
-		cell = get_cell(buffer, buffer->current_row, buffer->current_col);
-		cell->flags |= BUF_CELL_SET;
-		cell->c = buf[i];
-#endif
 	}
 
 	return controller_output(buffer->bufid, size, buf);
