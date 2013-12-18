@@ -183,7 +183,7 @@ out_free:
 
 void buffer_free(struct buffer *buffer) {
 	struct buffer_line *current;
-	struct buffer_line *next;
+	struct buffer_line *next = NULL;
 
 	loop_deregister(&buffer->fd);
 	predictor_free(&buffer->predictor);
