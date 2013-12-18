@@ -157,7 +157,7 @@ struct buffer *buffer_init(int bufid) {
 	buffer->bottommost = buffer->lines[buffer->rows - 1];
 
 	buffer_line_init(buffer->topmost, NULL, buffer->lines[1]);
-	for (int i = 1; i < buffer->cols - 1; i++)
+	for (int i = 1; i < buffer->rows - 1; i++)
 		buffer_line_init(buffer->lines[i], buffer->lines[i - 1], buffer->lines[i + 1]);
 	buffer_line_init(buffer->bottommost, buffer->lines[buffer->cols - 2], NULL);
 
