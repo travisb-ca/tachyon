@@ -265,6 +265,7 @@ int buffer_input(struct buffer *buffer, int size, char *buf) {
 	struct buffer_line *line;
 
 	for (int i = 0; i < size; i++) {
+#if 0
 		if (buf[i] == '\b' && buffer->current_col > 0) {
 			DLOG("Backing up a backspace");
 			buffer->current_col--;
@@ -277,6 +278,7 @@ int buffer_input(struct buffer *buffer, int size, char *buf) {
 		else
 			buffer->current_col++;
 
+#endif
 		if (buffer->current_col == buffer->cols || buf[i] == '\n') {
 			/* End of the line, move down one */
 			DLOG("End of line reached");
@@ -296,12 +298,15 @@ int buffer_input(struct buffer *buffer, int size, char *buf) {
 				buffer->bottommost->next = line;
 				memmove(&buffer->lines[0], &buffer->lines[1], (buffer->rows - 1) * sizeof(*buffer->lines));
 				buffer->lines[buffer->rows - 1] = line;
+				buffer->bottommost = line;
 			}
 		}
 
+#if 0
 		cell = get_cell(buffer, buffer->current_row, buffer->current_col);
 		cell->flags |= BUF_CELL_SET;
 		cell->c = buf[i];
+#endif
 	}
 
 	return controller_output(buffer->bufid, size, buf);
