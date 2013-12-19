@@ -60,6 +60,15 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 }
 
 /*
+ * Clear the window pane.
+ */
+static void controller_clear(int bufid) {
+	const char *vt100_clear_screen = "\033[2J";
+	controller_output(bufid, sizeof(vt100_clear_screen) - 1,
+			  vt100_clear_screen);
+}
+
+/*
  * Set the current buffer to the given buffer number if it exists.
  */
 static void controller_set_current_buffer(unsigned int num) {
@@ -67,6 +76,9 @@ static void controller_set_current_buffer(unsigned int num) {
 		current_buf_num = num;
 		current_buf = GCon.buffers[num];
 	}
+
+	controller_clear(current_buf_num);
+	buffer_redraw(current_buf);
 }
 
 /*
@@ -320,7 +332,7 @@ out_deregister:
  * 0      - On success
  * EAGAIN - The buffer is currently full
  */
-int controller_output(int bufid, int size, char *buf) {
+int controller_output(int bufid, int size, const char *buf) {
 	if (size > sizeof(GCon.buf_out) - GCon.buf_out_used)
 		return EAGAIN;
 

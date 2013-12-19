@@ -42,7 +42,7 @@ struct controller {
 bool run;
 
 int controller_init(void);
-int controller_output(int bufid, int size, char *buf);
+int controller_output(int bufid, int size, const char *buf);
 void controller_buffer_exiting(int bufid);
 
 #endif

@@ -66,6 +66,7 @@ void buffer_free(struct buffer *buffer);
 int buffer_set_winsize(struct buffer *buf, int rows, int cols);
 int buffer_output(struct buffer *buffer, int size, char *buf);
 int buffer_input(struct buffer *buffer, int size, char *buf);
+void buffer_redraw(struct buffer *buffer);
 
 /*
  * Semi-private methods for use of the terminal emulation functions

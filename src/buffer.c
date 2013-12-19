@@ -322,3 +322,17 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
 	return predictor_output(&buffer->predictor, buffer, size, buf,
 				_buffer_output);
 }
+
+/*
+ * Redraw all the buffer contents to its controller
+ */
+void buffer_redraw(struct buffer *buffer) {
+	struct buffer_cell *cell;
+	for (int row = 0; row < buffer->vt.rows; row++) {
+		for (int col = 0; col < buffer->vt.cols; col++) {
+			cell = buffer_get_cell(buffer, row, col);
+			controller_output(buffer->bufid, 1, &cell->c);
+		}
+		controller_output(buffer->bufid, 2, "\r\n");
+	}
+}
