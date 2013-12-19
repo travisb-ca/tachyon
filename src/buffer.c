@@ -330,6 +330,8 @@ void buffer_redraw(struct buffer *buffer) {
 	struct buffer_cell *cell;
 	const char *vt100_goto_origin = "\033[f";
 	const char *space = " ";
+	char buf[16];
+	int len;
 
 	controller_output(buffer->bufid, sizeof(vt100_goto_origin) - 1,
 			  vt100_goto_origin);
@@ -345,4 +347,9 @@ void buffer_redraw(struct buffer *buffer) {
 		if (row < buffer->vt.rows - 1)
 			controller_output(buffer->bufid, 2, "\r\n");
 	}
+
+	len = snprintf(buf, sizeof(buf), "\033[%d;%df", buffer->vt.current_row + 1,
+		       buffer->vt.current_col + 1);
+	controller_output(buffer->bufid, len, buf);
+
 }
