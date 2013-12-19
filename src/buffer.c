@@ -216,7 +216,7 @@ struct buffer_cell *buffer_get_cell(struct buffer *buf, unsigned int row, unsign
 	if (col >= line->len)
 		return NULL;
 
-	return &line[row].cells[col];
+	return &line->cells[col];
 }
 
 int buffer_set_winsize(struct buffer *buf, int rows, int cols) {
