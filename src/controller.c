@@ -309,8 +309,7 @@ int controller_init(void) {
 		goto out_deregister;
 	}
 
-	current_buf_num = 0;
-	current_buf = GCon.buffers[0];
+	controller_set_current_buffer(0);
 
 	loop_register_signal(SIGWINCH, handle_sigwinch);
 
