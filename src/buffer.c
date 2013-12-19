@@ -328,6 +328,11 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
  */
 void buffer_redraw(struct buffer *buffer) {
 	struct buffer_cell *cell;
+	const char *vt100_goto_origin = "\033[f";
+
+	controller_output(buffer->bufid, sizeof(vt100_goto_origin) - 1,
+			  vt100_goto_origin);
+
 	for (int row = 0; row < buffer->vt.rows; row++) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
 			cell = buffer_get_cell(buffer, row, col);
