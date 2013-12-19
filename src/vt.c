@@ -47,13 +47,13 @@ static void normal_chars(struct buffer *buffer, struct buffer_cell *cell, char c
 {
 	cell->c = c;
 	cell->flags |= BUF_CELL_SET;
-	buffer->current_col++;
+	buffer->vt.current_col++;
 }
 
 static void normal_backspace(struct buffer *buffer, struct buffer_cell *cell, char c)
 {
-	if (buffer->current_col > 0)
-		buffer->current_col--;
+	if (buffer->vt.current_col > 0)
+		buffer->vt.current_col--;
 }
 
 static void normal_tab(struct buffer *buffer, struct buffer_cell *cell, char c)
@@ -64,23 +64,23 @@ static void normal_tab(struct buffer *buffer, struct buffer_cell *cell, char c)
 	 */
 	int tabstop;
 
-	if (buffer->current_col != buffer->cols - 1)
+	if (buffer->vt.current_col != buffer->vt.cols - 1)
 		cell->c = '\t';
 
-	tabstop = ((buffer->current_col + 8) / 8) * 8;
-	if (tabstop >= buffer->cols)
-		tabstop = buffer->cols - 1;
-	buffer->current_col = tabstop;
+	tabstop = ((buffer->vt.current_col + 8) / 8) * 8;
+	if (tabstop >= buffer->vt.cols)
+		tabstop = buffer->vt.cols - 1;
+	buffer->vt.current_col = tabstop;
 }
 
 static void normal_newline(struct buffer *buffer, struct buffer_cell *cell, char c)
 {
-	buffer->current_row++;
+	buffer->vt.current_row++;
 }
 
 static void normal_linefeed(struct buffer *buffer, struct buffer_cell *cell, char c)
 {
-	buffer->current_col = 0;
+	buffer->vt.current_col = 0;
 }
 
 static void normal_mode(struct buffer *buffer, struct buffer_cell *cell, char c)
@@ -133,6 +133,6 @@ static const struct terminal_def terminal_dumb = {
 void vt_interpret(struct buffer *buffer, char c)
 {
 	struct buffer_cell *cell;
-	cell = buffer_get_cell(buffer, buffer->current_row, buffer->current_col);
+	cell = buffer_get_cell(buffer, buffer->vt.current_row, buffer->vt.current_col);
 	terminal_dumb.modes[MODE_NORMAL](buffer, cell, c);
 }
