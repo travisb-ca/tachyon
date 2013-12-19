@@ -329,6 +329,7 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
 void buffer_redraw(struct buffer *buffer) {
 	struct buffer_cell *cell;
 	const char *vt100_goto_origin = "\033[f";
+	const char *space = " ";
 
 	controller_output(buffer->bufid, sizeof(vt100_goto_origin) - 1,
 			  vt100_goto_origin);
@@ -336,8 +337,12 @@ void buffer_redraw(struct buffer *buffer) {
 	for (int row = 0; row < buffer->vt.rows; row++) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
 			cell = buffer_get_cell(buffer, row, col);
-			controller_output(buffer->bufid, 1, &cell->c);
+			if (cell->flags & BUF_CELL_SET)
+				controller_output(buffer->bufid, 1, &cell->c);
+			else
+				controller_output(buffer->bufid, 1, space);
 		}
-		controller_output(buffer->bufid, 2, "\r\n");
+		if (row < buffer->vt.rows - 1)
+			controller_output(buffer->bufid, 2, "\r\n");
 	}
 }
