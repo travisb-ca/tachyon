@@ -9,7 +9,7 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 	def tearDown1(self):
 		self.waitForTermination()
 
-	def test_exitImmedately(self):
+	def test_exitImmediately(self):
 		self.sendLine('exit')
 
 	def test_bufferShellResponds(self):
