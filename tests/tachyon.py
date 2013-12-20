@@ -20,7 +20,7 @@ class TachyonTestCase(lousy.TestCase):
 	def startTachyon(self, args=[], sync=True):
 		cmd = ['./tachyon', '--shell="/bin/bash --noprofile --norc"']
 		cmd.extend(args)
-		self.tachyon = lousy.Process(cmd, shell=True, pty=True)
+		self.tachyon = lousy.Process(cmd, shell=True, pty='vt100')
 		if sync:
 			self.expectPrompt('^bash.*\$ ')
 
