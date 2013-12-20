@@ -23,6 +23,7 @@ class TachyonTestCase(lousy.TestCase):
 		self.tachyon = lousy.Process(cmd, shell=True, pty='vt100')
 		if sync:
 			self.expectPrompt('^bash.*\$ ')
+			self.sendLine('') # Reshow prompt
 
 	# Wait for the tachyon process to terminate. Fail if the timeout is exceeded
 	def waitForTermination(self, timeout=5):
