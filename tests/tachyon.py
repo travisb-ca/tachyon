@@ -30,6 +30,11 @@ class TachyonTestCase(lousy.TestCase):
 		response = self.tachyon.waitForTermination(timeout)
 		self.assertTrue(response, 'Timed out waiting to process to terminate')
 
+	# Return a snapshot of the terminal
+	def snapShot(self):
+		self.tachyon.read() # Ensure we have all the output
+		return self.tachyon.vty.snapShotScreen()
+
 	# Send the given string to tachyon as given
 	def send(self, string):
 		self.tachyon.send(string)
