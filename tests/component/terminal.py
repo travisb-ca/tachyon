@@ -20,3 +20,6 @@ class TestTerminal(tachyon.TachyonTestCase):
 
 		after = self.snapShot()
 		self.assertEqual(before, after)
+
+		self.sendCmdExit()
+		self.sendCmdExit()
