@@ -49,6 +49,7 @@ class TachyonTestCase(lousy.TestCase):
 		self.send(self.META + cmd)
 
 	def sendCmd(self, cmd):
+		self.syncOutput()
 		self.sendLine('') # Reshow prompt
 		self.expectPrompt('bash.*\$ ')
 		self.sendLine(cmd)
