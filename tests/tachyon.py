@@ -49,6 +49,7 @@ class TachyonTestCase(lousy.TestCase):
 		self.send(self.META + cmd)
 
 	def sendCmd(self, cmd):
+		self.sendLine('') # Reshow prompt
 		self.expectPrompt('bash.*\$ ')
 		self.sendLine(cmd)
 		self.expectOnly('.*' + re.escape(cmd) + '.*')
@@ -87,7 +88,6 @@ class TachyonTestCase(lousy.TestCase):
 	# Goto the next buffer ^tn, handles special synchronization
 	def bufferNext(self):
 		self.sendMeta('n')
-		self.sendLine('') # Reshow prompt
 
 	# Goto the previous buffer ^tn, handles special synchronization
 	def bufferPrev(self):
