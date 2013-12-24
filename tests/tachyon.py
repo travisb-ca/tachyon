@@ -32,7 +32,7 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Return a snapshot of the terminal
 	def snapShot(self):
-		self.tachyon.read() # Ensure we have all the output
+		self.syncOutput()
 		return self.tachyon.vty.snapShotScreen()
 
 	# Send the given string to tachyon as given
@@ -52,6 +52,10 @@ class TachyonTestCase(lousy.TestCase):
 		self.expectPrompt('bash.*\$ ')
 		self.sendLine(cmd)
 		self.expectOnly('.*' + re.escape(cmd) + '.*')
+
+	# Ensure that there is no more waiting output
+	def syncOutput(self):
+		self.tachyon.flushOutput()
 
 	# Wait until the timeout is seen or the given prompt is that last output on the last line
 	def expectPrompt(self, prompt, timeout=5):
