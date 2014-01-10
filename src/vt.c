@@ -94,6 +94,8 @@ int vt_init(struct vt *vt)
 	vt->current_row = 0;
 	vt->current_col = 0;
 
+	vt->flags = VT_FL_AUTOSCROLL;
+
 	vt->lines = malloc(vt->cols * sizeof(*vt->lines));
 	if (!vt->lines)
 		goto err;
@@ -257,26 +259,32 @@ void vt_interpret(struct buffer *buffer, char c)
 	if (vt->current_col == vt->cols) {
 		/* End of the line, move down one */
 		DLOG("End of line reached");
-		vt->current_col = 0;
-		vt->current_row++;
+		if (vt->flags & VT_FL_AUTOWRAP) {
+			vt->current_col = 0;
+			vt->current_row++;
+		} else {
+			vt->current_col = vt->cols - 1;
+		}
 
 	}
 
 	if (vt->current_row == vt->rows) {
 		/* Last line in the buffer, scroll */
 		DLOG("End of buffer reached");
-		line = vt_line_alloc(vt->cols);
-		if (!line) {
-			ELOG("Failed to allocate new line!");
-			return;
-		}
+		if (vt->flags & VT_FL_AUTOSCROLL) {
+			line = vt_line_alloc(vt->cols);
+			if (!line) {
+				ELOG("Failed to allocate new line!");
+				return;
+			}
 
-		vt_line_init(line, vt->bottommost, NULL);
-		vt->bottommost->next = line;
-		memmove(&vt->lines[0], &vt->lines[1],
-			(vt->rows - 1) * sizeof(*vt->lines));
-		vt->lines[vt->rows - 1] = line;
-		vt->bottommost = line;
+			vt_line_init(line, vt->bottommost, NULL);
+			vt->bottommost->next = line;
+			memmove(&vt->lines[0], &vt->lines[1],
+				(vt->rows - 1) * sizeof(*vt->lines));
+			vt->lines[vt->rows - 1] = line;
+			vt->bottommost = line;
+		}
 
 		vt->current_row--;
 	}

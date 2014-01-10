@@ -38,6 +38,12 @@ struct vt {
 	uint16_t rows;
 	uint16_t cols;
 
+/* When reaching the end of line start at the beginning of the next line */
+#define VT_FL_AUTOWRAP (1 << 0)
+/* When reaching the bottom of the screen scroll all text up one line */
+#define VT_FL_AUTOSCROLL (1 << 1)
+	uint32_t flags;
+
 	struct vt_line *topmost;
 	struct vt_line *bottommost;
 	struct vt_line **lines;
