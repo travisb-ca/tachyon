@@ -48,6 +48,12 @@ struct vt {
 	struct vt_line *topmost;
 	struct vt_line *bottommost;
 	struct vt_line **lines;
+
+	/* Places to hold interm escape code parameters */
+	struct {
+		char chars[32];
+		uint16_t len;
+	} params;
 };
 
 int vt_init(struct vt *vt);

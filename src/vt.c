@@ -35,6 +35,8 @@
 
 enum {
 	MODE_NORMAL,
+	MODE_ESCAPE,
+	MODE_CSI,
 	MODE_NUM
 } vt_mode;
 
@@ -96,6 +98,8 @@ int vt_init(struct vt *vt)
 
 	vt->flags = VT_FL_AUTOSCROLL;
 	vt->vt_mode = MODE_NORMAL;
+
+	vt->params.len = 0;
 
 	vt->lines = malloc(vt->cols * sizeof(*vt->lines));
 	if (!vt->lines)
@@ -201,6 +205,11 @@ static void normal_linefeed(struct buffer *buffer, struct vt_cell *cell, char c)
 	buffer->vt.current_col = 0;
 }
 
+static void normal_escape(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	buffer->vt.vt_mode = MODE_ESCAPE;
+}
+
 static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	switch (c) {
@@ -232,7 +241,7 @@ static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 		HANDLE(0x18, ignore);
 		HANDLE(0x19, ignore);
 		HANDLE(0x1a, ignore);
-		HANDLE(0x1b, ignore);
+		HANDLE(0x1b, normal_escape);
 		HANDLE(0x1c, ignore);
 		HANDLE(0x1d, ignore);
 		HANDLE(0x1e, ignore);
@@ -241,16 +250,59 @@ static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 	}
 }
 
+static void escape_exit(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	buffer->vt.vt_mode = MODE_NORMAL;
+}
+
+static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	buffer->vt.vt_mode = MODE_CSI;
+	buffer->vt.params.len = 0;
+}
+
+static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	switch (c) {
+		DEFAULT(escape_exit);
+		HANDLE('[', escape_csi);
+	}
+}
+
+static void csi_collect_params(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	struct vt *vt = &buffer->vt;
+
+	if (vt->params.len < sizeof(vt->params.chars))
+		vt->params.chars[vt->params.len++] = c;
+}
+
+static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+}
+
+static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	switch (c) {
+		DEFAULT(csi_collect_params);
+		HANDLE('J', csi_clear_screen);
+	}
+}
+
 /*
  * This is the state change table for the terminal emulation. It is
  * basically a matrix of states and input bytes. This is a function which is
  * called with the terminal and the byte to be processed. This function then
  * performs whatever work is necessary for the emulation.
+ *
+ * Note: Order of modes must match enum vt_modes above.
  */
 static const struct terminal_def terminal_emulation = {
 	.max_mode = MODE_NUM,
 	.modes = {
 		normal_mode,
+		escape_mode,
+		csi_mode,
 	},
 };
 
