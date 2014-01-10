@@ -45,9 +45,9 @@ struct vt {
 #define VT_FL_AUTOSCROLL (1 << 1)
 	uint32_t flags;
 
-	struct vt_line *topmost;
-	struct vt_line *bottommost;
-	struct vt_line **lines;
+	struct vt_line *topmost; /* Earliest line in the scroll buffer */
+	struct vt_line *bottommost; /* Latest line in the scroll buffer */
+	struct vt_line **lines; /* rows x cols matrix of visible scroll buffer */
 
 	/* Places to hold interm escape code parameters */
 	struct {
