@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Travis Brown (travisb@travisbrown.ca)
+ * Copyright (C) 2013-2014  Travis Brown (travisb@travisbrown.ca)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -75,41 +75,6 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
 	}
 }
 
-static void buffer_cell_init(struct buffer_cell *cell)
-{
-	memset(cell, 0, sizeof(*cell));
-}
-
-static struct buffer_line *buffer_line_alloc(int columns)
-{
-	struct buffer_line *line;
-
-	line = malloc(sizeof(*line) + columns*sizeof(*line->cells));
-	if (!line)
-		return NULL;
-
-	line->next = NULL;
-	line->prev = NULL;
-	line->len = columns;
-
-	for (int i = 0; i < columns; i++)
-		buffer_cell_init(&line->cells[i]);
-
-	return line;
-}
-
-static void buffer_line_free(struct buffer_line *line)
-{
-	free(line);
-}
-
-static void buffer_line_init(struct buffer_line *line, struct buffer_line *prev,
-			     struct buffer_line *next)
-{
-	line->next = next;
-	line->prev = prev;
-}
-
 /*
  * Initialize a buffer.
  *
@@ -139,41 +104,15 @@ struct buffer *buffer_init(int bufid) {
 	if (buffer->fd.fd < 0)
 		goto out_free;
 
-	/* Allocate the screen/line buffer */
-	buffer->vt.cols = 80;
-	buffer->vt.rows = 24;
-	buffer->vt.current_row = 0;
-	buffer->vt.current_col = 0;
-
-	buffer->vt.lines = malloc(buffer->vt.cols * sizeof(*buffer->vt.lines));
-	if (!buffer->vt.lines)
+	if (vt_init(&buffer->vt))
 		goto out_free_fd;
-
-	for (int i = 0; i < buffer->vt.rows; i++) {
-		buffer->vt.lines[i] = buffer_line_alloc(buffer->vt.cols);
-		if (!buffer->vt.lines[i])
-			goto out_free_lines;
-	}
-	buffer->vt.topmost = buffer->vt.lines[0];
-	buffer->vt.bottommost = buffer->vt.lines[buffer->vt.rows - 1];
-
-	buffer_line_init(buffer->vt.topmost, NULL, buffer->vt.lines[1]);
-	for (int i = 1; i < buffer->vt.rows - 1; i++)
-		buffer_line_init(buffer->vt.lines[i], buffer->vt.lines[i - 1], buffer->vt.lines[i + 1]);
-	buffer_line_init(buffer->vt.bottommost, buffer->vt.lines[buffer->vt.cols - 2], NULL);
 
 	result = loop_register(&buffer->fd);
 	if (result != 0)
-		goto out_free_lines;
+		goto out_free_fd;
 
 	return buffer;
 
-out_free_lines:
-	if (buffer->vt.lines) {
-		for (int i = 0; i < buffer->vt.cols; i++)
-			free(buffer->vt.lines[i]);
-	}
-	free(buffer->vt.lines);
 out_free_fd:
 	close(buffer->fd.fd);
 
@@ -183,40 +122,13 @@ out_free:
 }
 
 void buffer_free(struct buffer *buffer) {
-	struct buffer_line *current;
-	struct buffer_line *next = NULL;
-
 	loop_deregister(&buffer->fd);
 	predictor_free(&buffer->predictor);
 	close(buffer->fd.fd);
 
-	current = buffer->vt.topmost;
-	if (current)
-		next = current->next;
-	while (current) {
-		buffer_line_free(current);
-
-		current = next;
-		if (next)
-			next = next->next;
-	}
+	vt_free(&buffer->vt);
 
 	free(buffer);
-}
-
-struct buffer_cell *buffer_get_cell(struct buffer *buf, unsigned int row, unsigned int col)
-{
-	struct buffer_line *line;
-
-	if (row >= buf->vt.rows || col >= buf->vt.cols)
-		return NULL;
-
-	line = buf->vt.lines[row];
-
-	if (col >= line->len)
-		return NULL;
-
-	return &line->cells[col];
 }
 
 int buffer_set_winsize(struct buffer *buf, int rows, int cols) {
@@ -262,38 +174,8 @@ out:
 }
 
 int buffer_input(struct buffer *buffer, int size, char *buf) {
-	struct buffer_line *line;
-
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++)
 		vt_interpret(buffer, buf[i]);
-
-		if (buffer->vt.current_col == buffer->vt.cols) {
-			/* End of the line, move down one */
-			DLOG("End of line reached");
-			buffer->vt.current_col = 0;
-			buffer->vt.current_row++;
-
-		}
-
-		if (buffer->vt.current_row == buffer->vt.rows) {
-			/* Last line in the buffer, scroll */
-			DLOG("End of buffer reached");
-			line = buffer_line_alloc(buffer->vt.cols);
-			if (!line) {
-				ELOG("Failed to allocate new line!");
-				continue;
-			}
-
-			buffer_line_init(line, buffer->vt.bottommost, NULL);
-			buffer->vt.bottommost->next = line;
-			memmove(&buffer->vt.lines[0], &buffer->vt.lines[1],
-				(buffer->vt.rows - 1) * sizeof(*buffer->vt.lines));
-			buffer->vt.lines[buffer->vt.rows - 1] = line;
-			buffer->vt.bottommost = line;
-
-			buffer->vt.current_row--;
-		}
-	}
 
 	return controller_output(buffer->bufid, size, buf);
 }
@@ -327,7 +209,7 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
  * Redraw all the buffer contents to its controller
  */
 void buffer_redraw(struct buffer *buffer) {
-	struct buffer_cell *cell;
+	struct vt_cell *cell;
 	const char *vt100_goto_origin = "\033[f";
 	const char *space = " ";
 	char buf[16];
@@ -338,7 +220,7 @@ void buffer_redraw(struct buffer *buffer) {
 
 	for (int row = 0; row < buffer->vt.rows; row++) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
-			cell = buffer_get_cell(buffer, row, col);
+			cell = vt_get_cell(buffer, row, col);
 			if (cell->flags & BUF_CELL_SET)
 				controller_output(buffer->bufid, 1, &cell->c);
 			else

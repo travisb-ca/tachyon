@@ -20,17 +20,32 @@
 #ifndef VT_H
 #define VT_H
 
+struct vt_cell {
+	char c;
+#define BUF_CELL_SET (1 << 0) /* This cell is in use */
+	uint8_t flags;
+};
+
+struct vt_line {
+	struct vt_line *next, *prev;
+	uint16_t len;
+	struct vt_cell cells[0];
+};
+
 struct vt {
 	uint16_t current_row;
 	uint16_t current_col;
 	uint16_t rows;
 	uint16_t cols;
 
-	struct buffer_line *topmost;
-	struct buffer_line *bottommost;
-	struct buffer_line **lines;
+	struct vt_line *topmost;
+	struct vt_line *bottommost;
+	struct vt_line **lines;
 };
 
+int vt_init(struct vt *vt);
+void vt_free(struct vt *vt);
 void vt_interpret(struct buffer *buffer, char c);
+struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int col);
 
 #endif

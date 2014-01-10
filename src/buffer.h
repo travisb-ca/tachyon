@@ -29,18 +29,6 @@
 
 #define BUFFER_BUF_SIZE 1024
 
-struct buffer_cell {
-	char c;
-#define BUF_CELL_SET (1 << 0) /* This cell is in use */
-	uint8_t flags;
-};
-
-struct buffer_line {
-	struct buffer_line *next, *prev;
-	uint16_t len;
-	struct buffer_cell cells[0];
-};
-
 struct buffer {
 	struct loop_fd fd;
 	struct predictor predictor;
@@ -60,8 +48,4 @@ int buffer_output(struct buffer *buffer, int size, char *buf);
 int buffer_input(struct buffer *buffer, int size, char *buf);
 void buffer_redraw(struct buffer *buffer);
 
-/*
- * Semi-private methods for use of the terminal emulation functions
- */
-struct buffer_cell *buffer_get_cell(struct buffer *buf, unsigned int row, unsigned int col);
 #endif
