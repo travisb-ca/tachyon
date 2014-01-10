@@ -95,6 +95,7 @@ int vt_init(struct vt *vt)
 	vt->current_col = 0;
 
 	vt->flags = VT_FL_AUTOSCROLL;
+	vt->vt_mode = MODE_NORMAL;
 
 	vt->lines = malloc(vt->cols * sizeof(*vt->lines));
 	if (!vt->lines)
@@ -240,7 +241,13 @@ static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 	}
 }
 
-static const struct terminal_def terminal_dumb = {
+/*
+ * This is the state change table for the terminal emulation. It is
+ * basically a matrix of states and input bytes. This is a function which is
+ * called with the terminal and the byte to be processed. This function then
+ * performs whatever work is necessary for the emulation.
+ */
+static const struct terminal_def terminal_emulation = {
 	.max_mode = MODE_NUM,
 	.modes = {
 		normal_mode,
@@ -254,7 +261,7 @@ void vt_interpret(struct buffer *buffer, char c)
 	struct vt_line *line;
 
 	cell = vt_get_cell(buffer, buffer->vt.current_row, buffer->vt.current_col);
-	terminal_dumb.modes[MODE_NORMAL](buffer, cell, c);
+	terminal_emulation.modes[vt->vt_mode](buffer, cell, c);
 
 	if (vt->current_col == vt->cols) {
 		/* End of the line, move down one */

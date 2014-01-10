@@ -33,6 +33,7 @@ struct vt_line {
 };
 
 struct vt {
+	int vt_mode;
 	uint16_t current_row;
 	uint16_t current_col;
 	uint16_t rows;
