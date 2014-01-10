@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Travis Brown (travisb@travisbrown.ca)
+ * Copyright (C) 2013-2014  Travis Brown (travisb@travisbrown.ca)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,6 +19,17 @@
  */
 #ifndef VT_H
 #define VT_H
+
+struct vt {
+	uint16_t current_row;
+	uint16_t current_col;
+	uint16_t rows;
+	uint16_t cols;
+
+	struct buffer_line *topmost;
+	struct buffer_line *bottommost;
+	struct buffer_line **lines;
+};
 
 void vt_interpret(struct buffer *buffer, char c);
 
