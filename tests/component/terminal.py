@@ -43,6 +43,8 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 	def tearDown1(self):
 		self.pipe.disconnect()
+
+		self.sendCmdExit()
 		self.waitForTermination()
 
 	def test_PipeStub(self):
