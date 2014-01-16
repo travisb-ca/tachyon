@@ -57,3 +57,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		b = self.snapShot()
 
 		self.assertNotEqual(a, b)
+
+		self.assertVtyCharIs(5, 0, 'a')
+		self.assertVtyString(5, 0, 'asdfasdfasdfasdf')
