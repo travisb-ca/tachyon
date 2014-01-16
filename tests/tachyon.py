@@ -94,3 +94,9 @@ class TachyonTestCase(lousy.TestCase):
 	def bufferPrev(self):
 		self.sendMeta('p')
 		self.sendLine('') # Reshow prompt
+
+class PipeStub(lousy.Stub):
+	# This is stub which just punts strings back and forth.
+	# tests/stubs/PipeStub.py is the script counterpart to this stub.
+	
+	type = 'PipeStub'

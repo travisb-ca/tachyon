@@ -1,8 +1,9 @@
 #!/usr/bin/env python2.7
 
 import tachyon
+import lousy
 
-class TestTerminal(tachyon.TachyonTestCase):
+class TestBasicTerminal(tachyon.TachyonTestCase):
 	def setUp1(self):
 		self.startTachyon()
 
@@ -23,3 +24,34 @@ class TestTerminal(tachyon.TachyonTestCase):
 
 		self.sendCmdExit()
 		self.sendCmdExit()
+
+class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
+	# Start a tests/stubs/PipeStub.py client and return the matching stub
+	def startPipeStub(self):
+		lousy.stubs.add_class('PipeStub', tachyon.PipeStub)
+
+		port = lousy.stubs.port()
+		self.sendCmd('tests/stubs/PipeStub.py %d' % port)
+		stub = lousy.stubs.waitForStub('PipeStub')
+		self.assertIsNotNone(stub)
+
+		return stub
+
+	def setUp1(self):
+		self.startTachyon()
+		self.pipe = self.startPipeStub()
+
+	def tearDown1(self):
+		self.pipe.disconnect()
+		self.waitForTermination()
+
+	def test_PipeStub(self):
+		# Basic test to ensure the PipeSstub is operating correctly
+
+		a = self.snapShot()
+
+		self.pipe.write('\n\n\rasdfasdfasdfasdf')
+
+		b = self.snapShot()
+
+		self.assertNotEqual(a, b)
