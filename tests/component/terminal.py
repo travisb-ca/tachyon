@@ -70,8 +70,8 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertNotEqual(a, b)
 
-		self.assertVtyCharIs(5, 0, 'a')
-		self.assertVtyString(5, 0, 'asdfasdfasdfasdf')
+		self.assertVtyCharIs(22, 0, 'a')
+		self.assertVtyString(22, 0, 'asdfasdfasdfasdf')
 
 	def test_csiClearScreen_all(self):
 		a = self.snapShot()
