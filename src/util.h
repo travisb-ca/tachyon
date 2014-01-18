@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Travis Brown (travisb@travisbrown.ca)
+ * Copyright (C) 2013-2014  Travis Brown (travisb@travisbrown.ca)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,6 +44,11 @@
  * Return the ascii character code of the normal character converted into control-X form.
  */
 #define CONTROL(x) ( (x) & ~((1 << 6) | (1 << 5)))
+
+/*
+ * Like strncmp, but where the first string is constant and only true on exact equality.
+ */
+#define CONST_STR_IS(const_a, b) (strncmp((const_a), (b), sizeof(const_a)) == 0)
 
 void close_on_exec(int fd);
 

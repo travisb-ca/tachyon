@@ -25,6 +25,7 @@
 #include "log.h"
 #include "options.h"
 #include "buffer.h"
+#include "util.h"
 #include "vt.h"
 
 #define DEFAULT(func) \
@@ -282,7 +283,7 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 	struct vt *vt = &buffer->vt;
 
 	if (vt->params.len > 0) {
-		if (!strncmp(vt->params.chars, "2", sizeof("2"))) {
+		if (CONST_STR_IS("2", vt->params.chars)) {
 			for (int row = 0; row < vt->rows; row++) {
 				for (int col = 0; col < vt->cols; col++) {
 					cell = vt_get_cell(buffer, row, col);
