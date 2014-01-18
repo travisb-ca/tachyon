@@ -279,6 +279,24 @@ static void csi_collect_params(struct buffer *buffer, struct vt_cell *cell, char
 
 static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c)
 {
+	struct vt *vt = &buffer->vt;
+
+	if (vt->params.len > 0) {
+		if (!strncmp(vt->params.chars, "2", sizeof("2"))) {
+			for (int row = 0; row < vt->rows; row++) {
+				for (int col = 0; col < vt->cols; col++) {
+					cell = vt_get_cell(buffer, row, col);
+					if (cell)
+						cell->flags &= ~ BUF_CELL_SET;
+				}
+			}
+		} else {
+			/* TODO Implement other modes */
+			DLOG("Unsupported csi_clear_screen type '%s'", vt->params.chars);
+		}
+	}
+
+	vt->vt_mode = MODE_NORMAL;
 }
 
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)

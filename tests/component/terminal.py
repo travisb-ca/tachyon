@@ -38,14 +38,26 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		return stub
 
 	def setUp1(self):
+		self._FrameBufferLooseEquality = True
 		self.startTachyon()
 		self.pipe = self.startPipeStub()
+
+		self.bufferCreate()
+		self.bufferNext()
+
+		# Clear the screen the slow way to ensure that each test has a clean slate to start with
+		msg = '\r\n' * (self.tachyon.vty.rows() + 1)
+		self.pipe.write(msg)
 
 	def tearDown1(self):
 		self.pipe.disconnect()
 
 		self.sendCmdExit()
+		self.sendCmdExit()
 		self.waitForTermination()
+
+	def sendCsi(self, string):
+		self.pipe.write('\033[' + string)
 
 	def test_PipeStub(self):
 		# Basic test to ensure the PipeSstub is operating correctly
@@ -60,3 +72,28 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertVtyCharIs(5, 0, 'a')
 		self.assertVtyString(5, 0, 'asdfasdfasdfasdf')
+
+	def test_csiClearScreen_all(self):
+		a = self.snapShot()
+
+		self.pipe.write('asdfasdfasdf\r\n')
+		self.pipe.write('qewrqwerqwer\r\n')
+
+		self.sendCsi('2J')
+		
+		b = self.snapShot()
+		self.assertEqual(a, b)
+
+		row, col = self.tachyon.vty.cursorPosition()
+		self.assertEqual(row, 23)
+		self.assertEqual(col, 0)
+
+		self.bufferNext()
+		self.bufferNext()
+
+		b = self.snapShot()
+		self.assertEqual(a, b)
+
+		row, col = self.tachyon.vty.cursorPosition()
+		self.assertEqual(row, 23)
+		self.assertEqual(col, 0)
