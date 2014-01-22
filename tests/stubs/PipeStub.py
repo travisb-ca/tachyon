@@ -33,7 +33,7 @@ def recv(sock):
 	size = sock.recv(4)
 	if size == '':
 		# Socket closed
-		print 'Socket closing, exiting'
+		print '\nSocket closing, exiting'
 		sys.exit(0)
 	size = struct.unpack(HEADER_FMT, size)[0]
 
@@ -53,4 +53,5 @@ send(sock, 'PipeStub,%d' % os.getpid())
 while True:
 	msg = recv(sock)
 	if msg != '':
-		print msg
+		sys.stdout.write(msg)
+		sys.stdout.flush()
