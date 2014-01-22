@@ -37,14 +37,21 @@ class TachyonTestCase(lousy.TestCase):
 
 	# Assert the terminal cell is the given character
 	def assertVtyCharIs(self, row, col, char):
+		self.syncOutput()
 		cell = self.tachyon.vty.cell(row, col)
 		self.assertEqual(char, cell.char)
 
 	# Assert an entire string starting at the given coordinates
 	def assertVtyString(self, row, col, string):
+		self.syncOutput()
 		vtyString = self.tachyon.vty.string(row, col, len(string))
 
 		self.assertEqual(string, vtyString)
+
+	# Return the Vty cursor position as a 2-tuple
+	def vtyCursorPosition(self):
+		self.syncOutput()
+		return self.tachyon.vty.cursorPosition()
 
 	# Send the given string to tachyon as given
 	def send(self, string):
