@@ -282,19 +282,17 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 {
 	struct vt *vt = &buffer->vt;
 
-	if (vt->params.len > 0) {
-		if (CONST_STR_IS("2", vt->params.chars)) {
-			for (int row = 0; row < vt->rows; row++) {
-				for (int col = 0; col < vt->cols; col++) {
-					cell = vt_get_cell(buffer, row, col);
-					if (cell)
-						cell->flags &= ~ BUF_CELL_SET;
-				}
+	if (vt->params.len > 0 && CONST_STR_IS("2", vt->params.chars)) {
+		for (int row = 0; row < vt->rows; row++) {
+			for (int col = 0; col < vt->cols; col++) {
+				cell = vt_get_cell(buffer, row, col);
+				if (cell)
+					cell->flags &= ~ BUF_CELL_SET;
 			}
-		} else {
-			/* TODO Implement other modes */
-			DLOG("Unsupported csi_clear_screen type '%s'", vt->params.chars);
 		}
+	} else {
+		/* TODO Implement other modes */
+		DLOG("Unsupported csi_clear_screen type '%s'", vt->params.chars);
 	}
 
 	vt->vt_mode = MODE_NORMAL;
