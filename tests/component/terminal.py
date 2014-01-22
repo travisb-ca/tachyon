@@ -50,6 +50,8 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.pipe.write(msg)
 
 	def tearDown1(self):
+		self.assertSurvivesBufferChange()
+
 		self.pipe.disconnect()
 
 		self.sendCmdExit()
@@ -105,8 +107,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 			self.assertVtyCharIs(0, col, '')
 		for col in range(20):
 			self.assertVtyCharIs(1, col, '')
-		
-		self.assertSurvivesBufferChange()
 
 	def test_csiClearScreen_toEnd(self):
 		self.setCursorPos(0, 0)
@@ -124,8 +124,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		for col in range(20):
 			self.assertVtyCharIs(1, col, '')
 
-		self.assertSurvivesBufferChange()
-
 	def test_csiClearScreen_fromStart(self):
 		self.setCursorPos(0, 0)
 
@@ -141,8 +139,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		for col in range(6):
 			self.assertVtyCharIs(1, col, '')
 		self.assertVtyString(1, 7, 'rqwer')
-		
-		self.assertSurvivesBufferChange()
 
 	def test_csiClearScreen_all(self):
 		a = self.snapShot()
@@ -158,8 +154,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 23)
 		self.assertEqual(col, 0)
-
-		self.assertSurvivesBufferChange()
 
 	def test_csiCursorPosition(self):
 		self.pipe.write('adfasdfasdfasdf\r\n;lkjh')
@@ -177,8 +171,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.pipe.write('z')
 		self.assertVtyCharIs(5, 5, 'z')
 
-		self.assertSurvivesBufferChange()
-
 	def test_csiCursorPosition_default(self):
 		self.pipe.write('adfasdfasdfasdf\r\n;lkjh')
 
@@ -195,8 +187,6 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.pipe.write('z')
 		self.assertVtyCharIs(0, 0, 'z')
 
-		self.assertSurvivesBufferChange()
-
 	def test_csiCursorPosition_empty(self):
 		self.pipe.write('adfasdfasdfasdf\r\n;lkjh')
 
@@ -212,5 +202,3 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.pipe.write('z')
 		self.assertVtyCharIs(0, 0, 'z')
-		
-		self.assertSurvivesBufferChange()
