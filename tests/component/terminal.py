@@ -76,6 +76,36 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCharIs(22, 0, 'a')
 		self.assertVtyString(22, 0, 'asdfasdfasdfasdf')
 
+	def test_csiClearScreen_toEnd_default(self):
+		self.setCursorPos(0, 0)
+
+		self.pipe.write('asdfasdfasdf\r\n')
+		self.pipe.write('qewrqwerqwer\r\n')
+
+		self.setCursorPos(0, 4)
+
+		self.sendCsi('J')
+
+		a = self.snapShot()
+
+		self.assertVtyString(0, 0, 'asdf')
+		for col in range(4, 20):
+			self.assertVtyCharIs(0, col, '')
+		for col in range(20):
+			self.assertVtyCharIs(1, col, '')
+		
+		row, col = self.tachyon.vty.cursorPosition()
+
+		self.bufferNext()
+		self.bufferNext()
+
+		b = self.snapShot()
+		self.assertEqual(a, b)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 0)
+		self.assertEqual(col, 4)
+
 	def test_csiClearScreen_toEnd(self):
 		self.setCursorPos(0, 0)
 
