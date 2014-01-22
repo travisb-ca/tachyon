@@ -97,3 +97,63 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		row, col = self.tachyon.vty.cursorPosition()
 		self.assertEqual(row, 23)
 		self.assertEqual(col, 0)
+
+	def test_csiCursorPosition(self):
+		self.pipe.write('adfasdfasdfasdf\r\n;lkjh')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 23)
+		self.assertEqual(col, 5)
+
+		self.sendCsi('6;6f')
+
+		self.bufferNext()
+		self.bufferNext()
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 5)
+		self.assertEqual(col, 5)
+
+		self.pipe.write('z')
+
+		self.assertVtyCharIs(5, 5, 'z')
+
+	def test_csiCursorPosition_default(self):
+		self.pipe.write('adfasdfasdfasdf\r\n;lkjh')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 23)
+		self.assertEqual(col, 5)
+
+		self.sendCsi('f')
+
+		self.bufferNext()
+		self.bufferNext()
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 0)
+		self.assertEqual(col, 0)
+
+		self.pipe.write('z')
+
+		self.assertVtyCharIs(0, 0, 'z')
+
+	def test_csiCursorPosition_empty(self):
+		self.pipe.write('adfasdfasdfasdf\r\n;lkjh')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 23)
+		self.assertEqual(col, 5)
+
+		self.sendCsi(';f')
+
+		self.bufferNext()
+		self.bufferNext()
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 0)
+		self.assertEqual(col, 0)
+
+		self.pipe.write('z')
+
+		self.assertVtyCharIs(0, 0, 'z')

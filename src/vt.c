@@ -260,6 +260,7 @@ static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	buffer->vt.vt_mode = MODE_CSI;
 	buffer->vt.params.len = 0;
+	buffer->vt.params.chars[sizeof(buffer->vt.params.chars) - 1] = '\0';
 }
 
 static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
@@ -327,11 +328,45 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void csi_position_cursor(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+	int row;
+	int col;
+	int result;
+
+	if (vt->params.len == 0 ||
+	     (vt->params.len == 1 && CONST_STR_IS(";", vt->params.chars))) {
+		row = 0;
+		col = 0;
+		result = 2; /* Match successful sscanf below */
+	}
+
+	if (vt->params.len >= 3) {
+		result = sscanf(vt->params.chars, "%u;%u", &row, &col);
+		if (result == 2) {
+			/*
+			 * The command is 1-indexed with 0 and 1 aliased where
+			 * we are 0-indexed, convert.
+			 * */
+			if (row != 0)
+				row--;
+			if (col != 0)
+				col--;
+		}
+	}
+
+	if (result == 2) {
+		vt->current_row = row;
+		vt->current_col = col;
+	}
+}
+
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	switch (c) {
 		DEFAULT(csi_collect_params);
 		HANDLE('J', csi_clear_screen);
+		HANDLE('f', csi_position_cursor);
 	}
 }
 
