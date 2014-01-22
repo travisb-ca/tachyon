@@ -260,7 +260,7 @@ static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	buffer->vt.vt_mode = MODE_CSI;
 	buffer->vt.params.len = 0;
-	buffer->vt.params.chars[sizeof(buffer->vt.params.chars) - 1] = '\0';
+	memset(buffer->vt.params.chars, 0, sizeof(buffer->vt.params.chars));
 }
 
 static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
@@ -275,7 +275,7 @@ static void csi_collect_params(struct buffer *buffer, struct vt_cell *cell, char
 {
 	struct vt *vt = &buffer->vt;
 
-	if (vt->params.len < sizeof(vt->params.chars))
+	if (vt->params.len < sizeof(vt->params.chars) - 1)
 		vt->params.chars[vt->params.len++] = c;
 }
 
@@ -283,9 +283,9 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 {
 	struct vt *vt = &buffer->vt;
 
-	if (vt->params.len == 0 || CONST_STR_IS("1", vt->params.chars)) {
+	if (vt->params.len == 0 || CONST_STR_IS("0", vt->params.chars)) {
 		/* Clear from cursor to end of screen */
-		for (int col = 0; col < vt->cols; col++) {
+		for (int col = vt->current_col; col < vt->cols; col++) {
 			cell = vt_get_cell(buffer, vt->current_row, col);
 			if (cell)
 				cell->flags &= ~BUF_CELL_SET;
