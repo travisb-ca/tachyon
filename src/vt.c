@@ -282,7 +282,36 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 {
 	struct vt *vt = &buffer->vt;
 
-	if (vt->params.len > 0 && CONST_STR_IS("2", vt->params.chars)) {
+	if (vt->params.len == 0 || CONST_STR_IS("1", vt->params.chars)) {
+		/* Clear from cursor to end of screen */
+		for (int col = 0; col < vt->cols; col++) {
+			cell = vt_get_cell(buffer, vt->current_row, col);
+			if (cell)
+				cell->flags &= ~BUF_CELL_SET;
+		}
+		for (int row = vt->current_row + 1; row < vt->rows; row++) {
+			for (int col = 0; col < vt->cols; col++) {
+				cell = vt_get_cell(buffer, row, col);
+				if (cell)
+					cell->flags &= ~BUF_CELL_SET;
+			}
+		}
+	} else if (vt->params.len > 0 && CONST_STR_IS("1", vt->params.chars)) {
+		/* Clear screen from 0,0 for cursor */
+		for (int row = 0; row < vt->current_row; row++) {
+			for (int col = 0; col < vt->cols; col++) {
+				cell = vt_get_cell(buffer, row, col);
+				if (cell)
+					cell->flags &= ~BUF_CELL_SET;
+			}
+		}
+		for (int col = 0; col <= vt->current_col; col++) {
+			cell = vt_get_cell(buffer, vt->current_row, col);
+			if (cell)
+				cell->flags &= ~BUF_CELL_SET;
+		}
+	} else if (vt->params.len > 0 && CONST_STR_IS("2", vt->params.chars)) {
+		/* Clear entire screen */
 		for (int row = 0; row < vt->rows; row++) {
 			for (int col = 0; col < vt->cols; col++) {
 				cell = vt_get_cell(buffer, row, col);
@@ -291,7 +320,7 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 			}
 		}
 	} else {
-		/* TODO Implement other modes */
+		/* Any other mode is an error. Do nothing */
 		DLOG("Unsupported csi_clear_screen type '%s'", vt->params.chars);
 	}
 
