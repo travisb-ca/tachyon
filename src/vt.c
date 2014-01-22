@@ -359,6 +359,8 @@ static void csi_position_cursor(struct buffer *buffer, struct vt_cell *cell, cha
 		vt->current_row = row;
 		vt->current_col = col;
 	}
+
+	vt->vt_mode = MODE_NORMAL;
 }
 
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
