@@ -401,7 +401,7 @@ static void csi_move_cursor_down(struct buffer *buffer, struct vt_cell *cell, ch
 		if (distance == 0)
 			distance = 1;
 
-		vt->current_row = min(vt->rows, vt->current_row + distance);
+		vt->current_row = min(vt->rows - 1, vt->current_row + distance);
 	}
 
 	vt->vt_mode = MODE_NORMAL;
