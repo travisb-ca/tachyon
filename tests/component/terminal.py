@@ -59,14 +59,20 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.waitForTermination()
 
 	def assertSurvivesBufferChange(self):
+		if lousy._debug:
+			print 'Ensuring framebuffer survived buffer switch'
 		a = self.snapShot()
 		a_row, a_col = self.vtyCursorPosition()
+		if lousy._debug:
+			print 'Saved sample a'
 
 		self.bufferNext()
 		self.bufferNext()
 
 		b = self.snapShot()
 		b_row, b_col = self.vtyCursorPosition()
+		if lousy._debug:
+			print 'Saved sample b'
 
 		self.assertEqual(a, b)
 		self.assertEqual(a_row, b_row)
