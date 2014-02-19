@@ -252,3 +252,57 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 20)
+
+	def test_csiCursorDown_default(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 1)
+
+		self.sendCsi('B')
+		self.sendCsi('B')
+		self.sendCsi('B')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 4)
+
+	def test_csiCursorDown_one(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 1)
+
+		self.sendCsi('1B')
+		self.sendCsi('1B')
+		self.sendCsi('1B')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 4)
+
+	def test_csiCursorDown_zero(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 1)
+
+		self.sendCsi('0B')
+		self.sendCsi('0B')
+		self.sendCsi('0B')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 4)
+
+	def test_csiCursorDown_arg(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 1)
+
+		self.sendCsi('3B')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 4)
