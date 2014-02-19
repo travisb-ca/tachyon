@@ -213,8 +213,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('A')
 		self.sendCsi('A')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 20)
+		self.assertVtyCharIs(20, 8, 'z')
 
 	def test_csiCursorUp_one(self):
 		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
@@ -226,8 +229,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('1A')
 		self.sendCsi('1A')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 20)
+		self.assertVtyCharIs(20, 8, 'z')
 
 	def test_csiCursorUp_zero(self):
 		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
@@ -239,8 +245,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('0A')
 		self.sendCsi('0A')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 20)
+		self.assertVtyCharIs(20, 8, 'z')
 
 	def test_csiCursorUp_arg(self):
 		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
@@ -250,8 +259,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.sendCsi('3A')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 20)
+		self.assertVtyCharIs(20, 8, 'z')
 
 	def test_csiCursorDown_default(self):
 		self.setCursorPos(0, 0)
@@ -264,8 +276,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('B')
 		self.sendCsi('B')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 4)
+		self.assertVtyCharIs(4, 8, 'z')
 
 	def test_csiCursorDown_one(self):
 		self.setCursorPos(0, 0)
@@ -278,8 +293,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('1B')
 		self.sendCsi('1B')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 4)
+		self.assertVtyCharIs(4, 8, 'z')
 
 	def test_csiCursorDown_zero(self):
 		self.setCursorPos(0, 0)
@@ -292,8 +310,11 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('0B')
 		self.sendCsi('0B')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 4)
+		self.assertVtyCharIs(4, 8, 'z')
 
 	def test_csiCursorDown_arg(self):
 		self.setCursorPos(0, 0)
@@ -304,5 +325,8 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.sendCsi('3B')
 
+		self.pipe.write('z')
+
 		row, col = self.vtyCursorPosition()
 		self.assertEqual(row, 4)
+		self.assertVtyCharIs(4, 8, 'z')
