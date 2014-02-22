@@ -1,0 +1,10 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-02-22 18:11:49
+Parent: issue
+User: travisb@travisbrown.ca
+--
+Screen sharing with screen is a little bit difficult since you have to deal with permissions of the terminal sometimes. This should be made easier. Perhaps a command line option which changes the permissions on the socket.
+
+It'd also be useful to have an easy option of choosing the session socket directories. Though this might be less necessary if the sockets are stored in the user's home directory by default. We'd have to watch out for mounted home directories though.
