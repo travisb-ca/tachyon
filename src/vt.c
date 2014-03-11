@@ -407,12 +407,35 @@ static void csi_move_cursor_down(struct buffer *buffer, struct vt_cell *cell, ch
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void csi_move_cursor_left(struct buffer *buffer, struct vt_cell *cell, char c) {
+	int distance;
+	int result;
+	struct vt *vt = &buffer->vt;
+
+	if (vt->params.len == 0) {
+		distance = 1;
+		result = 1; /* Match successful sscanf below */
+	} else {
+		result = sscanf(vt->params.chars, "%u", &distance);
+	}
+
+	if (result == 1) {
+		if (distance == 0)
+			distance = 1;
+
+		vt->current_col = max(0, vt->current_col - distance);
+	}
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	switch (c) {
 		DEFAULT(csi_collect_params);
 		HANDLE('A', csi_move_cursor_up);
 		HANDLE('B', csi_move_cursor_down);
+		HANDLE('D', csi_move_cursor_left);
 		HANDLE('J', csi_clear_screen);
 		HANDLE('f', csi_position_cursor);
 	}

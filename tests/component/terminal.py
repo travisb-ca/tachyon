@@ -366,3 +366,97 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertEqual(row, 23)
 		self.assertVtyCharIs(23, 8, 'z')
 
+	def test_csiCursorLeft_default(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.sendCsi('D')
+		self.sendCsi('D')
+		self.sendCsi('D')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorLeft_one(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.sendCsi('1D')
+		self.sendCsi('1D')
+		self.sendCsi('1D')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorLeft_zero(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.sendCsi('0D')
+		self.sendCsi('0D')
+		self.sendCsi('0D')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorLeft_arg(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.sendCsi('3D')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorLeft_pastMargin(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.sendCsi('300D')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 1)
+
+		self.assertVtyCharIs(0, 0, 'b')
+		self.assertVtyCharIs(0, 1, 'a')
