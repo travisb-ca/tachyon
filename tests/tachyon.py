@@ -53,6 +53,24 @@ class TachyonTestCase(lousy.TestCase):
 		self.syncOutput()
 		return self.tachyon.vty.cursorPosition()
 
+	# Get the emulated VT width
+	def vtyCols(self):
+		self.syncOutput()
+		return self.tachyon.vty.cols()
+
+	# Maximum column number, to save from writing vtyCols() - 1 all the time
+	def vtyMaxCol(self):
+		return self.vtyCols() - 1
+
+	# Get the emulated VT height
+	def vtyRows(self):
+		self.syncOutput()
+		return self.tachyon.vty.rows()
+
+	# Maximum row number, to save from writing vtyRows() - 1 all the time
+	def vtyMaxRow(self):
+		return self.vtyRows() - 1
+
 	# Send the given string to tachyon as given
 	def send(self, string):
 		self.tachyon.send(string)
