@@ -460,3 +460,109 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertVtyCharIs(0, 0, 'b')
 		self.assertVtyCharIs(0, 1, 'a')
+
+	def test_csiCursorRight_default(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.setCursorPos(0, 44)
+
+		self.sendCsi('C')
+		self.sendCsi('C')
+		self.sendCsi('C')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorRight_one(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.setCursorPos(0, 44)
+
+		self.sendCsi('1C')
+		self.sendCsi('1C')
+		self.sendCsi('1C')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.setCursorPos(0, 44)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorRight_zero(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.setCursorPos(0, 44)
+
+		self.sendCsi('0C')
+		self.sendCsi('0C')
+		self.sendCsi('0C')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.setCursorPos(0, 44)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorRight_arg(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * 50)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 50)
+
+		self.setCursorPos(0, 44)
+
+		self.sendCsi('3C')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, 48)
+
+		self.assertVtyCharIs(0, 46, 'a')
+		self.assertVtyCharIs(0, 47, 'b')
+		self.assertVtyCharIs(0, 48, 'a')
+
+	def test_csiCursorRight_pastMargin(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a' * self.vtyMaxCol())
+
+		self.setCursorPos(0, 20)
+
+		self.sendCsi('300C')
+
+		self.pipe.write('b')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(col, self.vtyMaxCol())
+
+		self.assertVtyCharIs(0, self.vtyMaxCol(), 'b')
+		self.assertVtyCharIs(0, self.vtyMaxCol() - 1, 'a')
