@@ -78,6 +78,9 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertEqual(a_row, b_row)
 		self.assertEqual(a_col, b_col)
 
+	def sendEsc(self, string):
+		self.pipe.write('\033' + string)
+
 	def sendCsi(self, string):
 		self.pipe.write('\033[' + string)
 
@@ -566,3 +569,20 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertVtyCharIs(0, self.vtyMaxCol(), 'b')
 		self.assertVtyCharIs(0, self.vtyMaxCol() - 1, 'a')
+
+	def test_escapeSaveRestoreCursore(self):
+		self.setCursorPos(10, 10)
+		self.sendEsc('7')
+
+		self.pipe.write('a\n' * 10)
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 20)
+		self.assertEqual(col, 0)
+
+		self.sendEsc('8')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 10)
+		self.assertEqual(col, 10)
+
