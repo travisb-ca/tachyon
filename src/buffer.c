@@ -230,8 +230,8 @@ void buffer_redraw(struct buffer *buffer) {
 			controller_output(buffer->bufid, 2, "\r\n");
 	}
 
-	len = snprintf(buf, sizeof(buf), "\033[%d;%df", buffer->vt.current_row + 1,
-		       buffer->vt.current_col + 1);
+	len = snprintf(buf, sizeof(buf), "\033[%d;%df", buffer->vt.current.row + 1,
+		       buffer->vt.current.col + 1);
 	controller_output(buffer->bufid, len, buf);
 
 }

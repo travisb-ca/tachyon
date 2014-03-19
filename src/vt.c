@@ -94,8 +94,9 @@ int vt_init(struct vt *vt)
 {
 	vt->cols = 80;
 	vt->rows = 24;
-	vt->current_row = 0;
-	vt->current_col = 0;
+	vt->current.row = 0;
+	vt->current.col = 0;
+	vt->saved = vt->current;
 
 	vt->flags = VT_FL_AUTOSCROLL;
 	vt->vt_mode = MODE_NORMAL;
@@ -170,13 +171,13 @@ static void normal_chars(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	cell->c = c;
 	cell->flags |= BUF_CELL_SET;
-	buffer->vt.current_col++;
+	buffer->vt.current.col++;
 }
 
 static void normal_backspace(struct buffer *buffer, struct vt_cell *cell, char c)
 {
-	if (buffer->vt.current_col > 0)
-		buffer->vt.current_col--;
+	if (buffer->vt.current.col > 0)
+		buffer->vt.current.col--;
 }
 
 static void normal_tab(struct buffer *buffer, struct vt_cell *cell, char c)
@@ -187,23 +188,23 @@ static void normal_tab(struct buffer *buffer, struct vt_cell *cell, char c)
 	 */
 	int tabstop;
 
-	if (buffer->vt.current_col != buffer->vt.cols - 1)
+	if (buffer->vt.current.col != buffer->vt.cols - 1)
 		cell->c = '\t';
 
-	tabstop = ((buffer->vt.current_col + 8) / 8) * 8;
+	tabstop = ((buffer->vt.current.col + 8) / 8) * 8;
 	if (tabstop >= buffer->vt.cols)
 		tabstop = buffer->vt.cols - 1;
-	buffer->vt.current_col = tabstop;
+	buffer->vt.current.col = tabstop;
 }
 
 static void normal_newline(struct buffer *buffer, struct vt_cell *cell, char c)
 {
-	buffer->vt.current_row++;
+	buffer->vt.current.row++;
 }
 
 static void normal_linefeed(struct buffer *buffer, struct vt_cell *cell, char c)
 {
-	buffer->vt.current_col = 0;
+	buffer->vt.current.col = 0;
 }
 
 static void normal_escape(struct buffer *buffer, struct vt_cell *cell, char c)
@@ -285,12 +286,12 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 
 	if (vt->params.len == 0 || CONST_STR_IS("0", vt->params.chars)) {
 		/* Clear from cursor to end of screen */
-		for (int col = vt->current_col; col < vt->cols; col++) {
-			cell = vt_get_cell(buffer, vt->current_row, col);
+		for (int col = vt->current.col; col < vt->cols; col++) {
+			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
 				cell->flags &= ~BUF_CELL_SET;
 		}
-		for (int row = vt->current_row + 1; row < vt->rows; row++) {
+		for (int row = vt->current.row + 1; row < vt->rows; row++) {
 			for (int col = 0; col < vt->cols; col++) {
 				cell = vt_get_cell(buffer, row, col);
 				if (cell)
@@ -299,15 +300,15 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 		}
 	} else if (vt->params.len > 0 && CONST_STR_IS("1", vt->params.chars)) {
 		/* Clear screen from 0,0 for cursor */
-		for (int row = 0; row < vt->current_row; row++) {
+		for (int row = 0; row < vt->current.row; row++) {
 			for (int col = 0; col < vt->cols; col++) {
 				cell = vt_get_cell(buffer, row, col);
 				if (cell)
 					cell->flags &= ~BUF_CELL_SET;
 			}
 		}
-		for (int col = 0; col <= vt->current_col; col++) {
-			cell = vt_get_cell(buffer, vt->current_row, col);
+		for (int col = 0; col <= vt->current.col; col++) {
+			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
 				cell->flags &= ~BUF_CELL_SET;
 		}
@@ -356,8 +357,8 @@ static void csi_position_cursor(struct buffer *buffer, struct vt_cell *cell, cha
 	}
 
 	if (result == 2) {
-		vt->current_row = row;
-		vt->current_col = col;
+		vt->current.row = row;
+		vt->current.col = col;
 	}
 
 	vt->vt_mode = MODE_NORMAL;
@@ -379,7 +380,7 @@ static void csi_move_cursor_up(struct buffer *buffer, struct vt_cell *cell, char
 		if (distance == 0)
 			distance = 1;
 
-		vt->current_row = max(0, vt->current_row - distance);
+		vt->current.row = max(0, vt->current.row - distance);
 	}
 
 	vt->vt_mode = MODE_NORMAL;
@@ -401,7 +402,7 @@ static void csi_move_cursor_down(struct buffer *buffer, struct vt_cell *cell, ch
 		if (distance == 0)
 			distance = 1;
 
-		vt->current_row = min(vt->rows - 1, vt->current_row + distance);
+		vt->current.row = min(vt->rows - 1, vt->current.row + distance);
 	}
 
 	vt->vt_mode = MODE_NORMAL;
@@ -423,7 +424,7 @@ static void csi_move_cursor_left(struct buffer *buffer, struct vt_cell *cell, ch
 		if (distance == 0)
 			distance = 1;
 
-		vt->current_col = max(0, vt->current_col - distance);
+		vt->current.col = max(0, vt->current.col - distance);
 	}
 
 	vt->vt_mode = MODE_NORMAL;
@@ -445,7 +446,7 @@ static void csi_move_cursor_right(struct buffer *buffer, struct vt_cell *cell, c
 		if (distance == 0)
 			distance = 1;
 
-		vt->current_col = min(vt->cols - 1, vt->current_col + distance);
+		vt->current.col = min(vt->cols - 1, vt->current.col + distance);
 	}
 
 	vt->vt_mode = MODE_NORMAL;
@@ -487,22 +488,22 @@ void vt_interpret(struct buffer *buffer, char c)
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
 
-	cell = vt_get_cell(buffer, buffer->vt.current_row, buffer->vt.current_col);
+	cell = vt_get_cell(buffer, buffer->vt.current.row, buffer->vt.current.col);
 	terminal_emulation.modes[vt->vt_mode](buffer, cell, c);
 
-	if (vt->current_col == vt->cols) {
+	if (vt->current.col == vt->cols) {
 		/* End of the line, move down one */
 		DLOG("End of line reached");
 		if (vt->flags & VT_FL_AUTOWRAP) {
-			vt->current_col = 0;
-			vt->current_row++;
+			vt->current.col = 0;
+			vt->current.row++;
 		} else {
-			vt->current_col = vt->cols - 1;
+			vt->current.col = vt->cols - 1;
 		}
 
 	}
 
-	if (vt->current_row == vt->rows) {
+	if (vt->current.row == vt->rows) {
 		/* Last line in the buffer, scroll */
 		DLOG("End of buffer reached");
 		if (vt->flags & VT_FL_AUTOSCROLL) {
@@ -520,6 +521,6 @@ void vt_interpret(struct buffer *buffer, char c)
 			vt->bottommost = line;
 		}
 
-		vt->current_row--;
+		vt->current.row--;
 	}
 }

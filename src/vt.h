@@ -32,12 +32,17 @@ struct vt_line {
 	struct vt_cell cells[0];
 };
 
+struct vt_cursor_mode {
+	uint16_t row;
+	uint16_t col;
+};
+
 struct vt {
 	int vt_mode;
-	uint16_t current_row;
-	uint16_t current_col;
 	uint16_t rows;
 	uint16_t cols;
+	struct vt_cursor_mode current;
+	struct vt_cursor_mode saved;
 
 /* When reaching the end of line start at the beginning of the next line */
 #define VT_FL_AUTOWRAP (1 << 0)
