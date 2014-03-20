@@ -466,6 +466,37 @@ static void csi_move_cursor_right(struct buffer *buffer, struct vt_cell *cell, c
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void csi_clear_line(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+
+	if (vt->params.len == 0 || CONST_STR_IS("0", vt->params.chars)) {
+		/* Clear from cursor to end of line */
+		for (int col = vt->current.col; col < vt->cols; col++) {
+			cell = vt_get_cell(buffer, vt->current.row, col);
+			if (cell)
+				cell->flags &= ~BUF_CELL_SET;
+		}
+	} else if (vt->params.len > 0 && CONST_STR_IS("1", vt->params.chars)) {
+		/* Clear from start of line to cursor */
+		for (int col = 0; col <= vt->current.col; col++) {
+			cell = vt_get_cell(buffer, vt->current.row, col);
+			if (cell)
+				cell->flags &= ~BUF_CELL_SET;
+		}
+	} else if (vt->params.len > 0 && CONST_STR_IS("2", vt->params.chars)) {
+		/* Clear entire line */
+		for (int col = 0; col < vt->cols; col++) {
+			cell = vt_get_cell(buffer, vt->current.row, col);
+			if (cell)
+				cell->flags &= ~BUF_CELL_SET;
+		}
+	} else {
+		/* Any other mode is an error. Do nothing */
+		DLOG("Unsupported csi_clear_line type '%s'", vt->params.chars);
+	}
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	switch (c) {
@@ -475,6 +506,7 @@ static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 		HANDLE('C', csi_move_cursor_right);
 		HANDLE('D', csi_move_cursor_left);
 		HANDLE('J', csi_clear_screen);
+		HANDLE('K', csi_clear_line);
 		HANDLE('f', csi_position_cursor);
 	}
 }

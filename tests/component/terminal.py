@@ -586,3 +586,55 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertEqual(row, 10)
 		self.assertEqual(col, 10)
 
+	def test_csiClearLine_default(self):
+		self.setCursorPos(10, 0)
+		self.pipe.write('a' * self.vtyMaxCol())
+		self.setCursorPos(10, 40)
+
+		self.sendCsi('K')
+
+		for i in range(self.vtyMaxCol()):
+			if i < 40:
+				c = 'a'
+			else:
+				c = ''
+			self.assertVtyCharIs(10, i, c)
+
+	def test_csiClearLine_toEnd(self):
+		self.setCursorPos(10, 0)
+		self.pipe.write('a' * self.vtyMaxCol())
+		self.setCursorPos(10, 40)
+
+		self.sendCsi('0K')
+
+		for i in range(self.vtyMaxCol()):
+			if i < 40:
+				c = 'a'
+			else:
+				c = ''
+			self.assertVtyCharIs(10, i, c)
+
+	def test_csiClearLine_fromStart(self):
+		self.setCursorPos(10, 0)
+		self.pipe.write('a' * self.vtyMaxCol())
+		self.setCursorPos(10, 40)
+
+		self.sendCsi('1K')
+
+		for i in range(self.vtyMaxCol()):
+			if i > 40:
+				c = 'a'
+			else:
+				c = ''
+			self.assertVtyCharIs(10, i, c)
+
+	def test_csiClearLine_all(self):
+		self.setCursorPos(10, 0)
+		self.pipe.write('a' * self.vtyMaxCol())
+		self.setCursorPos(10, 40)
+
+		self.sendCsi('2K')
+
+		for i in range(self.vtyMaxCol()):
+			self.assertVtyCharIs(10, i, '')
+
