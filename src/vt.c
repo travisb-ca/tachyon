@@ -269,6 +269,14 @@ static void escape_restore_cursor(struct buffer *buffer, struct vt_cell *cell, c
 	buffer->vt.vt_mode = MODE_NORMAL;
 }
 
+static void escape_cursor_down(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	struct vt *vt = &buffer->vt;
+
+	vt->current.row++;
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	buffer->vt.vt_mode = MODE_CSI;
@@ -282,6 +290,7 @@ static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 		DEFAULT(escape_exit);
 		HANDLE('7', escape_save_cursor);
 		HANDLE('8', escape_restore_cursor);
+		HANDLE('D', escape_cursor_down);
 		HANDLE('[', escape_csi);
 	}
 }

@@ -638,3 +638,44 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		for i in range(self.vtyMaxCol()):
 			self.assertVtyCharIs(10, i, '')
 
+	def test_escapeCursorDown(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 1)
+
+		self.sendEsc('D')
+		self.sendEsc('D')
+		self.sendEsc('D')
+
+		self.pipe.write('z')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 4)
+		self.assertVtyCharIs(4, 8, 'z')
+
+	def test_escapeCursorDown_pastMargin(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 1)
+
+		for i in range(self.vtyMaxRow() - 1):
+			# Move to bottom of screen
+			self.sendEsc('D')
+
+		self.pipe.write('z')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 23)
+		self.assertVtyCharIs(23, 8, 'z')
+		self.assertVtyCharIs(0, 0, 'a')
+
+		self.sendEsc('D')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, 23)
+		self.assertVtyCharIs(22, 8, 'z')
+		self.assertVtyCharIs(0, 0, 'h')
