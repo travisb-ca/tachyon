@@ -1,0 +1,22 @@
+Component: Client
+Date: 2014-03-21 18:40:55
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Escape timing
+Type: Feature
+Units_of_Work: 1000
+--
+Many useful keys on a keyboard are reprented by multi-byte escape codes. This causes an issue since you have to wait for a little bit after seeing escape to check to see if it's an escape code you need to interpret or not. Some examples are the function or arrow keys.
+
+This waiting works most of the time as long as the latency is consistent. However with networks these days if the parts of the escape gets split between two packets and there is some latency jerk then any reasonable timeout could be too slow.
+
+It should be possible, at least with the tachyon client, to solve this problem by not using escape for codes which the server might need to interpret.
