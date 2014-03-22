@@ -71,6 +71,15 @@ class TachyonTestCase(lousy.TestCase):
 	def vtyMaxRow(self):
 		return self.vtyRows() - 1
 
+	# Ensure the cursor position is at the specified position
+	# A value of -1 means don't test the row/column
+	def assertVtyCursorPos(self, row=-1, col=-1):
+		vty_row, vty_col = self.vtyCursorPosition()
+		if row != -1:
+			self.assertEqual(vty_row, row)
+		if col != -1:
+			self.assertEqual(vty_col, col)
+
 	# Send the given string to tachyon as given
 	def send(self, string):
 		self.tachyon.send(string)
