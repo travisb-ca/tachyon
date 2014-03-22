@@ -1,0 +1,10 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-03-22 19:13:44
+Parent: issue
+User: travisb@travisbrown.ca
+--
+Related to this it should be configurable how many lines total to store across all sessions. This would give some upper limit to the amount of memory tachyon could use. When more lines are needed the oldest line should be forgotten. Of course different rates should happen on client and server.
+
+Feasibly the client could have a smaller limit and call to the server whenever a line needs to be recalled.

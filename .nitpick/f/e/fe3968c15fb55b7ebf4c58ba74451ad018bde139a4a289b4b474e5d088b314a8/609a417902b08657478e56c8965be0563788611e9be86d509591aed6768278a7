@@ -1,0 +1,10 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-03-22 19:11:26
+Parent: issue
+User: travisb@travisbrown.ca
+--
+The echo predictor would need a timeout when it should assume that there isn't going to be a response and the application is just eating all keystrokes.
+
+I can't think offhand of any application which does this without returning _some_ characters, but it sounds possible. The timeout could be long if only a few programs do this.
