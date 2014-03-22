@@ -174,10 +174,12 @@ out:
 }
 
 int buffer_input(struct buffer *buffer, int size, char *buf) {
+	int result = controller_output(buffer->bufid, size, buf);
+
 	for (int i = 0; i < size; i++)
 		vt_interpret(buffer, buf[i]);
 
-	return controller_output(buffer->bufid, size, buf);
+	return result;
 }
 
 static int _buffer_output(struct buffer *buffer, int size, char *buf) {

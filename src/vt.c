@@ -165,6 +165,53 @@ struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int c
 	return &line->cells[col];
 }
 
+static void vt_scroll_down(struct buffer *buffer)
+{
+	struct vt *vt = &buffer->vt;
+	struct vt_line *line;
+
+	line = vt_line_alloc(vt->cols);
+	if (!line) {
+		ELOG("Failed to allocate new line!");
+		return;
+	}
+
+	vt_line_init(line, vt->bottommost, NULL);
+	vt->bottommost->next = line;
+	memmove(&vt->lines[0], &vt->lines[1],
+		(vt->rows - 1) * sizeof(*vt->lines));
+	vt->lines[vt->rows - 1] = line;
+	vt->bottommost = line;
+}
+
+static void vt_scroll_up(struct buffer *buffer)
+{
+	struct vt *vt = &buffer->vt;
+	struct vt_line *line;
+
+	if (!vt->lines[0]->prev) {
+		/* At the top of the scroll back, create a new line and insert it */
+		line = vt_line_alloc(vt->cols);
+		if (!line) {
+			ELOG("Failed to allocate new line!");
+			return;
+		}
+
+		vt_line_init(line, NULL, vt->lines[0]);
+	} else {
+		/* There are previous lines in the scrollback */
+		line = vt->lines[0]->prev;
+	}
+
+	memmove(&vt->lines[1], &vt->lines[0],
+		(vt->rows - 1) * sizeof(*vt->lines));
+	vt->lines[0] = line;
+	vt->topmost = line;
+
+	/* Ensure that the newly visible line is displayed to the user */
+	buffer_redraw(buffer);
+}
+
 static void ignore(struct buffer *buffer, struct vt_cell *cell, char c) {}
 
 static void normal_chars(struct buffer *buffer, struct vt_cell *cell, char c)
@@ -290,7 +337,11 @@ static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c
 {
 	struct vt *vt = &buffer->vt;
 
-	vt->current.row--;
+	if (vt->current.row == 0)
+		vt_scroll_up(buffer);
+	else
+		vt->current.row--;
+
 	vt->vt_mode = MODE_NORMAL;
 }
 
@@ -556,24 +607,6 @@ static const struct terminal_def terminal_emulation = {
 	},
 };
 
-static void vt_scroll_down(struct vt *vt)
-{
-	struct vt_line *line;
-
-	line = vt_line_alloc(vt->cols);
-	if (!line) {
-		ELOG("Failed to allocate new line!");
-		return;
-	}
-
-	vt_line_init(line, vt->bottommost, NULL);
-	vt->bottommost->next = line;
-	memmove(&vt->lines[0], &vt->lines[1],
-		(vt->rows - 1) * sizeof(*vt->lines));
-	vt->lines[vt->rows - 1] = line;
-	vt->bottommost = line;
-}
-
 void vt_interpret(struct buffer *buffer, char c)
 {
 	struct vt_cell *cell;
@@ -598,7 +631,7 @@ void vt_interpret(struct buffer *buffer, char c)
 		/* Last line in the buffer, scroll */
 		DLOG("End of buffer reached");
 		if (vt->flags & VT_FL_AUTOSCROLL)
-			vt_scroll_down(vt);
+			vt_scroll_down(buffer);
 
 		vt->current.row--;
 	}

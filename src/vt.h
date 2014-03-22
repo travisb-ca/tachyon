@@ -52,7 +52,7 @@ struct vt {
 
 	struct vt_line *topmost; /* Earliest line in the scroll buffer */
 	struct vt_line *bottommost; /* Latest line in the scroll buffer */
-	struct vt_line **lines; /* rows x cols matrix of visible scroll buffer */
+	struct vt_line **lines; /* rows x cols view of writeable scroll buffer */
 
 	/* Places to hold interm escape code parameters */
 	struct {

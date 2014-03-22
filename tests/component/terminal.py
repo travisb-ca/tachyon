@@ -646,3 +646,63 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertVtyCursorPos(row=8)
 		self.assertVtyCharIs(8, 8, 'z')
+
+	def test_escapeCursorUp_pastMargin_noScrollBack(self):
+		self.pipe.write('This will scroll off the bottom')
+		self.setCursorPos(10, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		self.assertVtyCursorPos(row=11)
+
+		for i in range(11):
+			# Move to top of screen
+			self.sendEsc('M')
+
+		self.pipe.write('z')
+
+		self.assertVtyCursorPos(row=0)
+		self.assertVtyCharIs(0, 8, 'z')
+		self.assertVtyCharIs(10, 0, 'a')
+
+		# Scroll past upper margin
+		self.sendEsc('M')
+		
+		self.pipe.write('arstarstarst')
+
+		self.assertVtyCursorPos(row=0)
+		self.assertVtyString(0, 9, 'arstarstarst')
+		self.assertVtyCharIs(1, 8, 'z')
+		self.assertVtyCharIs(11, 0, 'a')
+
+	def test_escapeCursorUp_pastMargin_withScrollBack(self):
+		for i in range(self.vtyRows() + 10):
+			self.pipe.write('Row %d\r\n' % i)
+
+		self.pipe.write('This will scroll off the bottom')
+		self.setCursorPos(10, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		self.assertVtyCursorPos(row=11)
+
+		for i in range(11):
+			# Move to top of screen
+			self.sendEsc('M')
+
+		self.pipe.write('z')
+
+		self.assertVtyCursorPos(row=0)
+		self.assertVtyCharIs(0, 8, 'z')
+		self.assertVtyCharIs(10, 0, 'a')
+
+		# Scroll past upper margin
+		self.sendEsc('M')
+
+		self.assertVtyString(0, 0, 'Row 10')
+		
+		self.pipe.write('arstarstarst')
+
+		self.assertVtyCursorPos(row=0)
+		self.assertVtyString(0, 9, 'arstarstarst')
+		self.assertVtyCharIs(1, 8, 'z')
+		self.assertVtyCharIs(11, 0, 'a')
+
