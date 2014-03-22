@@ -556,11 +556,28 @@ static const struct terminal_def terminal_emulation = {
 	},
 };
 
+static void vt_scroll_down(struct vt *vt)
+{
+	struct vt_line *line;
+
+	line = vt_line_alloc(vt->cols);
+	if (!line) {
+		ELOG("Failed to allocate new line!");
+		return;
+	}
+
+	vt_line_init(line, vt->bottommost, NULL);
+	vt->bottommost->next = line;
+	memmove(&vt->lines[0], &vt->lines[1],
+		(vt->rows - 1) * sizeof(*vt->lines));
+	vt->lines[vt->rows - 1] = line;
+	vt->bottommost = line;
+}
+
 void vt_interpret(struct buffer *buffer, char c)
 {
 	struct vt_cell *cell;
 	struct vt *vt = &buffer->vt;
-	struct vt_line *line;
 
 	cell = vt_get_cell(buffer, buffer->vt.current.row, buffer->vt.current.col);
 	terminal_emulation.modes[vt->vt_mode](buffer, cell, c);
@@ -580,20 +597,8 @@ void vt_interpret(struct buffer *buffer, char c)
 	if (vt->current.row == vt->rows) {
 		/* Last line in the buffer, scroll */
 		DLOG("End of buffer reached");
-		if (vt->flags & VT_FL_AUTOSCROLL) {
-			line = vt_line_alloc(vt->cols);
-			if (!line) {
-				ELOG("Failed to allocate new line!");
-				return;
-			}
-
-			vt_line_init(line, vt->bottommost, NULL);
-			vt->bottommost->next = line;
-			memmove(&vt->lines[0], &vt->lines[1],
-				(vt->rows - 1) * sizeof(*vt->lines));
-			vt->lines[vt->rows - 1] = line;
-			vt->bottommost = line;
-		}
+		if (vt->flags & VT_FL_AUTOSCROLL)
+			vt_scroll_down(vt);
 
 		vt->current.row--;
 	}
