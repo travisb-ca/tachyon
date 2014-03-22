@@ -631,3 +631,18 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertVtyCursorPos(self.vtyMaxRow(), 0)
 		self.assertVtyString(self.vtyMaxRow() - 2, 5, 'arstarstarst')
+
+	def test_escapeCursorUp(self):
+		self.setCursorPos(10, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
+
+		self.assertVtyCursorPos(row=11)
+
+		self.sendEsc('M')
+		self.sendEsc('M')
+		self.sendEsc('M')
+
+		self.pipe.write('z')
+
+		self.assertVtyCursorPos(row=8)
+		self.assertVtyCharIs(8, 8, 'z')
