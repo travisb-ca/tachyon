@@ -165,7 +165,7 @@ struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int c
 	return &line->cells[col];
 }
 
-static void vt_scroll_down(struct buffer *buffer)
+static void vt_scroll_up(struct buffer *buffer)
 {
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
@@ -184,7 +184,7 @@ static void vt_scroll_down(struct buffer *buffer)
 	vt->bottommost = line;
 }
 
-static void vt_scroll_up(struct buffer *buffer)
+static void vt_scroll_down(struct buffer *buffer)
 {
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
@@ -338,7 +338,7 @@ static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c
 	struct vt *vt = &buffer->vt;
 
 	if (vt->current.row == 0)
-		vt_scroll_up(buffer);
+		vt_scroll_down(buffer);
 	else
 		vt->current.row--;
 
@@ -631,7 +631,7 @@ void vt_interpret(struct buffer *buffer, char c)
 		/* Last line in the buffer, scroll */
 		DLOG("End of buffer reached");
 		if (vt->flags & VT_FL_AUTOSCROLL)
-			vt_scroll_down(buffer);
+			vt_scroll_up(buffer);
 
 		vt->current.row--;
 	}
