@@ -679,3 +679,23 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertEqual(row, 23)
 		self.assertVtyCharIs(22, 8, 'z')
 		self.assertVtyCharIs(0, 0, 'h')
+
+	def test_escapeNextLine(self):
+		self.setCursorPos(self.vtyMaxRow() - 1, 5)
+		self.pipe.write('arstarstarst')
+
+		self.sendEsc('E')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, self.vtyMaxRow())
+		self.assertEqual(col, 0)
+
+		self.assertVtyString(self.vtyMaxRow() - 1, 5, 'arstarstarst')
+
+		self.sendEsc('E')
+
+		row, col = self.vtyCursorPosition()
+		self.assertEqual(row, self.vtyMaxRow())
+		self.assertEqual(col, 0)
+
+		self.assertVtyString(self.vtyMaxRow() - 2, 5, 'arstarstarst')
