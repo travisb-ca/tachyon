@@ -1,0 +1,20 @@
+Component: Terminal
+Date: 2014-03-22 21:08:53
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Support multiple viewing terminal types
+Type: Feature
+Units_of_Work: 1000
+--
+Currently when looking at the buffer as it is being updated tachyon just passes the escape codes from the application directly to the viewing terminal. This works fine as long as the terminal supports all the escape codes in the same way tachyon does. Really the vt layer should interpret the codes and then push out to a terminal agnostic module to manipulate the terminal appropriately. Then the terminal wouldn't need to support the same escape codes as tachyon.
+
+Additionally this would make tachyon more efficient because it wouldn't have to trigger a full buffer refresh whenever the vt layer does something which isn't just a direct mapping of the escape codes being passed through. One example of this is when scrolling where lines from the scrollback may have to be pushed to the screen.
