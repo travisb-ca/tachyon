@@ -198,6 +198,7 @@ static void vt_scroll_down(struct buffer *buffer)
 		}
 
 		vt_line_init(line, NULL, vt->lines[0]);
+		vt->topmost->prev = line;
 	} else {
 		/* There are previous lines in the scrollback */
 		line = vt->lines[0]->prev;
