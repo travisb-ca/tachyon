@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-03-23 03:41:26
+Parent: issue
+User: travisb@travisbrown.ca
+--
+Another test which seems to suffer often from this bug is test_escapeCursorUp_pastMargin_noScrollBack
