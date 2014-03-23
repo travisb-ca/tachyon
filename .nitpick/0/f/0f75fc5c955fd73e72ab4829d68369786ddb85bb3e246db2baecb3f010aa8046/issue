@@ -1,0 +1,22 @@
+Component: Tests
+Date: 2014-03-23 03:33:23
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 5
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Test harness stops processing data after burst
+Type: Bug
+Units_of_Work: 1000
+--
+Something is wrong with the test framework such that it stops reading and processing data from the process after the process has pushed a large amount of data in.
+
+This is most obvious in the test escapeCursorDown_pastMargin_withScrollBack where there are hacks to get that test to pass most of the time, but notably not without debug mode on.
+
+Probably some buffer is getting full and then things are getting gummed up. Sometimes writing again later fixes things.
