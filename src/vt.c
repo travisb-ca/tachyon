@@ -169,19 +169,31 @@ static void vt_scroll_up(struct buffer *buffer)
 {
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
+	bool need_redraw = true;
 
-	line = vt_line_alloc(vt->cols);
+	line = vt->lines[vt->rows - 1]->next;
 	if (!line) {
-		ELOG("Failed to allocate new line!");
-		return;
+		/* No lines below in the scrollback, create a new one */
+		line = vt_line_alloc(vt->cols);
+		if (!line) {
+			ELOG("Failed to allocate new line!");
+			return;
+		}
+
+		vt_line_init(line, vt->bottommost, NULL);
+		vt->bottommost->next = line;
+
+		need_redraw = false;
 	}
 
-	vt_line_init(line, vt->bottommost, NULL);
-	vt->bottommost->next = line;
 	memmove(&vt->lines[0], &vt->lines[1],
 		(vt->rows - 1) * sizeof(*vt->lines));
 	vt->lines[vt->rows - 1] = line;
 	vt->bottommost = line;
+
+	/* Ensure that the newly visible line is displayed to the user */
+	if (need_redraw)
+		buffer_redraw(buffer);
 }
 
 static void vt_scroll_down(struct buffer *buffer)
@@ -631,9 +643,8 @@ void vt_interpret(struct buffer *buffer, char c)
 	if (vt->current.row == vt->rows) {
 		/* Last line in the buffer, scroll */
 		DLOG("End of buffer reached");
+		vt->current.row--;
 		if (vt->flags & VT_FL_AUTOSCROLL)
 			vt_scroll_up(buffer);
-
-		vt->current.row--;
 	}
 }

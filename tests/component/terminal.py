@@ -2,6 +2,7 @@
 
 import tachyon
 import lousy
+import time
 
 class TestBasicTerminal(tachyon.TachyonTestCase):
 	def setUp1(self):
@@ -596,7 +597,7 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCursorPos(row=4)
 		self.assertVtyCharIs(4, 8, 'z')
 
-	def test_escapeCursorDown_pastMargin(self):
+	def test_escapeCursorDown_pastMargin_noScrollBack(self):
 		self.setCursorPos(0, 0)
 		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
 
@@ -615,6 +616,51 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendEsc('D')
 
 		self.assertVtyCursorPos(row=23)
+		self.assertVtyCharIs(22, 8, 'z')
+		self.assertVtyCharIs(0, 0, 'h')
+
+	def test_escapeCursorDown_pastMargin_withScrollBack(self):
+		for i in range(self.vtyRows() + 5):
+			self.pipe.write('Row %d\r\n' % i)
+
+		# Scroll some text off the bottom to be retrieved
+		# For now minimize the incoming text volume since the test
+		# framework seems to delay processing when too much comes in
+		# and causes the text below to not arrive until after the test
+		# has failed.
+		self.setCursorPos(0, 0)
+		for i in range(5):
+			self.sendEsc('M')
+
+		self.setCursorPos(0, 0)
+		self.pipe.write('adsfasdfadsf\r\nhjklhkj')
+		# Even with a reduced volume by avoiding some full screen
+		# refreshes it's not enough and we need to sleep here
+		time.sleep(5)
+		self.pipe.write('l')
+		self.syncOutput()
+
+		self.assertVtyCursorPos(row=1)
+
+		for i in range(self.vtyMaxRow() - 1):
+			# Move to bottom of screen
+			self.sendEsc('D')
+
+		self.pipe.write('z')
+
+		self.assertVtyCursorPos(23, 9)
+		self.assertVtyCharIs(23, 8, 'z')
+		self.assertVtyCharIs(0, 0, 'a')
+
+		# Scroll past bottom margin
+		self.sendEsc('D')
+
+		self.assertVtyString(self.vtyMaxRow(), 0, 'Row 25')
+		self.assertVtyCursorPos(23, 9)
+		
+		self.pipe.write('arstarstarst')
+
+		self.assertVtyString(23, 9, 'arstarstarst')
 		self.assertVtyCharIs(22, 8, 'z')
 		self.assertVtyCharIs(0, 0, 'h')
 
