@@ -200,8 +200,10 @@ static void vt_scroll_down(struct buffer *buffer)
 {
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
+	bool need_redraw = true;
 
-	if (!vt->lines[0]->prev) {
+	line = vt->lines[0]->next;
+	if (!line) {
 		/* At the top of the scroll back, create a new line and insert it */
 		line = vt_line_alloc(vt->cols);
 		if (!line) {
@@ -211,9 +213,8 @@ static void vt_scroll_down(struct buffer *buffer)
 
 		vt_line_init(line, NULL, vt->lines[0]);
 		vt->topmost->prev = line;
-	} else {
-		/* There are previous lines in the scrollback */
-		line = vt->lines[0]->prev;
+
+		need_redraw = false;
 	}
 
 	memmove(&vt->lines[1], &vt->lines[0],
@@ -222,7 +223,8 @@ static void vt_scroll_down(struct buffer *buffer)
 	vt->topmost = line;
 
 	/* Ensure that the newly visible line is displayed to the user */
-	buffer_redraw(buffer);
+	if (need_redraw)
+		buffer_redraw(buffer);
 }
 
 static void ignore(struct buffer *buffer, struct vt_cell *cell, char c) {}
