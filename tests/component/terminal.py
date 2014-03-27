@@ -624,21 +624,12 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 			self.pipe.write('Row %d\r\n' % i)
 
 		# Scroll some text off the bottom to be retrieved
-		# For now minimize the incoming text volume since the test
-		# framework seems to delay processing when too much comes in
-		# and causes the text below to not arrive until after the test
-		# has failed.
-		self.setCursorPos(0, 0)
-		for i in range(5):
+		for i in range(self.vtyRows() + 5):
+			self.syncOutput()
 			self.sendEsc('M')
 
 		self.setCursorPos(0, 0)
-		self.pipe.write('adsfasdfadsf\r\nhjklhkj')
-		# Even with a reduced volume by avoiding some full screen
-		# refreshes it's not enough and we need to sleep here
-		time.sleep(5)
-		self.pipe.write('l')
-		self.syncOutput()
+		self.pipe.write('adsfasdfadsf\r\nhjklhkjl')
 
 		self.assertVtyCursorPos(row=1)
 
@@ -655,7 +646,7 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		# Scroll past bottom margin
 		self.sendEsc('D')
 
-		self.assertVtyString(self.vtyMaxRow(), 0, 'Row 25')
+		self.assertVtyString(self.vtyMaxRow(), 0, 'Row 24')
 		self.assertVtyCursorPos(23, 9)
 		
 		self.pipe.write('arstarstarst')
