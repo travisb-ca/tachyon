@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-03-27 04:40:49
+Parent: issue
+User: travisb@travisbrown.ca
+--
+It turns out that it wasn't that the test harness stopped processing data, but that the scroll_down function was broken. I've fixed that in the previous commit.

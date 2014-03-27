@@ -7,10 +7,10 @@ Owner: travisb@travisbrown.ca
 Percent_Complete: 0
 Priority: 5
 Reported_By: travisb@travisbrown.ca
-Resolution: None
+Resolution: Invalid
 Seen_In_Build: 
 Severity: Blocker
-State: Open
+State: Closed
 Title: Test harness stops processing data after burst
 Type: Bug
 Units_of_Work: 1000
