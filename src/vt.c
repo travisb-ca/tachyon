@@ -202,7 +202,7 @@ static void vt_scroll_down(struct buffer *buffer)
 	struct vt_line *line;
 	bool need_redraw = true;
 
-	line = vt->lines[0]->next;
+	line = vt->lines[0]->prev;
 	if (!line) {
 		/* At the top of the scroll back, create a new line and insert it */
 		line = vt_line_alloc(vt->cols);
