@@ -64,7 +64,7 @@ void close_on_exec(int fd);
  */
 #define BITMAP_DECLARE(n) \
 	struct { \
-		uint64_t data[(n)/64 + 1]; \
+		uint32_t data[(n)/32 + 1]; \
 	}
 
 /*
@@ -75,14 +75,14 @@ void close_on_exec(int fd);
 	_bitmap_getbit((bitmap), (n), ARRAY_SIZE((bitmap)->data))
 static inline int _bitmap_getbit(void *bitmap, int n, uint32_t num_elements)
 {
-	uint64_t *data = bitmap;
-	uint64_t segment;
+	uint32_t *data = bitmap;
+	uint32_t segment;
 
-	if (n > num_elements * 64)
+	if (n > num_elements * 32)
 		return -1;
 
-	segment = data[n / 64];
-	return (segment >> (n % 64)) & 0x1;
+	segment = data[n / 32];
+	return (segment >> (n % 32)) & 0x1;
 }
 
 /*
@@ -92,15 +92,15 @@ static inline int _bitmap_getbit(void *bitmap, int n, uint32_t num_elements)
 	_bitmap_setbit((bitmap), (n), (val), ARRAY_SIZE((bitmap)->data))
 static inline void _bitmap_setbit(void *bitmap, int n, uint64_t val, uint32_t num_elements)
 {
-	uint64_t *data = bitmap;
-	uint64_t *segment;
-	uint64_t mask;
+	uint32_t *data = bitmap;
+	uint32_t *segment;
+	uint32_t mask;
 
-	if (n > num_elements * 64)
+	if (n > num_elements * 32)
 		return;
 
-	segment = &data[n / 64];
-	mask = ~(1 << (n % 64));
+	segment = &data[n / 32];
+	mask = ~(1 << (n % 32));
 
 	if (val)
 		val = ~0;

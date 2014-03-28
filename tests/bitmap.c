@@ -68,6 +68,15 @@ int t6(void)
 	return BITMAP_GETBIT(&bitmap, 90) != 1;
 }
 
+int t7(void)
+{
+	BITMAP_DECLARE(132) bitmap = {};
+
+	BITMAP_SETBIT(&bitmap, 32, 1);
+
+	return BITMAP_GETBIT(&bitmap, 32) != 1;
+}
+
 int main(int argn, char **args)
 {
 	int result = 0;
@@ -89,6 +98,9 @@ int main(int argn, char **args)
 
 	result += t6();
 	printf("t6 %d\n", result);
+
+	result += t7();
+	printf("t7 %d\n", result);
 
 	return result;
 }
