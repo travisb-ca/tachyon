@@ -96,6 +96,9 @@ void static vt_reset_state(struct vt *vt)
 	vt->vt_mode = MODE_NORMAL;
 
 	vt->params.len = 0;
+
+	for (int i = 0; i < MAX_COLUMNS; i += 8)
+		BITMAP_SETBIT(&vt->current.tabstops, i, 1);
 }
 
 /*
@@ -253,17 +256,27 @@ static void normal_backspace(struct buffer *buffer, struct vt_cell *cell, char c
 static void normal_tab(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	/*
-	 * Emulate fixed tabstops. If the tabstop would move beyond the edge
-	 * of the screen overwrite the last character and don't move.
+	 * If the tabstop would move beyond the edge of the screen overwrite
+	 * the last character and don't move.
 	 */
+	struct vt *vt = &buffer->vt;
 	int tabstop;
+	int i;
 
-	if (buffer->vt.current.col != buffer->vt.cols - 1)
-		cell->c = '\t';
+	tabstop = vt->cols - 1;
+	for (i = vt->current.col + 1; i < vt->cols - 1; i++) {
+		if(BITMAP_GETBIT(&vt->current.tabstops, i)) {
+			tabstop = i;
+			break;
+		}
+	}
 
-	tabstop = ((buffer->vt.current.col + 8) / 8) * 8;
-	if (tabstop >= buffer->vt.cols)
-		tabstop = buffer->vt.cols - 1;
+	for (i = vt->current.col; i < tabstop; i++) {
+		cell = vt_get_cell(buffer, vt->current.row, i);
+		if (cell)
+			cell->c = ' ';
+	}
+
 	buffer->vt.current.col = tabstop;
 }
 

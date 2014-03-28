@@ -20,6 +20,9 @@
 #ifndef VT_H
 #define VT_H
 
+#include "util.h"
+#include "config.h"
+
 struct vt_cell {
 	char c;
 #define BUF_CELL_SET (1 << 0) /* This cell is in use */
@@ -35,6 +38,8 @@ struct vt_line {
 struct vt_cursor_mode {
 	uint16_t row;
 	uint16_t col;
+
+	BITMAP_DECLARE(MAX_COLUMNS) tabstops;
 };
 
 struct vt {

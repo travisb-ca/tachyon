@@ -753,3 +753,19 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 		self.assertVtyCharIs(0, 0, 'z')
 		self.assertVtyCharIs(10, 10, 'a')
+
+	def test_defaultTabStops(self):
+		self.setCursorPos(0, 0)
+		self.pipe.write('a\tb\tc\td\te\tf\tg\th\ti\tj\tk\tl')
+
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharIs(0, 8, 'b')
+		self.assertVtyCharIs(0, 16, 'c')
+		self.assertVtyCharIs(0, 24, 'd')
+		self.assertVtyCharIs(0, 32, 'e')
+		self.assertVtyCharIs(0, 40, 'f')
+		self.assertVtyCharIs(0, 48, 'g')
+		self.assertVtyCharIs(0, 56, 'h')
+		self.assertVtyCharIs(0, 64, 'i')
+		self.assertVtyCharIs(0, 72, 'j')
+		self.assertVtyCharIs(0, 79, 'l')
