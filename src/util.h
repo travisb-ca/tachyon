@@ -21,6 +21,7 @@
 #define UTIL_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 /* This one borrowed from Linux.
  *
@@ -41,6 +42,11 @@
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
 /*
+ * Returns the number of elements in a statically sized array
+ */
+#define ARRAY_SIZE(array) (sizeof(array)/sizeof(*array))
+
+/*
  * Return the ascii character code of the normal character converted into control-X form.
  */
 #define CONTROL(x) ( (x) & ~((1 << 6) | (1 << 5)))
@@ -51,5 +57,57 @@
 #define CONST_STR_IS(const_a, b) (strncmp((const_a), (b), sizeof(const_a)) == 0)
 
 void close_on_exec(int fd);
+
+/*
+ * A bitmap type of arbitrary, but fixed at compile time, length.
+ * n is the number of bits minimum.
+ */
+#define BITMAP_DECLARE(n) \
+	struct { \
+		uint64_t data[(n)/64 + 1]; \
+	}
+
+/*
+ * Returns the value of the bit in question. Returns -1 if n is out of
+ * bounds.
+ */
+#define BITMAP_GETBIT(bitmap, n) \
+	_bitmap_getbit((bitmap), (n), ARRAY_SIZE((bitmap)->data))
+static inline int _bitmap_getbit(void *bitmap, int n, uint32_t num_elements)
+{
+	uint64_t *data = bitmap;
+	uint64_t segment;
+
+	if (n > num_elements * 64)
+		return -1;
+
+	segment = data[n / 64];
+	return (segment >> (n % 64)) & 0x1;
+}
+
+/*
+ * Set the given bit to the given truth value
+ */
+#define BITMAP_SETBIT(bitmap, n, val) \
+	_bitmap_setbit((bitmap), (n), (val), ARRAY_SIZE((bitmap)->data))
+static inline void _bitmap_setbit(void *bitmap, int n, uint64_t val, uint32_t num_elements)
+{
+	uint64_t *data = bitmap;
+	uint64_t *segment;
+	uint64_t mask;
+
+	if (n > num_elements * 64)
+		return;
+
+	segment = &data[n / 64];
+	mask = ~(1 << (n % 64));
+
+	if (val)
+		val = ~0;
+	else
+		val = 0;
+
+	*segment = (*segment & mask) | (val & ~mask);
+}
 
 #endif
