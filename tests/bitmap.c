@@ -52,6 +52,22 @@ int t4(void)
 	return 0;
 }
 
+int t5(void)
+{
+	BITMAP_DECLARE(132) bitmap = {};
+
+	return BITMAP_GETBIT(&bitmap, 90) != 0;
+}
+
+int t6(void)
+{
+	BITMAP_DECLARE(132) bitmap = {};
+
+	BITMAP_SETBIT(&bitmap, 90, 1);
+
+	return BITMAP_GETBIT(&bitmap, 90) != 1;
+}
+
 int main(int argn, char **args)
 {
 	int result = 0;
@@ -67,6 +83,12 @@ int main(int argn, char **args)
 
 	result += t4();
 	printf("t4 %d\n", result);
+
+	result += t5();
+	printf("t5 %d\n", result);
+
+	result += t6();
+	printf("t6 %d\n", result);
 
 	return result;
 }
