@@ -84,6 +84,21 @@ static struct vt_line *vt_line_alloc(int columns)
 }
 
 /*
+ * Initial state of the program modifiable state
+ */
+void static vt_reset_state(struct vt *vt)
+{
+	vt->current.row = 0;
+	vt->current.col = 0;
+	vt->saved = vt->current;
+
+	vt->flags = VT_FL_AUTOSCROLL;
+	vt->vt_mode = MODE_NORMAL;
+
+	vt->params.len = 0;
+}
+
+/*
  * Initialize the virtual terminal to a default state.
  *
  * Returns:
@@ -94,14 +109,7 @@ int vt_init(struct vt *vt)
 {
 	vt->cols = 80;
 	vt->rows = 24;
-	vt->current.row = 0;
-	vt->current.col = 0;
-	vt->saved = vt->current;
-
-	vt->flags = VT_FL_AUTOSCROLL;
-	vt->vt_mode = MODE_NORMAL;
-
-	vt->params.len = 0;
+	vt_reset_state(vt);
 
 	vt->lines = malloc(vt->cols * sizeof(*vt->lines));
 	if (!vt->lines)
@@ -367,6 +375,14 @@ static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c)
 	memset(buffer->vt.params.chars, 0, sizeof(buffer->vt.params.chars));
 }
 
+static void escape_reset_to_initial(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	struct vt *vt = &buffer->vt;
+	vt_reset_state(vt);
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	switch (c) {
@@ -377,6 +393,7 @@ static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 		HANDLE('E', escape_next_line);
 		HANDLE('M', escape_cursor_up);
 		HANDLE('[', escape_csi);
+		HANDLE('c', escape_reset_to_initial);
 	}
 }
 

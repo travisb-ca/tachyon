@@ -743,3 +743,13 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCharIs(1, 8, 'z')
 		self.assertVtyCharIs(11, 0, 'a')
 
+	def test_escapeResetState(self):
+		self.setCursorPos(10, 10);
+		self.pipe.write('a')
+
+		self.sendEsc('c')
+
+		self.pipe.write('z')
+
+		self.assertVtyCharIs(0, 0, 'z')
+		self.assertVtyCharIs(10, 10, 'a')
