@@ -621,6 +621,20 @@ static void csi_clear_line(struct buffer *buffer, struct vt_cell *cell, char c) 
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void csi_tabstop_clear(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+
+	if (vt->params.len == 0 || CONST_STR_IS("0", vt->params.chars)) {
+		BITMAP_SETBIT(&vt->current.tabstops, vt->current.col, 0);
+	} else if (CONST_STR_IS("3", vt->params.chars)) {
+		for (int i = 0; i < MAX_COLUMNS; i++)
+			BITMAP_SETBIT(&vt->current.tabstops, i, 0);
+	} else {
+		DLOG("Unsupported csi_tabstop_clear type '%s'", vt->params.chars);
+	}
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	switch (c) {
@@ -632,6 +646,7 @@ static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 		HANDLE('J', csi_clear_screen);
 		HANDLE('K', csi_clear_line);
 		HANDLE('f', csi_position_cursor);
+		HANDLE('g', csi_tabstop_clear);
 	}
 }
 

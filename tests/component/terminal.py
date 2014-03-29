@@ -769,3 +769,46 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCharIs(0, 64, 'i')
 		self.assertVtyCharIs(0, 72, 'j')
 		self.assertVtyCharIs(0, 79, 'l')
+	
+	def test_clearTabStop_default(self):
+		self.setCursorPos(0, 8)
+		self.sendCsi('g')
+
+		self.setCursorPos(0, 0)
+
+		self.pipe.write('a\tb\tc')
+
+		# 16 is the second tabstop now that we've erased the second tabstop
+		# 24 is the third tabstop
+		self.assertVtyCursorPos(0, 25)
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharIs(0, 16, 'b')
+		self.assertVtyCharIs(0, 24, 'c')
+
+	def test_clearTabStop_arg(self):
+		self.setCursorPos(0, 8)
+		self.sendCsi('0g')
+
+		self.setCursorPos(0, 0)
+
+		self.pipe.write('a\tb\tc')
+
+		# 16 is the second tabstop now that we've erased the second tabstop
+		# 24 is the third tabstop
+		self.assertVtyCursorPos(0, 25)
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharIs(0, 16, 'b')
+		self.assertVtyCharIs(0, 24, 'c')
+
+	def test_clearTabStop_all(self):
+		self.setCursorPos(0, 8)
+		self.sendCsi('3g')
+
+		self.setCursorPos(0, 0)
+
+		self.pipe.write('a\tb\tc')
+
+		# vtyMaxCol is the second tabstop now that we've erased the second tabstop
+		self.assertVtyCursorPos(0, self.vtyMaxCol())
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharIs(0, self.vtyMaxCol(), 'c')
