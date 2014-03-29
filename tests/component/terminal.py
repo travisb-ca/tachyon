@@ -812,3 +812,18 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCursorPos(0, self.vtyMaxCol())
 		self.assertVtyCharIs(0, 0, 'a')
 		self.assertVtyCharIs(0, self.vtyMaxCol(), 'c')
+
+	def test_setTabStop(self):
+		self.setCursorPos(0, 4)
+		self.sendEsc('H')
+
+		self.setCursorPos(0, 0)
+
+		self.pipe.write('a\tb\tc')
+
+		# 4 is the new second tabstop
+		# 8 is the third tabstop
+		self.assertVtyCursorPos(0, 9)
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharIs(0, 4, 'b')
+		self.assertVtyCharIs(0, 8, 'c')

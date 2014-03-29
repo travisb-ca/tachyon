@@ -369,6 +369,15 @@ static void escape_next_line(struct buffer *buffer, struct vt_cell *cell, char c
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void escape_tabstop_set(struct buffer *buffer, struct vt_cell *cell, char c)
+{
+	struct vt *vt = &buffer->vt;
+
+	BITMAP_SETBIT(&vt->current.tabstops, vt->current.col, 1);
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c)
 {
 	struct vt *vt = &buffer->vt;
@@ -404,6 +413,7 @@ static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 		HANDLE('8', escape_restore_cursor);
 		HANDLE('D', escape_cursor_down);
 		HANDLE('E', escape_next_line);
+		HANDLE('H', escape_tabstop_set);
 		HANDLE('M', escape_cursor_up);
 		HANDLE('[', escape_csi);
 		HANDLE('c', escape_reset_to_initial);
