@@ -49,24 +49,20 @@ struct terminal_def {
 };
 
 static void vt_line_init(struct vt_line *line, struct vt_line *prev,
-			     struct vt_line *next)
-{
+			     struct vt_line *next) {
 	line->next = next;
 	line->prev = prev;
 }
 
-static void vt_line_free(struct vt_line *line)
-{
+static void vt_line_free(struct vt_line *line) {
 	free(line);
 }
 
-static void vt_cell_init(struct vt_cell *cell)
-{
+static void vt_cell_init(struct vt_cell *cell) {
 	memset(cell, 0, sizeof(*cell));
 }
 
-static struct vt_line *vt_line_alloc(int columns)
-{
+static struct vt_line *vt_line_alloc(int columns) {
 	struct vt_line *line;
 
 	line = malloc(sizeof(*line) + columns*sizeof(*line->cells));
@@ -86,8 +82,7 @@ static struct vt_line *vt_line_alloc(int columns)
 /*
  * Initial state of the program modifiable state
  */
-void static vt_reset_state(struct vt *vt)
-{
+void static vt_reset_state(struct vt *vt) {
 	vt->current.row = 0;
 	vt->current.col = 0;
 	vt->saved = vt->current;
@@ -108,8 +103,7 @@ void static vt_reset_state(struct vt *vt)
  * 0      - Success
  * ENOMEM - Failed to allocate necessary memory
  */
-int vt_init(struct vt *vt)
-{
+int vt_init(struct vt *vt) {
 	vt->cols = 80;
 	vt->rows = 24;
 	vt_reset_state(vt);
@@ -144,8 +138,7 @@ err:
 	return ENOMEM;
 }
 
-void vt_free(struct vt *vt)
-{
+void vt_free(struct vt *vt) {
 	struct vt_line *current;
 	struct vt_line *next = NULL;
 
@@ -161,8 +154,7 @@ void vt_free(struct vt *vt)
 	}
 }
 
-struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int col)
-{
+struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int col) {
 	struct vt_line *line;
 
 	if (row >= buf->vt.rows || col >= buf->vt.cols)
@@ -176,8 +168,7 @@ struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int c
 	return &line->cells[col];
 }
 
-static void vt_scroll_up(struct buffer *buffer)
-{
+static void vt_scroll_up(struct buffer *buffer) {
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
 	bool need_redraw = true;
@@ -207,8 +198,7 @@ static void vt_scroll_up(struct buffer *buffer)
 		buffer_redraw(buffer);
 }
 
-static void vt_scroll_down(struct buffer *buffer)
-{
+static void vt_scroll_down(struct buffer *buffer) {
 	struct vt *vt = &buffer->vt;
 	struct vt_line *line;
 	bool need_redraw = true;
@@ -240,21 +230,18 @@ static void vt_scroll_down(struct buffer *buffer)
 
 static void ignore(struct buffer *buffer, struct vt_cell *cell, char c) {}
 
-static void normal_chars(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_chars(struct buffer *buffer, struct vt_cell *cell, char c) {
 	cell->c = c;
 	cell->flags |= BUF_CELL_SET;
 	buffer->vt.current.col++;
 }
 
-static void normal_backspace(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_backspace(struct buffer *buffer, struct vt_cell *cell, char c) {
 	if (buffer->vt.current.col > 0)
 		buffer->vt.current.col--;
 }
 
-static void normal_tab(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_tab(struct buffer *buffer, struct vt_cell *cell, char c) {
 	/*
 	 * If the tabstop would move beyond the edge of the screen overwrite
 	 * the last character and don't move.
@@ -280,23 +267,19 @@ static void normal_tab(struct buffer *buffer, struct vt_cell *cell, char c)
 	buffer->vt.current.col = tabstop;
 }
 
-static void normal_newline(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_newline(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.current.row++;
 }
 
-static void normal_linefeed(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_linefeed(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.current.col = 0;
 }
 
-static void normal_escape(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_escape(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.vt_mode = MODE_ESCAPE;
 }
 
-static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 	switch (c) {
 		DEFAULT(normal_chars);
 		HANDLE(0x00, ignore);
@@ -335,33 +318,28 @@ static void normal_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 	}
 }
 
-static void escape_exit(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_exit(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.vt_mode = MODE_NORMAL;
 }
 
-static void escape_save_cursor(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_save_cursor(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.saved = buffer->vt.current;
 	buffer->vt.vt_mode = MODE_NORMAL;
 }
 
-static void escape_restore_cursor(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_restore_cursor(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.current = buffer->vt.saved;
 	buffer->vt.vt_mode = MODE_NORMAL;
 }
 
-static void escape_cursor_down(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_cursor_down(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	vt->current.row++;
 	vt->vt_mode = MODE_NORMAL;
 }
 
-static void escape_next_line(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_next_line(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	vt->current.row++;
@@ -369,8 +347,7 @@ static void escape_next_line(struct buffer *buffer, struct vt_cell *cell, char c
 	vt->vt_mode = MODE_NORMAL;
 }
 
-static void escape_tabstop_set(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_tabstop_set(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	BITMAP_SETBIT(&vt->current.tabstops, vt->current.col, 1);
@@ -378,8 +355,7 @@ static void escape_tabstop_set(struct buffer *buffer, struct vt_cell *cell, char
 	vt->vt_mode = MODE_NORMAL;
 }
 
-static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	if (vt->current.row == 0)
@@ -390,23 +366,20 @@ static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c
 	vt->vt_mode = MODE_NORMAL;
 }
 
-static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.vt_mode = MODE_CSI;
 	buffer->vt.params.len = 0;
 	memset(buffer->vt.params.chars, 0, sizeof(buffer->vt.params.chars));
 }
 
-static void escape_reset_to_initial(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_reset_to_initial(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 	vt_reset_state(vt);
 
 	vt->vt_mode = MODE_NORMAL;
 }
 
-static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 	switch (c) {
 		DEFAULT(escape_exit);
 		HANDLE('7', escape_save_cursor);
@@ -420,16 +393,14 @@ static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c)
 	}
 }
 
-static void csi_collect_params(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void csi_collect_params(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	if (vt->params.len < sizeof(vt->params.chars) - 1)
 		vt->params.chars[vt->params.len++] = c;
 }
 
-static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	if (vt->params.len == 0 || CONST_STR_IS("0", vt->params.chars)) {
@@ -645,8 +616,7 @@ static void csi_tabstop_clear(struct buffer *buffer, struct vt_cell *cell, char 
 	vt->vt_mode = MODE_NORMAL;
 }
 
-static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c)
-{
+static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 	switch (c) {
 		DEFAULT(csi_collect_params);
 		HANDLE('A', csi_move_cursor_up);
@@ -677,8 +647,7 @@ static const struct terminal_def terminal_emulation = {
 	},
 };
 
-void vt_interpret(struct buffer *buffer, char c)
-{
+void vt_interpret(struct buffer *buffer, char c) {
 	struct vt_cell *cell;
 	struct vt *vt = &buffer->vt;
 

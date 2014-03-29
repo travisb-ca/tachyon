@@ -131,8 +131,7 @@ static void controller_next_buffer(void) {
 		controller_set_current_buffer(i);
 }
 
-static int unsigned_mod_less_one(unsigned int i, unsigned int m)
-{
+static int unsigned_mod_less_one(unsigned int i, unsigned int m) {
 	if (i == 0)
 		return m - 1;
 	else

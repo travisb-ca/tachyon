@@ -73,8 +73,7 @@ void close_on_exec(int fd);
  */
 #define BITMAP_GETBIT(bitmap, n) \
 	_bitmap_getbit((bitmap), (n), ARRAY_SIZE((bitmap)->data))
-static inline int _bitmap_getbit(void *bitmap, int n, uint32_t num_elements)
-{
+static inline int _bitmap_getbit(void *bitmap, int n, uint32_t num_elements) {
 	uint32_t *data = bitmap;
 	uint32_t segment;
 
@@ -90,8 +89,7 @@ static inline int _bitmap_getbit(void *bitmap, int n, uint32_t num_elements)
  */
 #define BITMAP_SETBIT(bitmap, n, val) \
 	_bitmap_setbit((bitmap), (n), (val), ARRAY_SIZE((bitmap)->data))
-static inline void _bitmap_setbit(void *bitmap, int n, uint64_t val, uint32_t num_elements)
-{
+static inline void _bitmap_setbit(void *bitmap, int n, uint64_t val, uint32_t num_elements) {
 	uint32_t *data = bitmap;
 	uint32_t *segment;
 	uint32_t mask;

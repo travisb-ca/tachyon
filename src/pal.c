@@ -32,8 +32,7 @@
  * makes the Darwin poll() pretty useless for tachyon. The interface is
  * reasonably nice so we'll inefficiently emulate it here.
  */
-int pal_poll(struct pollfd fds[], nfds_t nfds, int timeout)
-{
+int pal_poll(struct pollfd fds[], nfds_t nfds, int timeout) {
 	fd_set read_fds;
 	fd_set write_fds;
 	fd_set error_fds;
@@ -90,8 +89,7 @@ out:
 
 #else
 
-int pal_poll(struct pollfd fds[], nfds_t nfds, int timeout)
-{
+int pal_poll(struct pollfd fds[], nfds_t nfds, int timeout) {
 	return poll(fds, nfds, timeout);
 }
 

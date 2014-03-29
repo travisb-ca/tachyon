@@ -48,8 +48,7 @@
  * -1	Failed posix_openpt
  * -2	Failed grantpt
  */
-int tty_new(char *command, int bufnum)
-{
+int tty_new(char *command, int bufnum) {
 	int result;
 	int pty_master;
 	int pty_slave;
@@ -193,18 +192,15 @@ err_master:
 
 static struct termios original_term_state;
 
-void tty_save_termstate(void)
-{
+void tty_save_termstate(void) {
 	tcgetattr(0, &original_term_state);
 }
 
-void tty_restore_termstate(void)
-{
+void tty_restore_termstate(void) {
 	tcsetattr(0, TCSANOW, &original_term_state);
 }
 
-int tty_configure_control_tty(void)
-{
+int tty_configure_control_tty(void) {
 	struct termios termstate;
 
 	if (tcgetattr(0, &termstate))

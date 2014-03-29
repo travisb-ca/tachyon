@@ -59,8 +59,7 @@ const static struct option parameters[] = {
 	{NULL      , no_argument       , NULL , 0 }};
 
 #define SHORTARGS "hpqs:vn:"
-static void usage(void)
-{
+static void usage(void) {
 	printf("tachyon [-hHpqv] [-s shell] [-n name]\n");
 	printf("	-h --help              - Display this message\n");
 	printf("	-p --predictor         - Turn on character prediction\n");
@@ -76,8 +75,7 @@ static void usage(void)
  * 1 - When tachyon should terminate cleanly, such as after displaying the usage
  * 2 - When tachyon should terminate uncleanly, such as on parameter error
  */
-static int process_args(int argn, char **args)
-{
+static int process_args(int argn, char **args) {
 	int flag;
 
 	while ((flag = getopt_long(argn, args, SHORTARGS, parameters, NULL)) != -1) {
@@ -163,8 +161,7 @@ static int get_login_shell(char *destination, int size) {
  * 0 - Success
  * 1 - Failure, settings in an undefined state
  */
-static int set_defaults(void)
-{
+static int set_defaults(void) {
 	int result;
 
 	if (cmd_options.new_buf_command[0] == '\0') {
@@ -183,8 +180,7 @@ static int set_defaults(void)
 	return 0;
 }
 
-int main(int argn, char **args)
-{
+int main(int argn, char **args) {
 	int result;
 
 	result = process_args(argn, args);
