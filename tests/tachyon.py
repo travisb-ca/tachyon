@@ -55,6 +55,9 @@ class TachyonTestCase(lousy.TestCase):
 		self.syncOutput()
 		vtyString = self.tachyon.vty.string(row, col, len(string))
 
+		if string != vtyString:
+			self.tachyon.vty.snapShotScreen(forcePrint=True)
+
 		self.assertEqual(string, vtyString)
 
 	# Return the Vty cursor position as a 2-tuple
