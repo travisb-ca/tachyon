@@ -41,6 +41,15 @@ class TachyonTestCase(lousy.TestCase):
 		cell = self.tachyon.vty.cell(row, col)
 		self.assertEqual(char, cell.char)
 
+	# Assert the terminal cell has the given set of attributes, such as bold
+	def assertVtyCharAttrIs(self, row, col, attr_list):
+		self.syncOutput()
+		cell = self.tachyon.vty.cell(row, col)
+		self.assertIsNotNone(cell, 'cell at (%d, %d)' % (row, col))
+		attributes = set(attr_list)
+		msg = 'Attributes "%s" != "%s" at cell (%d, %d)' % (attributes, cell.attributes, row, col)
+		self.assertEqual(cell.attributes, attributes, msg)
+
 	# Assert an entire string starting at the given coordinates
 	def assertVtyString(self, row, col, string):
 		self.syncOutput()
