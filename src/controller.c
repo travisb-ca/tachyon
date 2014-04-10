@@ -63,7 +63,7 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
  * Clear the window pane.
  */
 static void controller_clear(int bufid) {
-	const char *vt100_clear_screen = "\033[2J";
+	const char vt100_clear_screen[] = "\033[2J";
 	controller_output(bufid, sizeof(vt100_clear_screen) - 1,
 			  vt100_clear_screen);
 }
