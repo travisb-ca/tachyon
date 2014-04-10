@@ -1,0 +1,18 @@
+Component: Tests
+Date: 2014-04-10 04:36:35
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: Test escapeCursorUp_pastMargin_noScrollBack only works in debug mode
+Type: Bug
+Units_of_Work: 1000
+--
+Possible related to 0f75fc5c955fd73e72ab4829d68369786ddb85bb3e246db2baecb3f010aa8046 but the test escapeCursorUp_pastMargin_noScrollBack seems to pass all the time when run in debug mode, but fails all the time when run in normal mode.
