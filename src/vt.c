@@ -85,6 +85,7 @@ static struct vt_line *vt_line_alloc(int columns) {
 void static vt_reset_state(struct vt *vt) {
 	vt->current.row = 0;
 	vt->current.col = 0;
+	vt->current.style = 0;
 	vt->saved = vt->current;
 
 	vt->flags = VT_FL_AUTOSCROLL;
@@ -231,9 +232,12 @@ static void vt_scroll_down(struct buffer *buffer) {
 static void ignore(struct buffer *buffer, struct vt_cell *cell, char c) {}
 
 static void normal_chars(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+
 	cell->c = c;
 	cell->flags |= BUF_CELL_SET;
-	buffer->vt.current.col++;
+	cell->style = vt->current.style;
+	vt->current.col++;
 }
 
 static void normal_backspace(struct buffer *buffer, struct vt_cell *cell, char c) {
@@ -616,6 +620,32 @@ static void csi_tabstop_clear(struct buffer *buffer, struct vt_cell *cell, char 
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+	char *str = vt->params.chars;
+	char *end = vt->params.chars + vt->params.len;
+
+	while (str < end) {
+		if (vt->params.len == 0 || CONST_STR_IS("0", str))
+			vt->current.style = 0;
+		else if (CONST_STR_IS("1", str))
+			vt->current.style |= VT_STYLE_BOLD;
+		else if (CONST_STR_IS("4", str))
+			vt->current.style |= VT_STYLE_UNDERSCORE;
+		else if (CONST_STR_IS("5", str))
+			vt->current.style |= VT_STYLE_BLINK;
+		else if (CONST_STR_IS("7", str))
+			vt->current.style |= VT_STYLE_REVERSE;
+		else
+			DLOG("Unknown graphics attribute '%s'", str);
+
+		while (*str != '\0' && *str != ';' && str < end)
+			str++;
+	}
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 	switch (c) {
 		DEFAULT(csi_collect_params);
@@ -627,6 +657,7 @@ static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 		HANDLE('K', csi_clear_line);
 		HANDLE('f', csi_position_cursor);
 		HANDLE('g', csi_tabstop_clear);
+		HANDLE('m', csi_special_graphics_mode);
 	}
 }
 

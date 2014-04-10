@@ -3,6 +3,7 @@
 import tachyon
 import lousy
 import time
+import itertools
 
 class TestBasicTerminal(tachyon.TachyonTestCase):
 	def setUp1(self):
@@ -827,3 +828,80 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCharIs(0, 0, 'a')
 		self.assertVtyCharIs(0, 4, 'b')
 		self.assertVtyCharIs(0, 8, 'c')
+
+	def test_attributeBold(self):
+		self.setCursorPos(0, 0)
+		self.sendCsi('1m')
+
+		self.pipe.write('a')
+
+		self.sendCsi('0m')
+
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharAttrIs(0, 0, [lousy.FrameBufferCell.BOLD])
+
+	def test_attributeUnderline(self):
+		self.setCursorPos(0, 0)
+		self.sendCsi('4m')
+
+		self.pipe.write('a')
+
+		self.sendCsi('0m')
+
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharAttrIs(0, 0, [lousy.FrameBufferCell.UNDERSCORE])
+
+	def test_attributeBlink(self):
+		self.setCursorPos(0, 0)
+		self.sendCsi('5m')
+
+		self.pipe.write('a')
+
+		self.sendCsi('0m')
+
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharAttrIs(0, 0, [lousy.FrameBufferCell.BLINK])
+
+	def test_attributeReverse(self):
+		self.setCursorPos(0, 0)
+		self.sendCsi('7m')
+
+		self.pipe.write('a')
+
+		self.sendCsi('0m')
+
+		self.assertVtyCharIs(0, 0, 'a')
+		self.assertVtyCharAttrIs(0, 0, [lousy.FrameBufferCell.REVERSE])
+
+	def test_attributeCombinationsCumulative(self):
+		attributes = [1, 4, 5, 7]
+		map = {1 : lousy.FrameBufferCell.BOLD,
+			4: lousy.FrameBufferCell.UNDERSCORE,
+			5: lousy.FrameBufferCell.BLINK,
+			7: lousy.FrameBufferCell.REVERSE
+			}
+		row = 0
+
+		self.setCursorPos(0, 0)
+
+		for l in range(1, len(attributes) + 1):
+			for combo in itertools.combinations(attributes, l):
+				for permutation in itertools.permutations(combo):
+					for attr in permutation:
+						self.sendCsi('%sm' % str(attr))
+						self.pipe.write('a')
+					self.sendCsi('0m')
+
+					self.pipe.write('\t')
+					for attr in permutation:
+						self.pipe.write(str(attr))
+
+					for i in range(len(permutation)):
+						attrs = [map[a] for a in permutation[:i + 1]]
+						self.assertVtyCharAttrIs(row, i, attrs)
+
+					self.pipe.write('\n')
+					self.pipe.write('\r')
+					row += 1
+					if row == self.vtyMaxRow() + 1:
+						row = self.vtyMaxRow()

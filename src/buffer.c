@@ -223,10 +223,23 @@ void buffer_redraw(struct buffer *buffer) {
 	for (int row = 0; row < buffer->vt.rows; row++) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
 			cell = vt_get_cell(buffer, row, col);
-			if (cell->flags & BUF_CELL_SET)
+			if (cell->flags & BUF_CELL_SET) {
+				if (cell->style & VT_STYLE_BOLD)
+					controller_output(buffer->bufid, 4, "\033[1m");
+				if (cell->style & VT_STYLE_UNDERSCORE)
+					controller_output(buffer->bufid, 4, "\033[4m");
+				if (cell->style & VT_STYLE_BLINK)
+					controller_output(buffer->bufid, 4, "\033[5m");
+				if (cell->style & VT_STYLE_REVERSE)
+					controller_output(buffer->bufid, 4, "\033[7m");
+
 				controller_output(buffer->bufid, 1, &cell->c);
-			else
+
+				if (cell->style != 0)
+					controller_output(buffer->bufid, 4, "\033[0m");
+			} else {
 				controller_output(buffer->bufid, 1, space);
+			}
 		}
 		if (row < buffer->vt.rows - 1)
 			controller_output(buffer->bufid, 2, "\r\n");

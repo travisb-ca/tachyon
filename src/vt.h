@@ -23,10 +23,16 @@
 #include "util.h"
 #include "config.h"
 
+#define VT_STYLE_BOLD       (1 << 0)
+#define VT_STYLE_UNDERSCORE (1 << 1)
+#define VT_STYLE_BLINK      (1 << 2)
+#define VT_STYLE_REVERSE    (1 << 3)
+
 struct vt_cell {
 	char c;
 #define BUF_CELL_SET (1 << 0) /* This cell is in use */
 	uint8_t flags;
+	uint8_t style;
 };
 
 struct vt_line {
@@ -38,6 +44,8 @@ struct vt_line {
 struct vt_cursor_mode {
 	uint16_t row;
 	uint16_t col;
+
+	uint8_t style;
 
 	BITMAP_DECLARE(MAX_COLUMNS) tabstops;
 };
