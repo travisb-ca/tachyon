@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-04-10 04:28:18
+Parent: issue
+User: travisb@travisbrown.ca
+--
+Currently Tachyon actually scrolls back into the scrollback and brings the old lines back into the display.
