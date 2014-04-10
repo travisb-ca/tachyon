@@ -212,8 +212,8 @@ int buffer_output(struct buffer *buffer, int size, char *buf) {
  */
 void buffer_redraw(struct buffer *buffer) {
 	struct vt_cell *cell;
-	const char *vt100_goto_origin = "\033[f";
-	const char *space = " ";
+	const char vt100_goto_origin[] = "\033[f";
+	const char space[] = " ";
 	char buf[16];
 	int len;
 
