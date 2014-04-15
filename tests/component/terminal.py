@@ -962,3 +962,10 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 					row += 1
 					if row == self.vtyMaxRow() + 1:
 						row = self.vtyMaxRow()
+
+	def test_setMode(self):
+		# Mostly just a test that the mode parsing code doesn't blow up
+		self.sendCsi('h')
+		self.sendCsi('1h')
+		self.sendCsi('1;2h')
+		self.sendCsi('1;2;3;h')

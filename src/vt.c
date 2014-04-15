@@ -620,6 +620,48 @@ static void csi_tabstop_clear(struct buffer *buffer, struct vt_cell *cell, char 
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void decode_mode(struct vt *vt, char *mode, bool val) {
+	DLOG("Unsupported mode '%s'", mode);
+}
+
+static void parse_mode(struct vt *vt, bool val) {
+	char *cur; /* Start of the current option */
+	char *next; /* Start of the next option */
+	char *end; /* one past the end of the valid chars in param */
+
+	end = vt->params.chars + vt->params.len;
+	cur = vt->params.chars;
+
+	while (cur < end) {
+		while (next < end && *next != ';')
+			next++;
+		if (next < end) {
+			*next = '\0'; /* change ; into nul */
+			next++;
+		}
+
+		decode_mode(vt, cur, val);
+
+		cur = next;
+	}
+}
+
+static void csi_set_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+
+	parse_mode(vt, true);
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
+static void csi_reset_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
+	struct vt *vt = &buffer->vt;
+
+	parse_mode(vt, false);
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
 static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 	char *str = vt->params.chars;
@@ -657,6 +699,8 @@ static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 		HANDLE('K', csi_clear_line);
 		HANDLE('f', csi_position_cursor);
 		HANDLE('g', csi_tabstop_clear);
+		HANDLE('h', csi_set_mode);
+		HANDLE('l', csi_reset_mode);
 		HANDLE('m', csi_special_graphics_mode);
 	}
 }
