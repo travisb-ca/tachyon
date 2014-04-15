@@ -873,6 +873,63 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.assertVtyCharIs(0, 0, 'a')
 		self.assertVtyCharAttrIs(0, 0, [lousy.FrameBufferCell.REVERSE])
 
+	def outputCharWithAttrs(self, attrs, char):
+		attributes = []
+		if attrs & 0x1 == 0x1: # bold
+			attributes.append('1')
+		if attrs & 0x2 == 0x2: # underscore
+			attributes.append('4')
+		if attrs & 0x4 == 0x4: # blink
+			attributes.append('5')
+		if attrs & 0x8 == 0x8: # reverse
+			attributes.append('7')
+
+		if attrs == 0:
+			cmd = '0'
+		else:
+			cmd = ';'.join(attributes)
+
+		self.sendCsi('%sm' % cmd)
+		self.pipe.write(char)
+
+	def flags_to_attr(self, attrs):
+		attributes = []
+		if attrs & 0x1 == 0x1: # bold
+			attributes.append(lousy.FrameBufferCell.BOLD)
+		if attrs & 0x2 == 0x2: # underscore
+			attributes.append(lousy.FrameBufferCell.UNDERSCORE)
+		if attrs & 0x4 == 0x4: # blink
+			attributes.append(lousy.FrameBufferCell.BLINK)
+		if attrs & 0x8 == 0x8: # reverse
+			attributes.append(lousy.FrameBufferCell.REVERSE)
+
+		return attributes
+
+	def test_attributeCombinationsSingleChar(self):
+		self.setCursorPos(0, 0)
+
+		for i in range(16):
+			self.outputCharWithAttrs(i, 'a')
+			self.sendCsi('0m')
+
+		for i in range(16):
+			self.assertVtyCharIs(0, i, 'a')
+			self.assertVtyCharAttrIs(0, i, self.flags_to_attr(i))
+
+	def test_attributeCombinationsSingleCharWithNormalChar(self):
+		self.setCursorPos(0, 0)
+
+		for i in range(0, 16):
+			self.outputCharWithAttrs(i, 'b')
+			self.outputCharWithAttrs(0, 'c')
+
+		for i in range(16):
+			self.assertVtyCharIs(0, 2*i, 'b')
+			self.assertVtyCharAttrIs(0, 2*i, self.flags_to_attr(i))
+
+			self.assertVtyCharIs(0, 2*i + 1, 'c')
+			self.assertVtyCharAttrIs(0, 2*i + 1, [])
+
 	def test_attributeCombinationsCumulative(self):
 		attributes = [1, 4, 5, 7]
 		map = {1 : lousy.FrameBufferCell.BOLD,
