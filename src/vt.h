@@ -23,16 +23,57 @@
 #include "util.h"
 #include "config.h"
 
-#define VT_STYLE_BOLD       (1 << 0)
-#define VT_STYLE_UNDERSCORE (1 << 1)
-#define VT_STYLE_BLINK      (1 << 2)
-#define VT_STYLE_REVERSE    (1 << 3)
+#define VT_STYLE_BOLD               (1ULL << 1)
+#define VT_STYLE_UNDERSCORE         (1ULL << 4)
+#define VT_STYLE_BLINK              (1ULL << 5)
+#define VT_STYLE_REVERSE            (1ULL << 7)
+#define VT_STYLE_FOREGROUND_BLACK   (1ULL << 30)
+#define VT_STYLE_FOREGROUND_RED     (1ULL << 31)
+#define VT_STYLE_FOREGROUND_GREEN   (1ULL << 32)
+#define VT_STYLE_FOREGROUND_YELLOW  (1ULL << 33)
+#define VT_STYLE_FOREGROUND_BLUE    (1ULL << 34)
+#define VT_STYLE_FOREGROUND_MAGENTA (1ULL << 35)
+#define VT_STYLE_FOREGROUND_CYAN    (1ULL << 36)
+#define VT_STYLE_FOREGROUND_WHITE   (1ULL << 37)
+#define VT_STYLE_BACKGROUND_BLACK   (1ULL << 40)
+#define VT_STYLE_BACKGROUND_RED     (1ULL << 41)
+#define VT_STYLE_BACKGROUND_GREEN   (1ULL << 42)
+#define VT_STYLE_BACKGROUND_YELLOW  (1ULL << 43)
+#define VT_STYLE_BACKGROUND_BLUE    (1ULL << 44)
+#define VT_STYLE_BACKGROUND_MAGENTA (1ULL << 45)
+#define VT_STYLE_BACKGROUND_CYAN    (1ULL << 46)
+#define VT_STYLE_BACKGROUND_WHITE   (1ULL << 47)
+#define VT_STYLE_MAX 48
+ 
+#define VT_ALL_STYLES (              \
+	VT_STYLE_BOLD               |\
+	VT_STYLE_UNDERSCORE         |\
+	VT_STYLE_BLINK              |\
+	VT_STYLE_REVERSE            |\
+	VT_STYLE_FOREGROUND_BLACK   |\
+	VT_STYLE_FOREGROUND_RED     |\
+	VT_STYLE_FOREGROUND_GREEN   |\
+	VT_STYLE_FOREGROUND_YELLOW  |\
+	VT_STYLE_FOREGROUND_BLUE    |\
+	VT_STYLE_FOREGROUND_MAGENTA |\
+	VT_STYLE_FOREGROUND_CYAN    |\
+	VT_STYLE_FOREGROUND_WHITE   |\
+	VT_STYLE_BACKGROUND_BLACK   |\
+	VT_STYLE_BACKGROUND_RED     |\
+	VT_STYLE_BACKGROUND_GREEN   |\
+	VT_STYLE_BACKGROUND_YELLOW  |\
+	VT_STYLE_BACKGROUND_BLUE    |\
+	VT_STYLE_BACKGROUND_MAGENTA |\
+	VT_STYLE_BACKGROUND_CYAN    |\
+	VT_STYLE_BACKGROUND_WHITE   |\
+        0                            \
+)
 
 struct vt_cell {
 	char c;
 #define BUF_CELL_SET (1 << 0) /* This cell is in use */
 	uint8_t flags;
-	uint8_t style;
+	uint64_t style;
 };
 
 struct vt_line {
@@ -45,7 +86,7 @@ struct vt_cursor_mode {
 	uint16_t row;
 	uint16_t col;
 
-	uint8_t style;
+	uint64_t style;
 
 	BITMAP_DECLARE(MAX_COLUMNS) tabstops;
 };

@@ -216,6 +216,7 @@ void buffer_redraw(struct buffer *buffer) {
 	const char space[] = " ";
 	char buf[16];
 	int len;
+	uint64_t style;
 
 	controller_output(buffer->bufid, sizeof(vt100_goto_origin) - 1,
 			  vt100_goto_origin);
@@ -224,18 +225,18 @@ void buffer_redraw(struct buffer *buffer) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
 			cell = vt_get_cell(buffer, row, col);
 			if (cell->flags & BUF_CELL_SET) {
-				if (cell->style & VT_STYLE_BOLD)
-					controller_output(buffer->bufid, 4, "\033[1m");
-				if (cell->style & VT_STYLE_UNDERSCORE)
-					controller_output(buffer->bufid, 4, "\033[4m");
-				if (cell->style & VT_STYLE_BLINK)
-					controller_output(buffer->bufid, 4, "\033[5m");
-				if (cell->style & VT_STYLE_REVERSE)
-					controller_output(buffer->bufid, 4, "\033[7m");
+				style = cell->style & VT_ALL_STYLES;
+
+				for (int i = 0; i < VT_STYLE_MAX; i++) {
+					if (style & (1ULL << i)) {
+						len = snprintf(buf, sizeof(buf), "\033[%dm", i);
+						controller_output(buffer->bufid, len, buf);
+					}
+				}
 
 				controller_output(buffer->bufid, 1, &cell->c);
 
-				if (cell->style != 0)
+				if (style != 0)
 					controller_output(buffer->bufid, 4, "\033[0m");
 			} else {
 				controller_output(buffer->bufid, 1, space);

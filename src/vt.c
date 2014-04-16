@@ -667,6 +667,7 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 	char *str = vt->params.chars;
 	char *end = vt->params.chars + vt->params.len;
 	char *next;
+	uint8_t attr;
 
 	while (str < end) {
 		next = str;
@@ -677,18 +678,19 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 			next++;
 		}
 
-		if (vt->params.len == 0 || CONST_STR_IS("0", str))
+		if (vt->params.len == 0 || CONST_STR_IS("0", str)) {
 			vt->current.style = 0;
-		else if (CONST_STR_IS("1", str))
-			vt->current.style |= VT_STYLE_BOLD;
-		else if (CONST_STR_IS("4", str))
-			vt->current.style |= VT_STYLE_UNDERSCORE;
-		else if (CONST_STR_IS("5", str))
-			vt->current.style |= VT_STYLE_BLINK;
-		else if (CONST_STR_IS("7", str))
-			vt->current.style |= VT_STYLE_REVERSE;
-		else
-			DLOG("Unknown graphics attribute '%s'", str);
+		} else {
+			if (sscanf(str, "%hhu", &attr) != 1) {
+				DLOG("Invalid attribute '%s'", str);
+				continue;
+			}
+ 
+			if (VT_ALL_STYLES & (1ULL << attr))
+				vt->current.style |= (1ULL << attr);
+			else
+				DLOG("Unknown graphics attribute '%s'", str);
+		}
 
 		str = next;
 	}
