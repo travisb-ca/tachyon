@@ -907,13 +907,14 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 
 	def test_attributeCombinationsSingleChar(self):
 		self.setCursorPos(0, 0)
+		s = 'abcdefghijklmnopqrstuvwxyz'
 
 		for i in range(16):
-			self.outputCharWithAttrs(i, 'a')
+			self.outputCharWithAttrs(i, s[i])
 			self.sendCsi('0m')
 
 		for i in range(16):
-			self.assertVtyCharIs(0, i, 'a')
+			self.assertVtyCharIs(0, i, s[i])
 			self.assertVtyCharAttrIs(0, i, self.flags_to_attr(i))
 
 	def test_attributeCombinationsSingleCharWithNormalChar(self):
