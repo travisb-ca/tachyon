@@ -666,8 +666,17 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 	struct vt *vt = &buffer->vt;
 	char *str = vt->params.chars;
 	char *end = vt->params.chars + vt->params.len;
+	char *next;
 
 	while (str < end) {
+		next = str;
+		while (next < end && *next != ';')
+			next++;
+		if (next < end) {
+			*next = '\0'; /* change ; into nul */
+			next++;
+		}
+
 		if (vt->params.len == 0 || CONST_STR_IS("0", str))
 			vt->current.style = 0;
 		else if (CONST_STR_IS("1", str))
@@ -681,8 +690,7 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 		else
 			DLOG("Unknown graphics attribute '%s'", str);
 
-		while (*str != '\0' && *str != ';' && str < end)
-			str++;
+		str = next;
 	}
 
 	vt->vt_mode = MODE_NORMAL;
