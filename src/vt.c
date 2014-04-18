@@ -735,7 +735,7 @@ void vt_interpret(struct buffer *buffer, char c) {
 	struct vt_cell *cell;
 	struct vt *vt = &buffer->vt;
 
-	cell = vt_get_cell(buffer, buffer->vt.current.row, buffer->vt.current.col);
+	cell = vt_get_cell(buffer, vt->current.row, vt->current.col);
 	terminal_emulation.modes[vt->vt_mode](buffer, cell, c);
 
 	if (vt->current.col == vt->cols) {
