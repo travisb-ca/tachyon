@@ -85,7 +85,7 @@ static struct vt_line *vt_line_alloc(int columns) {
 void static vt_reset_state(struct vt *vt) {
 	vt->current.row = 0;
 	vt->current.col = 0;
-	vt->current.style = 0;
+	vt->current.flags = 0;
 	vt->saved = vt->current;
 
 	vt->flags = VT_FL_AUTOSCROLL;
@@ -235,8 +235,7 @@ static void normal_chars(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	cell->c = c;
-	cell->flags |= BUF_CELL_SET;
-	cell->style = vt->current.style;
+	cell->flags = vt->current.flags | VT_FLAG_CELL_SET;
 	vt->current.col++;
 }
 
@@ -412,13 +411,13 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 		for (int col = vt->current.col; col < vt->cols; col++) {
 			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
-				cell->flags &= ~BUF_CELL_SET;
+				cell->flags &= ~VT_FLAG_CELL_SET;
 		}
 		for (int row = vt->current.row + 1; row < vt->rows; row++) {
 			for (int col = 0; col < vt->cols; col++) {
 				cell = vt_get_cell(buffer, row, col);
 				if (cell)
-					cell->flags &= ~BUF_CELL_SET;
+					cell->flags &= ~VT_FLAG_CELL_SET;
 			}
 		}
 	} else if (vt->params.len > 0 && CONST_STR_IS("1", vt->params.chars)) {
@@ -427,13 +426,13 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 			for (int col = 0; col < vt->cols; col++) {
 				cell = vt_get_cell(buffer, row, col);
 				if (cell)
-					cell->flags &= ~BUF_CELL_SET;
+					cell->flags &= ~VT_FLAG_CELL_SET;
 			}
 		}
 		for (int col = 0; col <= vt->current.col; col++) {
 			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
-				cell->flags &= ~BUF_CELL_SET;
+				cell->flags &= ~VT_FLAG_CELL_SET;
 		}
 	} else if (vt->params.len > 0 && CONST_STR_IS("2", vt->params.chars)) {
 		/* Clear entire screen */
@@ -441,7 +440,7 @@ static void csi_clear_screen(struct buffer *buffer, struct vt_cell *cell, char c
 			for (int col = 0; col < vt->cols; col++) {
 				cell = vt_get_cell(buffer, row, col);
 				if (cell)
-					cell->flags &= ~ BUF_CELL_SET;
+					cell->flags &= ~VT_FLAG_CELL_SET;
 			}
 		}
 	} else {
@@ -583,21 +582,21 @@ static void csi_clear_line(struct buffer *buffer, struct vt_cell *cell, char c) 
 		for (int col = vt->current.col; col < vt->cols; col++) {
 			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
-				cell->flags &= ~BUF_CELL_SET;
+				cell->flags &= ~VT_FLAG_CELL_SET;
 		}
 	} else if (vt->params.len > 0 && CONST_STR_IS("1", vt->params.chars)) {
 		/* Clear from start of line to cursor */
 		for (int col = 0; col <= vt->current.col; col++) {
 			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
-				cell->flags &= ~BUF_CELL_SET;
+				cell->flags &= ~VT_FLAG_CELL_SET;
 		}
 	} else if (vt->params.len > 0 && CONST_STR_IS("2", vt->params.chars)) {
 		/* Clear entire line */
 		for (int col = 0; col < vt->cols; col++) {
 			cell = vt_get_cell(buffer, vt->current.row, col);
 			if (cell)
-				cell->flags &= ~BUF_CELL_SET;
+				cell->flags &= ~VT_FLAG_CELL_SET;
 		}
 	} else {
 		/* Any other mode is an error. Do nothing */
@@ -679,7 +678,7 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 		}
 
 		if (vt->params.len == 0 || CONST_STR_IS("0", str)) {
-			vt->current.style = 0;
+			vt->current.flags &= ~VT_ALL_STYLES;
 		} else {
 			if (sscanf(str, "%hhu", &attr) != 1) {
 				DLOG("Invalid attribute '%s'", str);
@@ -687,7 +686,7 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 			}
  
 			if (VT_ALL_STYLES & (1ULL << attr))
-				vt->current.style |= (1ULL << attr);
+				vt->current.flags |= (1ULL << attr);
 			else
 				DLOG("Unknown graphics attribute '%s'", str);
 		}

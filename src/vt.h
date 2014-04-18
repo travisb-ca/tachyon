@@ -23,6 +23,13 @@
 #include "util.h"
 #include "config.h"
 
+/*
+ * All the basic styles and flags a single character cell can have. The
+ * flags and styles are interlaced to make use of otherwise unused style
+ * bits while still keeping the mapping simple. This saves a couple of bytes
+ * per cell.
+ */
+#define VT_FLAG_CELL_SET            (1ULL << 0) /* This cell is in use */
 #define VT_STYLE_BOLD               (1ULL << 1)
 #define VT_STYLE_UNDERSCORE         (1ULL << 4)
 #define VT_STYLE_BLINK              (1ULL << 5)
@@ -71,9 +78,7 @@
 
 struct vt_cell {
 	char c;
-#define BUF_CELL_SET (1 << 0) /* This cell is in use */
-	uint8_t flags;
-	uint64_t style;
+	uint64_t flags;
 };
 
 struct vt_line {
@@ -86,7 +91,7 @@ struct vt_cursor_mode {
 	uint16_t row;
 	uint16_t col;
 
-	uint64_t style;
+	uint64_t flags;
 
 	BITMAP_DECLARE(MAX_COLUMNS) tabstops;
 };

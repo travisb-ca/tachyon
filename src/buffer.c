@@ -224,8 +224,8 @@ void buffer_redraw(struct buffer *buffer) {
 	for (int row = 0; row < buffer->vt.rows; row++) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
 			cell = vt_get_cell(buffer, row, col);
-			if (cell->flags & BUF_CELL_SET) {
-				style = cell->style & VT_ALL_STYLES;
+			if (cell->flags & VT_FLAG_CELL_SET) {
+				style = cell->flags & VT_ALL_STYLES;
 
 				for (int i = 0; i < VT_STYLE_MAX; i++) {
 					if (style & (1ULL << i)) {
