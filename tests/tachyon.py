@@ -23,6 +23,11 @@ class TachyonTestCase(lousy.TestCase):
 		self.tachyon = lousy.Process(cmd, shell=True, pty='vt100')
 		if sync:
 			self.expectPrompt('bash.*\$ ')
+
+			# Ensure the tty size is correct for the tests
+			self.sendLine('stty size')
+			self.expectOnly('^24 80$')
+
 			self.sendLine('') # Reshow prompt
 
 	# Wait for the tachyon process to terminate. Fail if the timeout is exceeded
