@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Travis Brown (travisb@travisbrown.ca)
+ * Copyright (C) 2013-2014  Travis Brown (travisb@travisbrown.ca)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,6 +45,13 @@ static struct controller GCon;
 static int current_buf_num;
 static struct buffer *current_buf;
 
+/*
+ * The size of the connected terminal. Currently only used to determine the
+ * size of new buffers.
+ */
+int terminal_rows = 80;
+int terminal_cols = 24;
+
 bool run = true;
 
 static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
@@ -54,6 +61,10 @@ static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 	DLOG("Received SIGWINCH %d times", num_signals);
 
 	winsize = tty_get_winsize(STDIN);
+
+	terminal_rows = winsize.ws_row;
+	terminal_cols = winsize.ws_col;
+
 	result = buffer_set_winsize(current_buf, winsize.ws_row, winsize.ws_col);
 	if (result)
 		WLOG("Failed to set slave window size %d", result);
@@ -102,7 +113,7 @@ static void controller_new_buffer(void) {
 		}
 	}
 
-	GCon.buffers[buf_num] = buffer_init(buf_num);
+	GCon.buffers[buf_num] = buffer_init(buf_num, terminal_rows, terminal_cols);
 	if (!GCon.buffers[buf_num]) {
 		NOTIFY("Failed to create new buffer");
 		return;
@@ -282,7 +293,12 @@ static void controller_cb_out(struct loop_fd *fd, int revents) {
  * ENOMEM - Failed to allocate memory to register
  */
 int controller_init(void) {
+	struct winsize winsize;
 	int result;
+
+	winsize = tty_get_winsize(STDIN);
+	terminal_rows = winsize.ws_row;
+	terminal_cols = winsize.ws_col;
 
 	GCon.in.fd = STDIN;
 	GCon.in.poll_flags = POLLIN | POLLPRI;
@@ -302,7 +318,7 @@ int controller_init(void) {
 	if (result != 0)
 		goto out_deregister;
 
-	GCon.buffers[0] = buffer_init(0);
+	GCon.buffers[0] = buffer_init(0, terminal_rows, terminal_cols);
 	if (!GCon.buffers[0]) {
 		result = ENOMEM;
 		goto out_deregister;

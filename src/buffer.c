@@ -82,7 +82,7 @@ static void buffer_cb(struct loop_fd *fd, int revents) {
  * A struct buffer * on success
  * NULL on failure
  */
-struct buffer *buffer_init(int bufid) {
+struct buffer *buffer_init(int bufid, int rows, int cols) {
 	struct buffer *buffer;
 	int result;
 
@@ -104,7 +104,7 @@ struct buffer *buffer_init(int bufid) {
 	if (buffer->fd.fd < 0)
 		goto out_free;
 
-	if (vt_init(&buffer->vt))
+	if (vt_init(&buffer->vt, rows, cols))
 		goto out_free_fd;
 
 	result = loop_register(&buffer->fd);

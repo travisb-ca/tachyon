@@ -104,9 +104,9 @@ void static vt_reset_state(struct vt *vt) {
  * 0      - Success
  * ENOMEM - Failed to allocate necessary memory
  */
-int vt_init(struct vt *vt) {
-	vt->cols = 80;
-	vt->rows = 24;
+int vt_init(struct vt *vt, int rows, int cols) {
+	vt->rows = rows;
+	vt->cols = cols;
 	vt_reset_state(vt);
 
 	vt->lines = malloc(vt->cols * sizeof(*vt->lines));

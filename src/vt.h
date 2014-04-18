@@ -120,7 +120,7 @@ struct vt {
 	} params;
 };
 
-int vt_init(struct vt *vt);
+int vt_init(struct vt *vt, int rows, int cols);
 void vt_free(struct vt *vt);
 void vt_interpret(struct buffer *buffer, char c);
 struct vt_cell *vt_get_cell(struct buffer *buf, unsigned int row, unsigned int col);
