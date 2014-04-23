@@ -1,0 +1,20 @@
+Component: Terminal
+Date: 2014-04-23 03:50:36
+Depends_On: 075635641e3de7a4e260bd8ed3f77d0c6c455dab7d064705671b5f050928c853
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Minor
+State: Open
+Title: Capability escape code
+Type: Feature
+Units_of_Work: 1000
+--
+As described in http://www.reddit.com/r/programming/comments/137kd9/18_months_ago_termkit_a_nextgeneration_terminal/c71kkpm one big issue today is that nobody actually uses TERM correctly because everything is too broken when you change it. An alternative would be to have a new escape code which queries various terminal capabilities.
+
+It might work with a canonical list of capabilities indexed. Then the client could send the query code for any capability it wanted to know about. A standard response to an unknown capability would be, say, zero. It is assumed and would be documented, that the client would understand what the valid results are.

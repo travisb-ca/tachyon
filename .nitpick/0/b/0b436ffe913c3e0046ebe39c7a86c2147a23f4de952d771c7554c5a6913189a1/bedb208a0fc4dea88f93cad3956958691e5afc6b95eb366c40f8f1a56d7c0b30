@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-04-23 04:04:06
+Parent: issue
+User: travisb@travisbrown.ca
+--
+There might be a case for extending this functionality such that the filesystem access can be used similar to FUSE. One such nicety for some would be to open a local editor with the remote file on the action of the remote. Or baring that for security reasons providing some other simple communication method to achieve a similar outcome.

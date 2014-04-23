@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-04-23 03:48:25
+Parent: issue
+User: travisb@travisbrown.ca
+--
+One easy way to accomplish this would be to have an escape code which entered/exited vi prediction, then the editor could be configured to emit the correct codes when necessary.
