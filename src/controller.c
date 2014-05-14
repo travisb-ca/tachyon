@@ -350,6 +350,10 @@ int controller_output(int bufid, int size, const char *buf) {
 	if (size > sizeof(GCon.buf_out) - GCon.buf_out_used)
 		return EAGAIN;
 
+	/* If this isn't for the current buffer don't output it */
+	if (bufid != current_buf_num)
+		return 0;
+
 	memcpy(GCon.buf_out + GCon.buf_out_used,
 	       buf, size);
 	GCon.buf_out_used += size;
