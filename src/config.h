@@ -27,4 +27,14 @@
  */
 #define MAX_COLUMNS 512
 
+/*
+ * Size of the buffer between the buffer and the controlling terminal.
+ */
+#define CONTROLLER_BUF_SIZE 102400
+
+/*
+ * Compile time limit on the number of buffers supported.
+ */
+#define CONTROLLER_MAX_BUFS 10
+
 #endif

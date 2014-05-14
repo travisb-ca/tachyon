@@ -23,9 +23,8 @@
 
 #include "loop.h"
 #include "buffer.h"
+#include "config.h"
 
-#define CONTROLLER_BUF_SIZE 102400
-#define CONTROLLER_MAX_BUFS 10
 struct controller {
 	struct loop_fd in; /* stdin */
 	struct loop_fd out; /* stdout */

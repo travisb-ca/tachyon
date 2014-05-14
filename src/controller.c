@@ -34,6 +34,7 @@
 #include "log.h"
 #include "tty.h"
 #include "options.h"
+#include "config.h"
 #include "controller.h"
 
 #define STDIN 0
@@ -45,6 +46,9 @@ static struct controller GCon;
 static int current_buf_num;
 static struct buffer *current_buf;
 
+/* Stack which holds the stack of previous buffers the user has seen */
+static int buffer_stack[CONTROLLER_MAX_BUFS - 1];
+
 /*
  * The size of the connected terminal. Currently only used to determine the
  * size of new buffers.
@@ -53,6 +57,61 @@ int terminal_rows = 80;
 int terminal_cols = 24;
 
 bool run = true;
+
+/*
+ * Manipulate the buffer stack such that the buffer we are leaving it at the
+ * top of the stack and the buffer we are entering isn't on the stack at
+ * all.
+ */
+static void bufstack_swap(int leaving, int entering) {
+	int e_index = 0;
+
+	/* Common case of the user switching back to the last used buffer */
+	if (buffer_stack[0] == entering) {
+		buffer_stack[0] = leaving;
+		return;
+	}
+
+	/*
+	 * Find the element we are going to replace, this could either be
+	 * the location where entering is already in the stack, or it could
+	 * be an unused entry if entering has never been entered before.
+	 */
+	while (e_index < ARRAY_SIZE(buffer_stack)) {
+		if (buffer_stack[e_index] == entering
+		    || buffer_stack[e_index] == -1)
+			break;
+		e_index++;
+	}
+
+	if (e_index == CONTROLLER_MAX_BUFS) {
+		ELOG("failed to find empty element in buf_stack!");
+		return;
+	}
+
+	memmove(&buffer_stack[1], &buffer_stack[0], e_index * sizeof(*buffer_stack));
+	buffer_stack[0] = leaving;
+}
+
+/*
+ * Remove the given buffer from the buffer stack. Usually because that
+ * buffer has closed.
+ */
+static void bufstack_remove(int bufnum) {
+	int i = 0;
+	const int size = ARRAY_SIZE(buffer_stack);
+
+	while (i < ARRAY_SIZE(buffer_stack) && buffer_stack[i] != bufnum)
+		i++;
+
+	if (i == CONTROLLER_MAX_BUFS) {
+		ELOG("Failed to find bufnum %d to remove", bufnum);
+		return;
+	}
+
+	memmove(&buffer_stack[i], &buffer_stack[i + 1], (size - i) * sizeof(*buffer_stack));
+	buffer_stack[size - 1] = -1;
+}
 
 static void handle_sigwinch(siginfo_t *siginfo, int num_signals) {
 	struct winsize winsize;
@@ -84,6 +143,7 @@ static void controller_clear(int bufid) {
  */
 static void controller_set_current_buffer(unsigned int num) {
 	if (GCon.buffers[num] != NULL) {
+		bufstack_swap(current_buf_num, num);
 		current_buf_num = num;
 		current_buf = GCon.buffers[num];
 	}
@@ -168,6 +228,17 @@ static void controller_prev_buffer(void) {
 		controller_set_current_buffer(i);
 }
 
+/*
+ * Change the current buffer to the buffer the user was previously looking
+ * at. If there is no other buffer notify the user.
+ */
+static void controller_last_buffer(void) {
+	if (buffer_stack[0] == -1)
+		NOTIFY("No other buffer!\n");
+	else
+		controller_set_current_buffer(buffer_stack[0]);
+}
+
 static int controller_handle_metakey(int size, char *input) {
 	int bytes_eaten = 0;
 	int meta_start = 0;
@@ -212,6 +283,9 @@ static int controller_handle_metakey(int size, char *input) {
 			} else if (input[i] == cmd_options.keys.buffer_prev) {
 				VLOG("Changing to prev buffer");
 				controller_prev_buffer();
+			} else if (input[i] == cmd_options.keys.buffer_last) {
+				VLOG("Changing to last buffer");
+				controller_last_buffer();
 			} else {
 				VLOG("Ignoring unhandled meta-sequence");
 			}
@@ -326,6 +400,9 @@ int controller_init(void) {
 
 	controller_set_current_buffer(0);
 
+	for (int i = 0; i < ARRAY_SIZE(buffer_stack); i++)
+		buffer_stack[i] = -1;
+
 	loop_register_signal(SIGWINCH, handle_sigwinch);
 
 	/* Force the window size of the slave */
@@ -376,6 +453,7 @@ void controller_buffer_exiting(int bufid) {
 	     i = (i + 1) % CONTROLLER_MAX_BUFS) {
 		if (GCon.buffers[i] != NULL) {
 			controller_set_current_buffer(i);
+			bufstack_remove(bufid);
 			return;
 		}
 	}

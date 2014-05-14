@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Travis Brown (travisb@travisbrown.ca)
+ * Copyright (C) 2013-2014  Travis Brown (travisb@travisbrown.ca)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -30,6 +30,7 @@ extern struct cmd_options {
 		char buffer_create; /* The key command which creates a new buffer */
 		char buffer_next; /* Change the current window to the next buffer */
 		char buffer_prev; /* Change the current window to the previous buffer */
+		char buffer_last; /* Change to the previous buffer */
 	} keys;
 } cmd_options;
 

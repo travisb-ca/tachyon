@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013  Travis Brown (travisb@travisbrown.ca)
+ * Copyright (C) 2013-2014  Travis Brown (travisb@travisbrown.ca)
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -46,6 +46,7 @@ struct cmd_options cmd_options = {
 		.buffer_create = 'c',
 		.buffer_next = 'n',
 		.buffer_prev = 'p',
+		.buffer_last = CONTROL('t'),
 	},
 };
 
