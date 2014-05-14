@@ -682,6 +682,7 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 		} else {
 			if (sscanf(str, "%hhu", &attr) != 1) {
 				DLOG("Invalid attribute '%s'", str);
+				str++; /* Ensure forward progress and don't fall into an infinite loop */
 				continue;
 			}
  
