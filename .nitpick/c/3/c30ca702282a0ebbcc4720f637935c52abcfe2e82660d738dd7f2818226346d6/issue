@@ -7,10 +7,10 @@ Owner: travisb@travisbrown.ca
 Percent_Complete: 0
 Priority: 1
 Reported_By: travisb@travisbrown.ca
-Resolution: None
+Resolution: WorksForMe
 Seen_In_Build: 
 Severity: Critical
-State: Open
+State: Closed
 Title: Meta-sequence skipping memmove test seems off
 Type: Bug
 Units_of_Work: 1000

@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-05-15 04:27:31
+Parent: issue
+User: travisb@travisbrown.ca
+--
+This is working fine in the tests and it intentionally sends it as a long string.

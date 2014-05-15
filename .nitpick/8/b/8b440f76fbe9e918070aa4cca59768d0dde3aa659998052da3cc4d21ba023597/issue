@@ -1,0 +1,20 @@
+Component: Terminal
+Date: 2014-05-15 04:31:05
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Blocker
+State: Open
+Title: utf8 support
+Type: Feature
+Units_of_Work: 1000
+--
+Currently Tachyon only supports ASCII because each cell is assumed to be a single byte long and any input character is assumed to be a single byte long. Just ASCII isn't really acceptable these days so utf8 should be supported.
+
+The biggest wrinkle with this is that it must be watched to stick a single unicode grapheme cluster into a single cell. Doing this space efficiently might be a bit of a challenge since a grapheme cluster can pretty much be arbitrarily long.
