@@ -126,3 +126,20 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 
 		self.sendCmdExit()
 		self.sendCmdExit()
+
+	def test_gotoBuffer(self):
+		for i in range(9):
+			self.bufferCreate()
+
+		for i in range(10):
+			self.sendMeta('%d' % i)
+			self.sendCmd('echo $TACHYON_BUFNUM')
+			self.expectOnly('^%d' % i)
+
+		for i in range(9):
+			self.sendCmdExit()
+
+		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.expectOnly('^0')
+
+		self.sendCmd('exit')
