@@ -35,7 +35,7 @@ struct controller {
 	int buf_out_used;
 	char buf_out[CONTROLLER_BUF_SIZE];
 
-	struct buffer *buffers[CONTROLLER_BUF_SIZE];
+	struct buffer *buffers[CONTROLLER_MAX_BUFS];
 };
 
 bool run;
