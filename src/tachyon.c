@@ -47,6 +47,16 @@ struct cmd_options cmd_options = {
 		.buffer_next = 'n',
 		.buffer_prev = 'p',
 		.buffer_last = CONTROL('t'),
+		.buffer_0 = '0',
+		.buffer_1 = '1',
+		.buffer_2 = '2',
+		.buffer_3 = '3',
+		.buffer_4 = '4',
+		.buffer_5 = '5',
+		.buffer_6 = '6',
+		.buffer_7 = '7',
+		.buffer_8 = '8',
+		.buffer_9 = '9',
 	},
 };
 

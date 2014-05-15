@@ -239,6 +239,16 @@ static void controller_last_buffer(void) {
 		controller_set_current_buffer(buffer_stack[0]);
 }
 
+/*
+ * Change the current buffer to the given buffer number if it exists, otherwise just notify the user.
+ */
+static void controller_goto_buffer(int bufnum) {
+	if (bufnum >= CONTROLLER_MAX_BUFS || !GCon.buffers[bufnum])
+		NOTIFY("Buffer %d doesn't exist", bufnum);
+	else
+		controller_set_current_buffer(bufnum);
+}
+
 static int controller_handle_metakey(int size, char *input) {
 	int bytes_eaten = 0;
 	int meta_start = 0;
@@ -286,6 +296,36 @@ static int controller_handle_metakey(int size, char *input) {
 			} else if (input[i] == cmd_options.keys.buffer_last) {
 				VLOG("Changing to last buffer");
 				controller_last_buffer();
+			} else if (input[i] == cmd_options.keys.buffer_0) {
+				VLOG("Changing to buffer 0");
+				controller_goto_buffer(0);
+			} else if (input[i] == cmd_options.keys.buffer_1) {
+				VLOG("Changing to buffer 1");
+				controller_goto_buffer(1);
+			} else if (input[i] == cmd_options.keys.buffer_2) {
+				VLOG("Changing to buffer 2");
+				controller_goto_buffer(2);
+			} else if (input[i] == cmd_options.keys.buffer_3) {
+				VLOG("Changing to buffer 3");
+				controller_goto_buffer(3);
+			} else if (input[i] == cmd_options.keys.buffer_4) {
+				VLOG("Changing to buffer 4");
+				controller_goto_buffer(4);
+			} else if (input[i] == cmd_options.keys.buffer_5) {
+				VLOG("Changing to buffer 5");
+				controller_goto_buffer(5);
+			} else if (input[i] == cmd_options.keys.buffer_6) {
+				VLOG("Changing to buffer 6");
+				controller_goto_buffer(6);
+			} else if (input[i] == cmd_options.keys.buffer_7) {
+				VLOG("Changing to buffer 7");
+				controller_goto_buffer(7);
+			} else if (input[i] == cmd_options.keys.buffer_8) {
+				VLOG("Changing to buffer 8");
+				controller_goto_buffer(8);
+			} else if (input[i] == cmd_options.keys.buffer_9) {
+				VLOG("Changing to buffer 9");
+				controller_goto_buffer(9);
 			} else {
 				VLOG("Ignoring unhandled meta-sequence");
 			}
