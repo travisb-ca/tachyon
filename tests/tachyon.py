@@ -5,6 +5,9 @@ import time
 import subprocess
 import re
 
+def control(char):
+	return chr(ord(char) & ~((1 << 6) | (1 << 5)))
+
 class TachyonTestCase(lousy.TestCase):
 	verbose_output = True
 	META = '\x14'
@@ -155,6 +158,11 @@ class TachyonTestCase(lousy.TestCase):
 	# Goto the previous buffer ^tn, handles special synchronization
 	def bufferPrev(self):
 		self.sendMeta('p')
+		self.sendLine('') # Reshow prompt
+
+	# Goto the last buffer ^tn, handles special synchronization
+	def bufferLast(self):
+		self.sendMeta(control('t'))
 		self.sendLine('') # Reshow prompt
 
 class PipeStub(lousy.Stub):
