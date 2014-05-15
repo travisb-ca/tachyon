@@ -445,21 +445,34 @@ int controller_output(int bufid, int size, const char *buf) {
  * After this function is called the buffer is no longer valid.
  */
 void controller_buffer_exiting(int bufid) {
+	int nextbuf = -1;
+	unsigned int i;
+
 	buffer_free(GCon.buffers[bufid]);
 	GCon.buffers[bufid] = NULL;
 
-	for (unsigned int i = (bufid + 1) % CONTROLLER_MAX_BUFS;
-	     i != bufid;
-	     i = (i + 1) % CONTROLLER_MAX_BUFS) {
-		if (GCon.buffers[i] != NULL) {
-			controller_set_current_buffer(i);
-			bufstack_remove(bufid);
-			return;
+	if (buffer_stack[0] != -1) {
+		/* Jump to the previous buffer in the stack */
+		nextbuf = buffer_stack[0];
+	} else {
+		/* Empty stack, just choose the next buffer */
+		for (i = (bufid + 1) % CONTROLLER_MAX_BUFS;
+		     i != bufid;
+		     i = (i + 1) % CONTROLLER_MAX_BUFS) {
+			if (GCon.buffers[i] != NULL) {
+				nextbuf = i;
+				break;
+			}
 		}
 	}
 
-	/*
-	 * We have no buffers remaining, exit.
-	 */
-	run = false;
+	if (nextbuf != -1) {
+		controller_set_current_buffer(nextbuf);
+		bufstack_remove(bufid);
+	} else {
+		/*
+		 * We have no buffers remaining, exit.
+		 */
+		run = false;
+	}
 }
