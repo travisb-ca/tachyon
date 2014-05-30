@@ -150,7 +150,7 @@ int tty_new(char *command, int bufnum) {
 			 * If we fail here due to lack of memory we'll power on
 			 * in the hopes that we can still exec below.
 			 */
-			setenv("TACHYON_BUFNUM", bufnum_str, 1);
+			setenv("WINDOW", bufnum_str, 1);
 			setenv("TACHYON_SESSION", cmd_options.session_name, 1);
 		}
 
