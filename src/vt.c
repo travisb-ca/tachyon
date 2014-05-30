@@ -38,6 +38,7 @@ enum {
 	MODE_NORMAL,
 	MODE_ESCAPE,
 	MODE_CSI,
+	MODE_OSC,
 	MODE_NUM
 } vt_mode;
 
@@ -90,6 +91,9 @@ void static vt_reset_state(struct vt *vt) {
 
 	vt->flags = VT_FL_AUTOSCROLL;
 	vt->vt_mode = MODE_NORMAL;
+
+	memset(&vt->window_title, 0, sizeof(vt->window_title));
+	memset(&vt->icon_name, 0, sizeof(vt->icon_name));
 
 	vt->params.len = 0;
 
@@ -369,10 +373,19 @@ static void escape_cursor_up(struct buffer *buffer, struct vt_cell *cell, char c
 	vt->vt_mode = MODE_NORMAL;
 }
 
+static void clear_vt_params(struct vt *vt) {
+	vt->params.len = 0;
+	memset(vt->params.chars, 0, sizeof(vt->params.chars));
+}
+
 static void escape_csi(struct buffer *buffer, struct vt_cell *cell, char c) {
 	buffer->vt.vt_mode = MODE_CSI;
-	buffer->vt.params.len = 0;
-	memset(buffer->vt.params.chars, 0, sizeof(buffer->vt.params.chars));
+	clear_vt_params(&buffer->vt);
+}
+
+static void escape_osc(struct buffer *buffer, struct vt_cell *cell, char c) {
+	buffer->vt.vt_mode = MODE_OSC;
+	clear_vt_params(&buffer->vt);
 }
 
 static void escape_reset_to_initial(struct buffer *buffer, struct vt_cell *cell, char c) {
@@ -392,11 +405,12 @@ static void escape_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 		HANDLE('H', escape_tabstop_set);
 		HANDLE('M', escape_cursor_up);
 		HANDLE('[', escape_csi);
+		HANDLE(']', escape_osc);
 		HANDLE('c', escape_reset_to_initial);
 	}
 }
 
-static void csi_collect_params(struct buffer *buffer, struct vt_cell *cell, char c) {
+static void collect_params(struct buffer *buffer, struct vt_cell *cell, char c) {
 	struct vt *vt = &buffer->vt;
 
 	if (vt->params.len < sizeof(vt->params.chars) - 1)
@@ -700,7 +714,7 @@ static void csi_special_graphics_mode(struct buffer *buffer, struct vt_cell *cel
 
 static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 	switch (c) {
-		DEFAULT(csi_collect_params);
+		DEFAULT(collect_params);
 		HANDLE('A', csi_move_cursor_up);
 		HANDLE('B', csi_move_cursor_down);
 		HANDLE('C', csi_move_cursor_right);
@@ -712,6 +726,67 @@ static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 		HANDLE('h', csi_set_mode);
 		HANDLE('l', csi_reset_mode);
 		HANDLE('m', csi_special_graphics_mode);
+	}
+}
+
+static void osc_set_icon_name(struct vt *vt, char *args) {
+	strncpy(vt->icon_name, args, sizeof(vt->icon_name) - 1);
+}
+
+static void osc_set_window_title(struct vt *vt, char *args) {
+	strncpy(vt->window_title, args, sizeof(vt->window_title) - 1);
+}
+
+static void osc_process(struct buffer *buffer, struct vt_cell *cell, char c) {
+	/* OSC command have a free form format where the command starts with
+	 * OSC and ends with a string terminator. The string terminator
+	 * isn't in the parameters we have been given.
+	 *
+	 * Normally the command is an integer right at the beginning
+	 * separated by semicolons from the arguments.
+	 */
+	struct vt *vt = &buffer->vt;
+	char *args;
+	char *cmd = &vt->params.chars[0];
+
+	args = memchr(vt->params.chars, ';', vt->params.len);
+	if (args) {
+		/* separate the command from the arguments */
+		*args = '\0';
+		args++;
+	}
+
+	if (CONST_STR_IS("0", cmd)) {
+		osc_set_icon_name(vt, args);
+		osc_set_window_title(vt, args);
+	} else if (CONST_STR_IS("1", cmd)) {
+		osc_set_icon_name(vt, args);
+	} else if (CONST_STR_IS("2", cmd)) {
+		osc_set_window_title(vt, args);
+	} else {
+		/* Any other command is an error. Do nothing */
+		DLOG("Unsupported OSC command '%s' with args '%s'", cmd, args);
+	}
+
+	vt->vt_mode = MODE_NORMAL;
+}
+
+static void osc_process_trim(struct buffer *buffer, struct vt_cell *cell, char c) {
+	/* A two byte string terminator was used, so we need to trim one
+	 * byte before we process the OSC string.
+	 */
+	if (buffer->vt.params.len > 0) {
+		buffer->vt.params.chars[buffer->vt.params.len - 1] = '\0';
+		buffer->vt.params.len--;
+	}
+	osc_process(buffer, cell, c);
+}
+
+static void osc_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
+	switch (c) {
+		DEFAULT(collect_params);
+		HANDLE('\a', osc_process);
+		HANDLE('\\', osc_process_trim);
 	}
 }
 
@@ -729,6 +804,7 @@ static const struct terminal_def terminal_emulation = {
 		normal_mode,
 		escape_mode,
 		csi_mode,
+		osc_mode,
 	},
 };
 

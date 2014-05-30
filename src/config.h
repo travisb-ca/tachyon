@@ -37,4 +37,15 @@
  */
 #define CONTROLLER_MAX_BUFS 10
 
+/*
+ * Maximum stored size of the window and icon titles
+ */
+#define VT_TITLE_LEN 128
+
+/*
+ * Maximum supported length of an escape paramater string. Should be at least
+ * as large as VT_TITLE_LEN.
+ */
+#define VT_PARAM_LEN 128
+
 #endif

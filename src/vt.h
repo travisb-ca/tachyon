@@ -103,6 +103,9 @@ struct vt {
 	struct vt_cursor_mode current;
 	struct vt_cursor_mode saved;
 
+	char window_title[VT_TITLE_LEN];
+	char icon_name[VT_TITLE_LEN];
+
 /* When reaching the end of line start at the beginning of the next line */
 #define VT_FL_AUTOWRAP (1 << 0)
 /* When reaching the bottom of the screen scroll all text up one line */
@@ -115,7 +118,7 @@ struct vt {
 
 	/* Places to hold interm escape code parameters */
 	struct {
-		char chars[32];
+		char chars[VT_PARAM_LEN];
 		uint16_t len;
 	} params;
 };
