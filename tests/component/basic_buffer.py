@@ -73,55 +73,55 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 		self.bufferCreate()
 		self.bufferCreate()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^2')
 
 		self.bufferPrev()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^1')
 
 		self.bufferLast()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^2')
 
 		self.bufferNext()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^0')
 
 		self.sendCmdExit()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^2')
 
 		self.sendCmdExit()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^1')
 
 		self.sendCmd('exit')
 
 	def test_tachyonVariables(self):
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^0')
 
 		self.bufferCreate()
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^1')
 
 		self.bufferPrev()
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^0$')
 
 		self.sendCmdExit()
 		
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^1')
 
 		self.bufferCreate()
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^0$')
 
 		self.sendCmdExit()
@@ -133,13 +133,13 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 
 		for i in range(10):
 			self.sendMeta('%d' % i)
-			self.sendCmd('echo $TACHYON_BUFNUM')
+			self.sendCmd('echo $WINDOW')
 			self.expectOnly('^%d' % i)
 
 		for i in range(9):
 			self.sendCmdExit()
 
-		self.sendCmd('echo $TACHYON_BUFNUM')
+		self.sendCmd('echo $WINDOW')
 		self.expectOnly('^0')
 
 		self.sendCmd('exit')
