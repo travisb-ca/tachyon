@@ -224,21 +224,19 @@ void buffer_redraw(struct buffer *buffer) {
 	controller_output(buffer->bufid, sizeof(vt100_goto_origin) - 1,
 			  vt100_goto_origin);
 
-	if (buffer->vt.window_title[0] != '\0') {
-		controller_output(buffer->bufid, sizeof(osc_set_window) - 1,
-				  osc_set_window);
+	controller_output(buffer->bufid, sizeof(osc_set_window) - 1,
+			  osc_set_window);
+	if (buffer->vt.window_title[0] != '\0')
 		controller_output(buffer->bufid, strlen(buffer->vt.window_title),
 				  buffer->vt.window_title);
-		controller_output(buffer->bufid, sizeof(bell) - 1, bell);
-	}
+	controller_output(buffer->bufid, sizeof(bell) - 1, bell);
 
-	if (buffer->vt.icon_name[0] != '\0') {
-		controller_output(buffer->bufid, sizeof(osc_set_icon) - 1,
-				  osc_set_icon);
+	controller_output(buffer->bufid, sizeof(osc_set_icon) - 1,
+			  osc_set_icon);
+	if (buffer->vt.icon_name[0] != '\0')
 		controller_output(buffer->bufid, strlen(buffer->vt.icon_name),
 				  buffer->vt.icon_name);
-		controller_output(buffer->bufid, sizeof(bell) - 1, bell);
-	}
+	controller_output(buffer->bufid, sizeof(bell) - 1, bell);
 
 	for (int row = 0; row < buffer->vt.rows; row++) {
 		for (int col = 0; col < buffer->vt.cols; col++) {
