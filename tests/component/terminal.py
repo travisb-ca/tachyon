@@ -86,6 +86,9 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 	def sendCsi(self, string):
 		self.pipe.write('\033[' + string)
 
+	def sendOsc(self, string):
+		self.pipe.write('\033]' + string + '\007')
+
 	def setCursorPos(self, row, col):
 		self.sendCsi('%d;%df' % (int(row) + 1, int(col) + 1))
 
@@ -970,3 +973,72 @@ class TestTerminalEscapeCodes(tachyon.TachyonTestCase):
 		self.sendCsi('1h')
 		self.sendCsi('1;2h')
 		self.sendCsi('1;2;3;h')
+
+	def test_setXtermWindowTitle(self):
+		title = 'asdf'
+		vty = self.getVtty()
+
+		self.sendOsc('2;' + title)
+		self.pipe.write('set title\n')
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, '')
+		self.assertEqual(vty.window_title, title)
+
+		self.bufferLast()
+		self.pipe.write('blank title')
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, '')
+		self.assertEqual(vty.window_title, '')
+
+		self.bufferLast()
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, '')
+		self.assertEqual(vty.window_title, title)
+
+	def test_setXtermIconName(self):
+		title = 'asdf'
+		vty = self.getVtty()
+
+		self.sendOsc('1;' + title)
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, title)
+		self.assertEqual(vty.window_title, '')
+
+		self.bufferLast()
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, '')
+		self.assertEqual(vty.window_title, '')
+
+		self.bufferLast()
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, title)
+		self.assertEqual(vty.window_title, '')
+
+	def test_setXtermIconNameAndWindowTitle(self):
+		title = 'asdf'
+		vty = self.getVtty()
+
+		self.sendOsc('0;' + title)
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, title)
+		self.assertEqual(vty.window_title, title)
+
+		self.bufferLast()
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, '')
+		self.assertEqual(vty.window_title, '')
+
+		self.bufferLast()
+
+		self.syncOutput()
+		self.assertEqual(vty.icon_name, title)
+		self.assertEqual(vty.window_title, title)
+

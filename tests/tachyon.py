@@ -100,6 +100,12 @@ class TachyonTestCase(lousy.TestCase):
 		if col != -1:
 			self.assertEqual(vty_col, col)
 
+	# Get the underlying lousy tty emulation engine. Useful for checking
+	# the lowest level of capabilities which aren't generic across
+	# terminal types.
+	def getVtty(self):
+		return self.tachyon.vty.emulation
+
 	# Send the given string to tachyon as given
 	def send(self, string):
 		self.tachyon.send(string)
