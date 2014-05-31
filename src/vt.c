@@ -730,11 +730,17 @@ static void csi_mode(struct buffer *buffer, struct vt_cell *cell, char c) {
 }
 
 static void osc_set_icon_name(struct vt *vt, char *args) {
-	strncpy(vt->icon_name, args, sizeof(vt->icon_name) - 1);
+	if (args)
+		strncpy(vt->icon_name, args, sizeof(vt->icon_name) - 1);
+	else
+		vt->icon_name[0] = '\0';
 }
 
 static void osc_set_window_title(struct vt *vt, char *args) {
-	strncpy(vt->window_title, args, sizeof(vt->window_title) - 1);
+	if (args)
+		strncpy(vt->window_title, args, sizeof(vt->window_title) - 1);
+	else
+		vt->window_title[0] = '\0';
 }
 
 static void osc_process(struct buffer *buffer, struct vt_cell *cell, char c) {
@@ -754,6 +760,9 @@ static void osc_process(struct buffer *buffer, struct vt_cell *cell, char c) {
 		/* separate the command from the arguments */
 		*args = '\0';
 		args++;
+
+		if (args > cmd + vt->params.len)
+			args = NULL;
 	}
 
 	if (CONST_STR_IS("0", cmd)) {
