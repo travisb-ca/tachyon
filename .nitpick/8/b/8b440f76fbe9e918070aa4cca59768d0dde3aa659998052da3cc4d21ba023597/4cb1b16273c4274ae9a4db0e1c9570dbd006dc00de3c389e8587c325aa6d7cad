@@ -1,0 +1,8 @@
+Attachment: 
+Attachment-filename: 
+Attachment-type: application/octet-stream
+Date: 2014-05-31 05:10:39
+Parent: issue
+User: travisb@travisbrown.ca
+--
+Speaking of glyphs the solution to the space problem is obvious. Implement the glyphs using the flyweight pattern.
