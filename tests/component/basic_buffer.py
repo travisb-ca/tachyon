@@ -43,10 +43,10 @@ class TestBasicWindows(tachyon.TachyonTestCase):
 		self.expectOnly('^2$')
 		self.sendCmdExit()
 		self.sendCmd('echo $BUFNUM')
-		self.expectOnly('^3$')
+		self.expectOnly('^1$')
 		self.sendCmdExit()
 		self.sendCmd('echo $BUFNUM')
-		self.expectOnly('^1$')
+		self.expectOnly('^3$')
 		self.sendCmd('exit')
 
 	def test_prevBuffers(self):
