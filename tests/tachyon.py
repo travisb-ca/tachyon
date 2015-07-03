@@ -150,7 +150,6 @@ class TachyonTestCase(lousy.TestCase):
 	# Like sendCmd('exit') but handles the necessary extra synchronization
 	def sendCmdExit(self):
 		self.sendCmd('exit')
-		time.sleep(0.5)
 		self.sendLine('') # Reshow prompt
 
 	# Create a new buffer ^tc
